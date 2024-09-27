@@ -1,6 +1,7 @@
 # pity_cash
 
-A new Flutter project.
+Belajar Mobile kak
+
 
 ## Getting Started
 
