@@ -78,14 +78,6 @@ class _EditCategoriesState extends State<EditCategories> {
                           Navigator.pop(context);
                         },
                       ),
-                      Text(
-                        'Hi, Syahrul!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                       Icon(
                         Icons.notifications,
                         color: Colors.white,

@@ -4,6 +4,7 @@ import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/pemasukan/edit_pemasukan.dart';
+import 'package:pity_cash/view/pengeluaran/edit_pengeluaran.dart';
 
 class DetailPengeluaran extends StatelessWidget {
   final List<Pengeluaran> pengeluaranList; // Daftar pengeluaran yang diteruskan
@@ -12,6 +13,8 @@ class DetailPengeluaran extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("Pengeluaran List: $pengeluaranList");
+// Cek nilai tanggal
     final String baseUrl =
         "http://pitycash.mamorasoft.com/api"; // Ganti dengan base URL Anda
 
@@ -102,7 +105,13 @@ class DetailPengeluaran extends StatelessWidget {
                             width: 80,
                             child: ElevatedButton(
                               onPressed: () {
-                                // Tambahkan aksi edit jika perlu
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditPengeluaran(
+                                        pengeluaranList: pengeluaranList),
+                                  ),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 primary: Color(0xFFF7941E),
@@ -157,12 +166,24 @@ class DetailPengeluaran extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   alignment: Alignment.centerLeft,
+                                  padding: EdgeInsets.all(
+                                      8.0), // Increased padding for better aesthetics
                                   child: Text(
-                                    pengeluaranList.isNotEmpty
-                                        ? pengeluaranList[0]
-                                            .createdAt
-                                            .toString()
+                                    // Pastikan kita mendapatkan tanggal dari pengeluaranList
+                                    pengeluaranList.isNotEmpty &&
+                                            pengeluaranList[0].tanggal != null
+                                        ? DateFormat('d MMMM yyyy')
+                                            .format(pengeluaranList[0].tanggal!)
                                         : 'Tidak ada data',
+                                    style: TextStyle(
+                                      fontSize:
+                                          14, // Sesuaikan ukuran font sesuai kebutuhan
+                                      color: Colors
+                                          .black87, // Sesuaikan warna teks
+                                    ),
+                                    overflow: TextOverflow
+                                        .ellipsis, // Prevent text from overflowing
+                                    maxLines: 1, // Limit to one line
                                   ),
                                 ),
                               ),
@@ -223,9 +244,9 @@ class DetailPengeluaran extends StatelessWidget {
                                                 child: Text(
                                                   pengeluaran.name,
                                                   style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 19,
-                                                  ),
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 19),
                                                 ),
                                               ),
                                               // Spacer to push the button to the right

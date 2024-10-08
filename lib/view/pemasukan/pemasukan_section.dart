@@ -14,8 +14,10 @@ class PemasukanSection extends StatefulWidget {
 }
 
 class _PemasukanSectionState extends State<PemasukanSection> {
+  double saldo = 0.0;
   List<Pemasukan> incomes = [];
-  List<Pemasukan> filteredIncomes = []; // Daftar yang sudah difilter
+  List<Pemasukan> filteredIncomes = [];
+  DateTimeRange? selectedDateRange; // Daftar yang sudah difilter
 
   bool isIncomeSelected = true;
   String? token;
@@ -33,10 +35,28 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   @override
   void initState() {
     super.initState();
+    _getSaldo();
     _checkLoginStatus();
     _fetchIncomes(currentPage); // Initial fetch
     _searchController
         .addListener(_filterIncomes); // Listen for changes in the search field
+  }
+
+  Future<void> _getSaldo() async {
+    try {
+      final fetchedSaldo =
+          await _apiService.fetchSaldo(); // Panggil fungsi fetchSaldo
+      setState(() {
+        saldo = fetchedSaldo; // Update saldo dengan hasil dari API
+        isLoading = false; // Matikan loading setelah saldo berhasil diambil
+      });
+    } catch (e) {
+      print('Failed to load saldo: $e');
+      setState(() {
+        saldo = 0.0; // Atur saldo ke 0 jika gagal
+        isLoading = false; // Matikan loading jika gagal mengambil saldo
+      });
+    }
   }
 
   Future<void> _checkLoginStatus() async {
@@ -69,7 +89,13 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           incomes.addAll(fetchedIncomes); // Append for subsequent pages
         }
         currentPage++; // Increment current page for pagination
-        _filterIncomes(); // Update filtered incomes after fetching
+
+        // Apply filter if date range is selected
+        if (selectedDateRange != null) {
+          _filterIncomesByDateRange(); // Filter fetched data by date range
+        } else {
+          _filterIncomes(); // Filter by search query if no date range is selected
+        }
       });
     } catch (e) {
       print('Error fetching incomes: $e'); // Log error message
@@ -82,17 +108,72 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     }
   }
 
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      initialDateRange: selectedDateRange,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Color(0xFFEB8153), // Warna oranye khusus
+            accentColor:
+                Color(0xFFEB8153), // Warna aksen untuk range yang dipilih
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFFEB8153), // Warna header background picker
+              onPrimary: Colors.white, // Warna teks di header (Putih)
+              onSurface:
+                  Color(0xFFEB8153), // Warna teks tanggal yang bisa dipilih
+            ),
+            buttonTheme: ButtonThemeData(
+              textTheme: ButtonTextTheme.primary, // Warna teks tombol
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != selectedDateRange) {
+      setState(() {
+        selectedDateRange = picked;
+        _filterIncomesByDateRange(); // Filter incomes by the selected date range
+      });
+    }
+  }
+
+  void _filterIncomesByDateRange() {
+    if (selectedDateRange != null) {
+      // Filter the incomes based on the selected date range
+      filteredIncomes = incomes.where((pemasukan) {
+        // Parse pemasukan.date into DateTime
+        final pemasukanDate = DateTime.parse(pemasukan.date);
+        // Check if pemasukanDate is within the selected range
+        return pemasukanDate.isAfter(
+                selectedDateRange!.start.subtract(Duration(days: 1))) &&
+            pemasukanDate
+                .isBefore(selectedDateRange!.end.add(Duration(days: 1)));
+      }).toList();
+    } else {
+      filteredIncomes =
+          List.from(incomes); // Show all incomes if no range is selected
+    }
+  }
+
   void _filterIncomes() {
     String query = _searchController.text.toLowerCase();
     setState(() {
-      // If the query is empty, show all incomes
       if (query.isEmpty) {
-        filteredIncomes = List.from(incomes); // Show all incomes
+        filteredIncomes =
+            List.from(incomes); // Show all incomes if query is empty
       } else {
         // Filter incomes based on name or date
         filteredIncomes = incomes.where((pemasukan) {
           return pemasukan.name.toLowerCase().contains(query) ||
-              pemasukan.date.toLowerCase().contains(query); // Using string date
+              pemasukan.date
+                  .toLowerCase()
+                  .contains(query); // Filtering by name or date
         }).toList();
       }
     });
@@ -170,14 +251,20 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       ),
                       SizedBox(height: 2),
                       Center(
-                        child: Text(
-                          isLoggedIn ? '\Rp 90.000,00' : '\Rp 0,00',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: isLoading
+                            ? CircularProgressIndicator() // Tampilkan loading saat data sedang diambil
+                            : Text(
+                                NumberFormat.currency(
+                                  locale: 'id_ID', // Format untuk IDR
+                                  symbol: 'Rp ', // Simbol mata uang
+                                  decimalDigits: 2, // Jumlah desimal
+                                ).format(saldo), // Tampilkan saldo dari API
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                       SizedBox(height: 12),
                       // Custom Toggle button for Income and Expense
@@ -310,9 +397,86 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     children: [
                       // Row to hold buttons on the right
                       Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .end, // Aligns buttons to the right
                         children: [
+                          // Date Range Picker TextField
+                          SizedBox(
+                            width: 225, // Adjust width as needed
+                            child: GestureDetector(
+                              onTap: () => _selectDateRange(
+                                  context), // Open date range picker on tap
+                              child: AbsorbPointer(
+                                // Prevents text editing
+                                child: TextField(
+                                  enabled: false, // Disable text editing
+                                  decoration: InputDecoration(
+                                    hintText: selectedDateRange == null
+                                        ? 'Pilih Tanggal'
+                                        : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
+                                    hintStyle: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize:
+                                          13, // Ukuran font yang lebih kecil
+                                    ),
+                                    prefixIcon: Padding(
+                                      padding: const EdgeInsets.only(
+                                          right:
+                                              8.0), // Space between icon and text
+                                      child: Container(
+                                        height:
+                                            48, // Adjust height for TextField
+                                        width:
+                                            48, // Adjust width to be circular
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Color(
+                                              0xFFEB8153), // Background color of circle
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors
+                                                  .black26, // Shadow color
+                                              blurRadius: 4.0, // Blur radius
+                                              spreadRadius:
+                                                  1.0, // Spread radius
+                                              offset: Offset(
+                                                  0, 5), // Shadow position
+                                            ),
+                                          ],
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Icon(
+                                            Icons.calendar_today,
+                                            color: Colors.white,
+                                            size: 22,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    filled:
+                                        true, // Enables the background color
+                                    fillColor: Colors.grey[
+                                        200], // Sets the background color to light grey
+                                    border: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide.none, // Removes the border
+                                      borderRadius: BorderRadius.circular(
+                                          24.0), // Adds rounded corners
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical:
+                                          15, // Vertical padding inside TextField
+                                      horizontal:
+                                          20, // Horizontal padding for text
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          Spacer(), // Mengisi ruang di antara tombol Select Date Range dan tombol Print dan Download
+
+                          // Tombol Print
                           SizedBox(
                             width: 50,
                             height: 50,
@@ -328,7 +492,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               ),
                             ),
                           ),
-                          SizedBox(width: 8), // Space between the buttons
+
+                          SizedBox(
+                              width:
+                                  8), // Space between Print and Download buttons
+
+                          // Tombol Download
                           SizedBox(
                             width: 50,
                             height: 50,
@@ -345,7 +514,10 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             ),
                           ),
                         ],
-                      ), // Space between buttons and the list
+                      ),
+
+                      SizedBox(
+                          height: 16), // Spacing between the rows if needed
                       Expanded(
                         child: LazyLoadScrollView(
                           onEndOfPage: () {

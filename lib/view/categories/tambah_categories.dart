@@ -47,14 +47,6 @@ class _TambahCategoriesState extends State<TambahCategories> {
                           Navigator.pop(context);
                         },
                       ),
-                      Text(
-                        'Hi, Syahrul!',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
                       Icon(
                         Icons.notifications,
                         color: Colors.white,

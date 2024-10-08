@@ -18,7 +18,6 @@ class EditPemasukan extends StatefulWidget {
 }
 
 class _EditPemasukanState extends State<EditPemasukan> {
-  bool showPrefix = false;
   int _selectedIndex = 0;
 
   DateTime? selectedDate;
@@ -31,6 +30,13 @@ class _EditPemasukanState extends State<EditPemasukan> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController jumlahController = TextEditingController();
 
+  String formatCurrency(double amount) {
+    final formatCurrency = NumberFormat.simpleCurrency(locale: 'id_ID');
+    return formatCurrency
+        .format(amount)
+        .replaceAll('Rp', 'Rp.'); // Ensure 'Rp.' is shown correctly
+  }
+
   @override
   void initState() {
     super.initState();
@@ -41,15 +47,9 @@ class _EditPemasukanState extends State<EditPemasukan> {
     // Set the selected date to the date of the pemasukan
     selectedDate =
         DateTime.parse(widget.pemasukan.date); // Set to pemasukan date
-    jumlahController.text = widget.pemasukan.jumlah;
+    jumlahController.text =
+        formatCurrency(double.tryParse(widget.pemasukan.jumlah) ?? 0.0);
     selectedCategory = widget.pemasukan.category;
-
-    jumlahController.addListener(() {
-      setState(() {
-        // Display 'Rp.' only if there's text input
-        showPrefix = jumlahController.text.isNotEmpty;
-      });
-    });
   }
 
   void dispose() {
@@ -93,13 +93,15 @@ class _EditPemasukanState extends State<EditPemasukan> {
 
     // Prepare jumlahValue for parsing and storage
     String formattedAmount = jumlahController.text
+        .replaceAll('Rp. ', '') // Remove 'Rp. ' prefix
+        .replaceAll('Rp', '') // Remove 'Rp' prefix if it exists without dot
         .replaceAll('.', '') // Remove dots (for thousands)
         .replaceAll(',', '.'); // Replace comma with a dot for decimal point
 
     double? jumlahValue =
         double.tryParse(formattedAmount); // Try parsing the formatted amount
-    if (jumlahValue == null || jumlahValue < 0) {
-      // Ensure it's a valid number
+    if (jumlahValue == null || jumlahValue <= 0) {
+      // Ensure it's a valid number and greater than zero
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Jumlah harus berupa angka yang valid dan positif.')),
@@ -117,7 +119,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
         descriptionController.text, // Description
         selectedDate?.toIso8601String() ?? '', // Date
         jumlahValue.toString(), // Convert jumlahValue to String
-        selectedCategory!.id, // Category ID (ensured to be used)
+        selectedCategory!.id, // Use category ID directly
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -134,7 +136,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
       });
 
       Future.delayed(Duration(milliseconds: 500), () {
-        Navigator.pop(context); // Go back after delay
+        Navigator.pop(context); // Go back after a delay
       });
     } catch (e) {
       print('Error: $e');
@@ -381,9 +383,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
           ),
           hintText: 'Masukkan jumlah dalam bentuk Rp', // Hint text yang diminta
           hintStyle: TextStyle(color: Colors.grey),
-          prefixText: showPrefix
-              ? 'Rp. '
-              : null, // Tampilkan 'Rp.' hanya jika ada input
+          // Tampilkan 'Rp.' hanya jika ada input
           prefixStyle: TextStyle(
             color: Colors.black87,
             fontSize: 15,
@@ -453,17 +453,25 @@ class _EditPemasukanState extends State<EditPemasukan> {
               category.name.toLowerCase().contains(pattern.toLowerCase()));
         },
         itemBuilder: (context, Category suggestion) {
-          return ListTile(
-            title: Text(suggestion.name),
+          return Column(
+            children: [
+              ListTile(
+                title: Text(
+                  suggestion.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, // Buat teks tebal
+                    fontSize: 14, // Ukuran teks lebih kecil
+                  ),
+                ),
+              ),
+              Divider(height: 1, color: Colors.grey), // Divider antar item
+            ],
           );
         },
         onSuggestionSelected: (Category suggestion) {
           setState(() {
             selectedCategory = suggestion; // Menetapkan kategori yang dipilih
           });
-          // Update the controller text to reflect the selected category name
-          // nameController.text =
-          //     selectedCategory?.name ?? ''; // Memperbarui controller jika perlu
         },
         noItemsFoundBuilder: (context) => Padding(
           padding: const EdgeInsets.all(8.0),
@@ -471,6 +479,11 @@ class _EditPemasukanState extends State<EditPemasukan> {
             'Tidak ada kategori ditemukan.',
             style: TextStyle(color: Colors.red),
           ),
+        ),
+        suggestionsBoxDecoration: SuggestionsBoxDecoration(
+          color: Colors.white, // Warna latar dropdown
+          borderRadius: BorderRadius.circular(12), // Radius dropdown
+          elevation: 4, // Shadow untuk dropdown
         ),
       ),
     );

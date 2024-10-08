@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/pemasukan/edit_pemasukan.dart';
@@ -38,17 +40,6 @@ class DetailPemasukan extends StatelessWidget {
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                        ),
-                      ),
-                      Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Hi, Syahrul!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
                         ),
                       ),
                       Align(
@@ -220,13 +211,19 @@ class DetailPemasukan extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   Text(
-                                    'Jumlah:',
+                                    'Total:',
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   SizedBox(width: 4),
                                   Text(
-                                    'Rp ${double.tryParse(pemasukan.jumlah)?.toStringAsFixed(0) ?? '0'}',
+                                    NumberFormat.currency(
+                                            locale: 'id_ID',
+                                            symbol: 'Rp ',
+                                            decimalDigits: 0)
+                                        .format(
+                                            double.tryParse(pemasukan.jumlah) ??
+                                                0),
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
@@ -289,6 +286,30 @@ class DetailPemasukan extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class ThousandSeparatorInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Menghapus semua karakter non-digit
+    String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (newText.isEmpty) {
+      return TextEditingValue();
+    }
+
+    // Menggunakan intl package untuk format dengan pemisah ribuan
+    String formattedText =
+        NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
+
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
     );
   }
 }

@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:dio/dio.dart';
 import 'package:pity_cash/models/incomes_model.dart';
@@ -21,6 +24,33 @@ class ApiService {
     print('Token: $token'); // Log untuk melihat token
     if (token != null) {
       _dio.options.headers['Authorization'] = 'Bearer $token';
+    }
+  }
+
+  Future<double> fetchSaldo() async {
+    try {
+      await _setAuthToken();
+      final response = await _dio.get(
+        'http://pitycash.mamorasoft.com/api/income/saldo',
+      );
+
+      print('Response status code: ${response.statusCode}'); // Log status code
+      print('Response data: ${response.data}'); // Log data yang diterima
+
+      if (response.statusCode == 200) {
+        // Cek format dari response.data
+        if (response.data is Map) {
+          final double saldo = double.parse(response.data['1'].toString());
+          return saldo;
+        } else {
+          throw Exception('Response data is not a valid map');
+        }
+      } else {
+        throw Exception('Failed to fetch saldo: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching saldo: $e');
+      throw Exception('Failed to fetch saldo');
     }
   }
 
@@ -282,7 +312,7 @@ class ApiService {
       'description': description,
       'jumlah': jumlah,
       'date': date,
-      'category_id': categoryId
+      'id': categoryId
     };
 
     try {
@@ -341,22 +371,38 @@ class ApiService {
     }
   }
 
-  Future<List<Pengeluaran>> fetchExpenses({int page = 1}) async {
+  Future<List<Pengeluaran>> fetchExpenses({
+    int page = 1,
+    DateTimeRange? dateRange, // Menambahkan parameter date range
+  }) async {
     print('Fetching expenses from page: $page');
     try {
-      await _setAuthToken(); // Pastikan untuk mengatur token otorisasi
+      await _setAuthToken(); // Ensure the auth token is set
+
+      // Menambahkan query parameter untuk date range jika ada
+      final Map<String, dynamic> queryParams = {'page': page};
+
+      if (dateRange != null) {
+        queryParams['start_date'] =
+            DateFormat('yyyy-MM-dd').format(dateRange.start);
+        queryParams['end_date'] =
+            DateFormat('yyyy-MM-dd').format(dateRange.end);
+      }
+
       final response = await _dio.get(
         '$baseUrl/outcome/all',
-        queryParameters: {'page': page},
+        queryParameters: queryParams, // Menambahkan queryParams
       );
 
       print('Status code: ${response.statusCode}');
       if (response.statusCode == 200) {
         final expenseData = response.data['data']['data'] as List;
         print('Expenses fetched: $expenseData');
-        return expenseData
-            .map((expenseJson) => Pengeluaran.fromJson(expenseJson))
-            .toList();
+
+        // Create a list of Pengeluaran from the fetched expense data
+        return expenseData.map((expenseJson) {
+          return Pengeluaran.fromJson(expenseJson); // Call with single argument
+        }).toList();
       } else {
         throw Exception('Failed to load expenses: ${response.statusCode}');
       }
@@ -367,6 +413,88 @@ class ApiService {
         print('Error fetching expenses: $e');
       }
       throw Exception('Failed to load expenses');
+    }
+  }
+
+// Misalnya, fungsi ini untuk mendapatkan tanggal berdasarkan idParent
+  Future<Map<int, DateTime?>> fetchTanggalMap() async {
+    // Gantikan dengan logika untuk mengambil tanggal yang relevan
+    // Contoh hardcode, sesuaikan dengan sumber data Anda
+    return {
+      1: DateTime.parse('2024-01-01'),
+      2: DateTime.parse('2024-01-02'),
+      // Tambahkan sesuai kebutuhan
+    };
+  }
+
+  Future<void> createPengeluaran(
+    List<String> names,
+    List<String> descriptions,
+    List<String> parentDates, // Accept formatted dates
+    List<int> jumlahs,
+    List<int> jumlahSatuans,
+    List<double> nominals,
+    List<double> dls,
+    List<int> categoryIds,
+    List<File> files,
+    List<String> images,
+  ) async {
+    try {
+      List<Map<String, dynamic>> pengeluaranList = [];
+
+      // Prepare the list of pengeluaran items
+      for (int i = 0; i < names.length; i++) {
+        pengeluaranList.add({
+          'name': names[i],
+          'description': descriptions[i],
+          'jumlah_satuan': jumlahSatuans[i],
+          'nominal': nominals[i],
+          'dll': dls[i],
+          'jumlah': jumlahs[i],
+          'id': categoryIds[i], // Ensure this matches your API expectations
+        });
+      }
+
+      // Check that parent dates are not empty
+      if (parentDates.isEmpty) {
+        throw Exception("At least one date must be provided.");
+      }
+
+      // Construct the request body
+      Map<String, dynamic> requestBody = {
+        'tanggal': parentDates, // Use the formatted parent dates directly
+        'name': names,
+        'description': descriptions,
+        'jumlah_satuan': jumlahSatuans,
+        'nominal': nominals,
+        'dll': dls,
+        'jumlah': jumlahs,
+        'id': categoryIds,
+        // 'image': images, // Include if you have images to upload
+      };
+
+      // Debugging: Log the request body
+      print('Request Body: $requestBody');
+
+      // Send the request
+      await _setAuthToken(); // Assuming this method sets the auth token correctly
+      final response =
+          await _dio.post('$baseUrl/outcome/store', data: requestBody);
+
+      // Check the response
+      if (response.statusCode == 201) {
+        print('Pengeluaran berhasil ditambahkan: ${response.data}');
+      } else {
+        throw Exception('Failed to create pengeluaran: ${response.data}');
+      }
+    } catch (e) {
+      print('Error in ApiService: $e');
+      if (e is DioError) {
+        print('Response data: ${e.response?.data}');
+        print('Response status code: ${e.response?.statusCode}');
+        print('Response headers: ${e.response?.headers}');
+      }
+      throw Exception('Error in ApiService: $e');
     }
   }
 }

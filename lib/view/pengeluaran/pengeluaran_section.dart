@@ -20,9 +20,14 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   List<Pengeluaran> expenses = []; // Updated to use Pengeluaran
   List<Pengeluaran> filteredExpenses = [];
   Map<int, List<Pengeluaran>> groupedFilteredExpenses = {};
+
+  DateTimeRange? selectedDateRange; // Daftar yang sudah difilter
+
 // Updated to use Pengeluaran
 
   // Other variables remain unchanged
+  double saldo = 0.0; // State untuk menyimpan saldo
+  bool isLoading = true; // State untuk loading status
   bool isOutcomeSelected = true;
   String? token;
   String? name;
@@ -33,15 +38,32 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
 
   bool isLoadingMore = false;
   int currentPage = 1;
-  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _getSaldo();
     _checkLoginStatus();
     _fetchExpenses(currentPage); // Ambil data awal
     _searchController
         .addListener(_filterExpenses); // Dengarkan perubahan di search field
+  }
+
+  Future<void> _getSaldo() async {
+    try {
+      final fetchedSaldo =
+          await _apiService.fetchSaldo(); // Panggil fungsi fetchSaldo
+      setState(() {
+        saldo = fetchedSaldo; // Update saldo dengan hasil dari API
+        isLoading = false; // Matikan loading setelah saldo berhasil diambil
+      });
+    } catch (e) {
+      print('Failed to load saldo: $e');
+      setState(() {
+        saldo = 0.0; // Atur saldo ke 0 jika gagal
+        isLoading = false; // Matikan loading jika gagal mengambil saldo
+      });
+    }
   }
 
   Future<void> _checkLoginStatus() async {
@@ -56,13 +78,19 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     if (isLoadingMore) return; // Prevent fetching if already loading more data
 
     setState(() {
-      isLoading = true; // Start loading
+      isLoadingMore = true; // Start loading
     });
 
     try {
       // Add debug print to verify the API call
-      print('Fetching expenses for page: $page');
-      final fetchedExpenses = await _apiService.fetchExpenses(page: page);
+      print(
+          'Fetching expenses for page: $page with date range: $selectedDateRange');
+
+      // Panggil fetchExpenses dari api_service dengan pagination dan date range
+      final fetchedExpenses = await _apiService.fetchExpenses(
+        page: page,
+        dateRange: selectedDateRange, // Tambahkan date range jika dipilih
+      );
 
       // Debug print the response from the API
       print('Fetched expenses: ${fetchedExpenses.toString()}');
@@ -73,6 +101,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         } else {
           expenses.addAll(fetchedExpenses); // Append for subsequent pages
         }
+
         currentPage++; // Increment current page for pagination
         _filterExpenses(); // Update filtered expenses after fetching
       });
@@ -87,31 +116,78 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     }
   }
 
+  Future<void> _selectDateRange(BuildContext context) async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      initialDateRange: selectedDateRange,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Color(0xFFEB8153),
+            accentColor: Color(0xFFEB8153),
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFFEB8153),
+              onPrimary: Colors.white,
+              onSurface: Color(0xFFEB8153),
+            ),
+            buttonTheme: ButtonThemeData(
+              textTheme: ButtonTextTheme.primary,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null && picked != selectedDateRange) {
+      setState(() {
+        selectedDateRange = picked;
+      });
+      _filterExpenses(); // Reapply filters when date range is selected
+    }
+  }
+
   void _filterExpenses() {
     String query = _searchController.text.toLowerCase();
-    setState(() {
-      // Jika query kosong, tampilkan semua pengeluaran
-      if (query.isEmpty) {
-        filteredExpenses = List.from(expenses); // Tampilkan semua pengeluaran
-      } else {
-        // Filter pengeluaran berdasarkan nama atau tanggal
-        filteredExpenses = expenses.where((pengeluaran) {
-          bool matchesName = pengeluaran.name.toLowerCase().contains(query);
-          bool matchesDate = DateFormat('dd MMMM yyyy')
-              .format(pengeluaran.createdAt)
-              .toLowerCase()
-              .contains(query);
 
-          return matchesName ||
-              matchesDate; // Kembalikan true jika salah satu cocok
+    setState(() {
+      // Step 1: Filter expenses by date range if a date range is selected
+      List<Pengeluaran> dateRangeFilteredExpenses = expenses;
+      if (selectedDateRange != null) {
+        dateRangeFilteredExpenses = expenses.where((pengeluaran) {
+          return pengeluaran.tanggal != null &&
+              (pengeluaran.tanggal!.isAfter(selectedDateRange!.start) ||
+                  pengeluaran.tanggal!
+                      .isAtSameMomentAs(selectedDateRange!.start)) &&
+              (pengeluaran.tanggal!.isBefore(selectedDateRange!.end) ||
+                  pengeluaran.tanggal!
+                      .isAtSameMomentAs(selectedDateRange!.end));
         }).toList();
       }
 
-      // Kelompokkan filtered expenses setelah memfilter
+      // Step 2: If query is empty, just show the date-range filtered expenses
+      if (query.isEmpty) {
+        filteredExpenses = List.from(dateRangeFilteredExpenses);
+      } else {
+        // Step 3: Apply search query filtering on top of date-range filtered results
+        filteredExpenses = dateRangeFilteredExpenses.where((pengeluaran) {
+          // Filter by name or tanggal (date)
+          bool matchesName = pengeluaran.name.toLowerCase().contains(query);
+          bool matchesDate = DateFormat('dd MMMM yyyy')
+              .format(pengeluaran.tanggal!)
+              .toLowerCase()
+              .contains(query);
+
+          return matchesName || matchesDate;
+        }).toList();
+      }
+
+      // Step 4: Group filtered expenses by parentId
       groupedFilteredExpenses = {};
       for (var pengeluaran in filteredExpenses) {
-        int parentId =
-            pengeluaran.idParent; // Gunakan default jika idParent null
+        int parentId = pengeluaran.idParent;
         if (!groupedFilteredExpenses.containsKey(parentId)) {
           groupedFilteredExpenses[parentId] = [];
         }
@@ -199,15 +275,22 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                       ),
                       SizedBox(height: 2),
                       Center(
-                        child: Text(
-                          isLoggedIn ? '\Rp 90.000,00' : '\Rp 0,00',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: isLoading
+                            ? CircularProgressIndicator() // Tampilkan loading saat data sedang diambil
+                            : Text(
+                                NumberFormat.currency(
+                                  locale: 'id_ID', // Format untuk IDR
+                                  symbol: 'Rp ', // Simbol mata uang
+                                  decimalDigits: 2, // Jumlah desimal
+                                ).format(saldo), // Tampilkan saldo dari API
+                                style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
+
                       SizedBox(height: 12),
                       // Custom Toggle button for Income and Expense
                       Container(
@@ -344,41 +427,123 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                   child: Column(
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment
+                            .spaceBetween, // Distribute space evenly
                         children: [
                           SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: CircleAvatar(
-                              backgroundColor: Color(0xFF51A6F5),
-                              child: IconButton(
-                                icon: Icon(Icons.print_outlined),
-                                color: Colors.white,
-                                iconSize: 28,
-                                onPressed: () {
-                                  // Add your print action here
-                                },
+                            width: 225, // Adjust width as needed
+                            child: GestureDetector(
+                              onTap: () => _selectDateRange(
+                                  context), // Open date range picker on tap
+                              child: AbsorbPointer(
+                                // Prevents text editing
+                                child: TextField(
+                                  enabled: false, // Disable text editing
+                                  decoration: InputDecoration(
+                                    hintText: selectedDateRange == null
+                                        ? 'Pilih Tanggal'
+                                        : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
+                                    hintStyle: TextStyle(
+                                      color: Colors.black54,
+                                      fontSize:
+                                          13, // Ukuran font yang lebih kecil
+                                    ),
+                                    prefixIcon: Padding(
+                                      padding: const EdgeInsets.only(
+                                          right:
+                                              8.0), // Space between icon and text
+                                      child: Container(
+                                        height:
+                                            48, // Adjust height for TextField
+                                        width:
+                                            48, // Adjust width to be circular
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Color(
+                                              0xFFEB8153), // Background color of circle
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors
+                                                  .black26, // Shadow color
+                                              blurRadius: 4.0, // Blur radius
+                                              spreadRadius:
+                                                  1.0, // Spread radius
+                                              offset: Offset(
+                                                  0, 5), // Shadow position
+                                            ),
+                                          ],
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Icon(
+                                            Icons.calendar_today,
+                                            color: Colors.white,
+                                            size: 22,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    filled:
+                                        true, // Enables the background color
+                                    fillColor: Colors.grey[
+                                        200], // Sets the background color to light grey
+                                    border: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide.none, // Removes the border
+                                      borderRadius: BorderRadius.circular(
+                                          24.0), // Adds rounded corners
+                                    ),
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical:
+                                          15, // Vertical padding inside TextField
+                                      horizontal:
+                                          20, // Horizontal padding for text
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                          SizedBox(width: 8),
-                          SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: CircleAvatar(
-                              backgroundColor: Color(0xFF68CF29),
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_circle_down_sharp),
-                                color: Colors.white,
-                                iconSize: 28,
-                                onPressed: () {
-                                  // Add your download action here
-                                },
+
+                          // Buttons Row
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: CircleAvatar(
+                                  backgroundColor: Color(0xFF51A6F5),
+                                  child: IconButton(
+                                    icon: Icon(Icons.print_outlined),
+                                    color: Colors.white,
+                                    iconSize: 28,
+                                    onPressed: () {
+                                      // Add your print action here
+                                    },
+                                  ),
+                                ),
                               ),
-                            ),
+                              SizedBox(width: 8),
+                              SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: CircleAvatar(
+                                  backgroundColor: Color(0xFF68CF29),
+                                  child: IconButton(
+                                    icon: Icon(Icons.arrow_circle_down_sharp),
+                                    color: Colors.white,
+                                    iconSize: 28,
+                                    onPressed: () {
+                                      // Add your download action here
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
+                      SizedBox(height: 10),
                       Expanded(
                         child: LazyLoadScrollView(
                           onEndOfPage: () {
@@ -419,16 +584,20 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       SizedBox(height: 8.0),
-                                      // Display date
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            groupItems.isNotEmpty
+                                            groupItems.isNotEmpty &&
+                                                    groupItems.first
+                                                            .parentPengeluaran !=
+                                                        null &&
+                                                    groupItems.first.tanggal !=
+                                                        null
                                                 ? DateFormat('dd MMMM yyyy')
                                                     .format(groupItems
-                                                        .first.createdAt)
+                                                        .first.tanggal!)
                                                 : 'Tidak ada tanggal',
                                             style: TextStyle(
                                               fontSize: 14,
@@ -437,6 +606,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                           ),
                                         ],
                                       ),
+
                                       Divider(
                                         color: Colors.grey[400],
                                         thickness: 1,

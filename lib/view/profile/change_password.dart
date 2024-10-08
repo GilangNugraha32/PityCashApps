@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:pity_cash/service/share_preference.dart';
 
-class EditProfile extends StatefulWidget {
+class ChangePasswordProfile extends StatefulWidget {
   @override
-  _EditProfileState createState() => _EditProfileState();
+  _ChangePasswordProfileState createState() => _ChangePasswordProfileState();
 }
 
-class _EditProfileState extends State<EditProfile> {
+class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
   final SharedPreferencesService _prefsService = SharedPreferencesService();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _alamatController = TextEditingController();
+
+  bool _isCurrentPasswordVisible = false;
+  bool _isNewPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
 
   String? _selectedGender;
 
@@ -24,30 +32,31 @@ class _EditProfileState extends State<EditProfile> {
   Future<void> _loadProfileData() async {
     final username = await _prefsService.getUserName();
     final email = await _prefsService.getUserEmail();
-    final alamat = await _prefsService.getUserAddress();
-    // final gender =
-    // await _prefsService.getUserGender(); // Load gender from preferences
     setState(() {
       _usernameController.text = username ?? 'Guest';
       _emailController.text = email ?? 'example@example.com';
-      _alamatController.text = alamat ?? 'Malang';
-      // _selectedGender = gender ?? 'Laki-Laki'; // Ensure this value is valid
     });
   }
 
-  void _updateProfile() async {
-    final username = _usernameController.text;
-    final email = _emailController.text;
-    final alamat = _alamatController.text;
+  void _updatePassword() async {
+    final currentPassword = _currentPasswordController.text;
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
 
-    if (username.isNotEmpty &&
-        email.isNotEmpty &&
-        alamat.isNotEmpty &&
-        _selectedGender != null) {
-      // Update logic can go here, including saving the data back to SharedPreferences
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Profile updated successfully')),
-      );
+    if (currentPassword.isNotEmpty &&
+        newPassword.isNotEmpty &&
+        confirmPassword.isNotEmpty) {
+      if (newPassword == confirmPassword) {
+        // Update logic can go here, including saving the new password back to SharedPreferences
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Password updated successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('New password and confirm password do not match')),
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill in all fields')),
@@ -55,8 +64,8 @@ class _EditProfileState extends State<EditProfile> {
     }
   }
 
-  Widget _buildTextField(
-      String label, TextEditingController controller, IconData icon) {
+  Widget _buildPasswordField(String label, TextEditingController controller,
+      bool isVisible, Function() toggleVisibility) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -65,53 +74,17 @@ class _EditProfileState extends State<EditProfile> {
         SizedBox(height: 8),
         TextFormField(
           controller: controller,
+          obscureText: !isVisible,
           decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: Colors.black),
+            suffixIcon: IconButton(
+              icon: Icon(
+                  isVisible
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: Colors.black),
+              onPressed: toggleVisibility,
+            ),
             hintText: 'Enter your $label',
-            fillColor: Colors.grey[200],
-            filled: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide(color: Color(0xFFEB8153)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide(color: Color(0xFFEB8153)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide(color: Color(0xFFEB8153)),
-            ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-          ),
-        ),
-        SizedBox(height: 16),
-      ],
-    );
-  }
-
-  Widget _buildGenderDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Gender',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        DropdownButtonFormField<String>(
-          value: _selectedGender,
-          items: [
-            DropdownMenuItem(value: 'Laki-Laki', child: Text('Laki-Laki')),
-            DropdownMenuItem(value: 'Perempuan', child: Text('Perempuan')),
-          ],
-          onChanged: (value) {
-            setState(() {
-              _selectedGender = value; // Update pilihan gender
-            });
-          },
-          decoration: InputDecoration(
-            prefixIcon:
-                Icon(Icons.female_sharp, color: Colors.black), // Ikon hitam
-            hintText: 'Select your gender',
             fillColor: Colors.grey[200],
             filled: true,
             border: OutlineInputBorder(
@@ -153,7 +126,6 @@ class _EditProfileState extends State<EditProfile> {
               padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
               child: Column(
                 children: [
-                  // Header dengan ikon di pojok kiri dan kanan
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -162,7 +134,7 @@ class _EditProfileState extends State<EditProfile> {
                         onPressed: () => Navigator.pop(context),
                       ),
                       Text(
-                        'Edit Profile',
+                        'Change Password',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -176,19 +148,13 @@ class _EditProfileState extends State<EditProfile> {
                       ),
                     ],
                   ),
-
                   SizedBox(height: 24),
-
-                  // Avatar
                   CircleAvatar(
                     radius: 50,
                     backgroundImage: AssetImage('assets/piticash_log.png'),
                     backgroundColor: Colors.transparent,
                   ),
-
                   SizedBox(height: 8),
-
-                  // Nama dan email berdasarkan login status
                   Text(
                     _usernameController.text,
                     style: TextStyle(
@@ -228,16 +194,33 @@ class _EditProfileState extends State<EditProfile> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       SizedBox(height: 16),
-                      _buildTextField(
-                          'Name', _usernameController, Icons.person_outline),
-                      _buildTextField(
-                          'Email', _emailController, Icons.email_outlined),
-                      _buildTextField(
-                          'Address', _alamatController, Icons.home_outlined),
-                      _buildGenderDropdown(), // Dropdown for gender
+                      _buildPasswordField(
+                          'Current Password',
+                          _currentPasswordController,
+                          _isCurrentPasswordVisible, () {
+                        setState(() {
+                          _isCurrentPasswordVisible =
+                              !_isCurrentPasswordVisible;
+                        });
+                      }),
+                      _buildPasswordField('New Password',
+                          _newPasswordController, _isNewPasswordVisible, () {
+                        setState(() {
+                          _isNewPasswordVisible = !_isNewPasswordVisible;
+                        });
+                      }),
+                      _buildPasswordField(
+                          'Confirm Password',
+                          _confirmPasswordController,
+                          _isConfirmPasswordVisible, () {
+                        setState(() {
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible;
+                        });
+                      }),
                       SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: _updateProfile,
+                        onPressed: _updatePassword,
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 16.0),
                           backgroundColor: Color(0xFFEB8153),
@@ -245,7 +228,7 @@ class _EditProfileState extends State<EditProfile> {
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                         ),
-                        child: Text('Update Profile',
+                        child: Text('Update Password',
                             style: TextStyle(fontSize: 16)),
                       ),
                     ],

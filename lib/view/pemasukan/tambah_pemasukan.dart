@@ -449,8 +449,19 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
               category.name.toLowerCase().contains(pattern.toLowerCase()));
         },
         itemBuilder: (context, Category suggestion) {
-          return ListTile(
-            title: Text(suggestion.name),
+          return Column(
+            children: [
+              ListTile(
+                title: Text(
+                  suggestion.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, // Buat teks tebal
+                    fontSize: 14, // Ukuran teks lebih kecil
+                  ),
+                ),
+              ),
+              Divider(height: 1, color: Colors.grey), // Divider antar item
+            ],
           );
         },
         onSuggestionSelected: (Category suggestion) {
@@ -464,6 +475,11 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
             'Tidak ada kategori ditemukan.',
             style: TextStyle(color: Colors.red),
           ),
+        ),
+        suggestionsBoxDecoration: SuggestionsBoxDecoration(
+          color: Colors.white, // Warna latar dropdown
+          borderRadius: BorderRadius.circular(12), // Radius dropdown
+          elevation: 4, // Shadow untuk dropdown
         ),
       ),
     );

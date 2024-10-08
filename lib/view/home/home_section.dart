@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pity_cash/service/api_service.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
+import 'package:pity_cash/models/incomes_model.dart';
+import 'package:pity_cash/models/outcomes_model.dart';
+import 'package:pity_cash/service/share_preference.dart';
 
 class HomeSection extends StatefulWidget {
   @override
@@ -8,17 +15,39 @@ class HomeSection extends StatefulWidget {
 }
 
 class _HomeSectionState extends State<HomeSection> {
+  double saldo = 0.0;
+  bool isLoading = true;
+  bool isLoadingMore = false;
   bool isIncomeSelected = true; // Initial state
   String? token; // Token variable
   String? name; // User name variable
   bool isLoggedIn = false; // Track login status
 
   final SharedPreferencesService _prefsService = SharedPreferencesService();
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
+    _getSaldo();
     super.initState();
     _checkLoginStatus(); // Check login status on init
+  }
+
+  Future<void> _getSaldo() async {
+    try {
+      final fetchedSaldo =
+          await _apiService.fetchSaldo(); // Panggil fungsi fetchSaldo
+      setState(() {
+        saldo = fetchedSaldo; // Update saldo dengan hasil dari API
+        isLoading = false; // Matikan loading setelah saldo berhasil diambil
+      });
+    } catch (e) {
+      print('Failed to load saldo: $e');
+      setState(() {
+        saldo = 0.0; // Atur saldo ke 0 jika gagal
+        isLoading = false; // Matikan loading jika gagal mengambil saldo
+      });
+    }
   }
 
   Future<void> _checkLoginStatus() async {
@@ -95,14 +124,20 @@ class _HomeSectionState extends State<HomeSection> {
                   ),
                   SizedBox(height: 2),
                   Center(
-                    child: Text(
-                      isLoggedIn ? '\Rp 90.000,00' : '\Rp 0,00',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: isLoading
+                        ? CircularProgressIndicator() // Tampilkan loading saat data sedang diambil
+                        : Text(
+                            NumberFormat.currency(
+                              locale: 'id_ID', // Format untuk IDR
+                              symbol: 'Rp ', // Simbol mata uang
+                              decimalDigits: 2, // Jumlah desimal
+                            ).format(saldo), // Tampilkan saldo dari API
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                   SizedBox(height: 12),
                   // Custom Toggle button for Income and Expense
