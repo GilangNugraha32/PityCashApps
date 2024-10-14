@@ -502,7 +502,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
             hintText: selectedDate == null
                 ? 'Pilih Tanggal'
                 : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: TextStyle(color: Colors.black87),
             prefixIcon: Padding(
               padding: const EdgeInsets.only(
                   right: 8.0), // Jarak antara ikon dan teks

@@ -224,10 +224,10 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            isLoggedIn ? 'Hi, $name!' : 'Hi, Guest!',
+                            'Incomes',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -256,7 +256,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             : Text(
                                 NumberFormat.currency(
                                   locale: 'id_ID', // Format untuk IDR
-                                  symbol: 'Rp ', // Simbol mata uang
+                                  symbol: 'Rp', // Simbol mata uang
                                   decimalDigits: 2, // Jumlah desimal
                                 ).format(saldo), // Tampilkan saldo dari API
                                 style: TextStyle(

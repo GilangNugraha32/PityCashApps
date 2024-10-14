@@ -201,6 +201,7 @@ class ApiService {
   Future<List<Pemasukan>> fetchIncomes({int page = 1}) async {
     print('Fetching incomes from page: $page');
     await _setAuthToken(); // Ensure the authentication token is set
+
     try {
       final response = await _dio.get(
         '$baseUrl/income/all',
@@ -208,13 +209,19 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final incomeData = response.data['data']['data']
-            as List; // Assuming 'data' contains a list of incomes
+        // Ensure the response structure matches your expectations
+        final incomeData = response.data['data']['data'] as List;
         print('Incomes fetched: $incomeData');
 
+        // Check if incomeData is empty
+        if (incomeData.isEmpty) {
+          print('No incomes found for page $page');
+          return []; // Return an empty list if no data found
+        }
+
+        // Map each JSON object to Pemasukan
         return incomeData.map((incomeJson) {
-          return Pemasukan.fromJson(
-              incomeJson); // Map each JSON object to Pemasukan
+          return Pemasukan.fromJson(incomeJson);
         }).toList();
       } else {
         throw Exception('Failed to load incomes: ${response.statusCode}');
@@ -437,7 +444,6 @@ class ApiService {
     List<double> dls,
     List<int> categoryIds,
     List<File> files,
-    List<String> images,
   ) async {
     try {
       List<Map<String, dynamic>> pengeluaranList = [];
@@ -495,6 +501,170 @@ class ApiService {
         print('Response headers: ${e.response?.headers}');
       }
       throw Exception('Error in ApiService: $e');
+    }
+  }
+
+  Future<void> editPengeluaran(
+    int parentId,
+    List<String> tanggalList, // List to hold dates for each entry
+    List<int> dataIds,
+    List<String> names,
+    List<String> descriptions,
+    List<int> jumlahs,
+    List<int> jumlahSatuans,
+    List<double> nominals,
+    List<double> dls,
+    List<int> categoryIds,
+    List<File> files,
+  ) async {
+    try {
+      List<Map<String, dynamic>> pengeluaranList = [];
+
+      for (int i = 0; i < names.length; i++) {
+        // Check for non-null values before adding to the list
+        if (dataIds[i] != null &&
+            names[i].isNotEmpty &&
+            jumlahSatuans[i] != null &&
+            nominals[i] != null &&
+            jumlahs[i] != null &&
+            categoryIds[i] != null) {
+          pengeluaranList.add({
+            'id_data': dataIds[i],
+            'name': names[i],
+            'description': descriptions[i], // Provide default if null
+            'jumlah_satuan': jumlahSatuans[i].toString(), // Convert to String
+            'nominal': nominals[i].toString(), // Convert to String
+            'dll': dls[i].toString(), // Convert to String
+            'jumlah': jumlahs[i].toString(), // Convert to String
+            'id': categoryIds[i].toString(), // Convert to String
+            'tanggal':
+                tanggalList[i], // Use tanggal from the list for each entry
+            // Add image data handling if applicable
+            'image': files.isNotEmpty && files[i].path.isNotEmpty
+                ? await _uploadFile(files[i]) // Ensure you upload the file
+                : null,
+          });
+        } else {
+          print(
+              "Error: Missing required fields for pengeluaran item at index $i");
+        }
+      }
+
+      if (pengeluaranList.isEmpty) {
+        print("Error: No valid pengeluaran items to update.");
+        return; // Exit early if no valid items
+      }
+
+      // Create the request body according to the API requirements
+      Map<String, dynamic> requestBody = {
+        'tanggal': tanggalList.isNotEmpty
+            ? tanggalList.first
+            : DateTime.now()
+                .toIso8601String()
+                .split('T')
+                .first, // Default if list is empty
+        'name': names,
+        'description': descriptions,
+        'jumlah_satuan': jumlahSatuans,
+        'nominal': nominals,
+        'jumlah': jumlahs,
+        'dll': dls,
+        'id': categoryIds,
+        'image': files
+            .map((file) => file.path)
+            .toList(), // Ensure images are properly formatted
+        'pengeluaran': pengeluaranList, // Include the list of pengeluaran items
+      };
+
+      print('Request Body: $requestBody');
+
+      await _setAuthToken();
+      final response = await _dio.put(
+        '$baseUrl/outcome/update/$parentId',
+        data: requestBody,
+      );
+
+      if (response.statusCode == 200) {
+        print('Data updated successfully: ${response.data}');
+        // Handle the successful response as needed
+        if (response.data['status'] == 'success') {
+          print(response.data['message']);
+        }
+      } else {
+        print('Failed to update data: ${response.statusCode} ${response.data}');
+      }
+    } catch (e) {
+      // Log error with more detail
+      print('Error in ApiService: $e');
+      // Check for specific exceptions if needed
+      if (e is DioError) {
+        // Handle DioError specifically
+        print('DioError: ${e.response?.data} ${e.response?.statusCode}');
+      }
+    }
+  }
+
+// Example method to upload files if necessary
+  Future<String?> _uploadFile(File file) async {
+    try {
+      // Implement your file upload logic here and return the image URL or null
+      return null; // Replace with actual implementation
+    } catch (e) {
+      print('Error uploading file: $e');
+      return null; // Handle the upload failure
+    }
+  }
+
+  Future<void> deleteDataPengeluaran(int id) async {
+    print('Deleting outcome ID: $id');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+      final response = await _dio.delete('$baseUrl/outcome/pengeluaran/$id');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('Outcome deleted successfully');
+      } else {
+        String errorMessage =
+            response.data['message'] ?? 'Failed to delete outcome';
+        throw Exception(errorMessage); // Lempar exception jika gagal
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError deleting outcome: ${e.response?.data}');
+        throw Exception(
+            'Failed to delete outcome: ${e.response?.data['message'] ?? 'Unknown error'}');
+      } else {
+        print('Error deleting outcome: $e');
+        throw Exception(
+            'Failed to delete outcome'); // Lempar exception untuk error lainnya
+      }
+    }
+  }
+
+  Future<void> deleteParentPengeluaran(int idParent) async {
+    print('Deleting all outcomes for Parent ID: $idParent');
+    try {
+      await _setAuthToken(); // Ensure the authentication token is set
+      final response =
+          await _dio.delete('$baseUrl/outcome/pengeluaran/parent/$idParent');
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('All outcomes deleted successfully');
+      } else {
+        String errorMessage =
+            response.data['message'] ?? 'Failed to delete outcomes';
+        throw Exception(errorMessage); // Throw exception if deletion failed
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError deleting outcomes: ${e.response?.data}');
+        throw Exception(
+            'Failed to delete outcomes: ${e.response?.data['message'] ?? 'Unknown error'}');
+      } else {
+        print('Error deleting outcomes: $e');
+        throw Exception(
+            'Failed to delete outcomes'); // Throw exception for other errors
+      }
     }
   }
 }

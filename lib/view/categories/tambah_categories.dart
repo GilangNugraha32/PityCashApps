@@ -57,7 +57,7 @@ class _TambahCategoriesState extends State<TambahCategories> {
                   SizedBox(height: 20),
                   Center(
                     child: Text(
-                      'Add Category',
+                      'Tambah Kategori',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
@@ -171,25 +171,29 @@ class _TambahCategoriesState extends State<TambahCategories> {
                               String name = nameController.text;
                               String description = descriptionController.text;
 
-                              // Cek jika field yang dibutuhkan tidak kosong
+                              // Check if the required fields are not empty
                               if (name.isNotEmpty &&
                                   selectedJenisKategori != null) {
                                 try {
-                                  // Panggil fungsi createCategory dari ApiService
-                                  await ApiService().createCategory(name,
-                                      selectedJenisKategori!, description);
+                                  // Call the createCategory function from ApiService
+                                  await ApiService().createCategory(
+                                    name,
+                                    selectedJenisKategori!, // Ensure this is not null
+                                    description,
+                                  );
 
-                                  // Tampilkan Snackbar jika berhasil
+                                  // Show a Snackbar if the category is successfully added
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content: Text(
                                             'Kategori berhasil ditambahkan')),
                                   );
 
-                                  Navigator.pop(
-                                      context); // Navigasi kembali setelah berhasil
+                                  // Navigate back to the previous screen and pass 'success' as a result
+                                  Navigator.pop(context,
+                                      'success'); // Pass a result to the previous page
                                 } catch (e) {
-                                  // Tampilkan pesan error jika ada masalah
+                                  // Show an error message if there's an issue
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content:
@@ -197,7 +201,7 @@ class _TambahCategoriesState extends State<TambahCategories> {
                                   );
                                 }
                               } else {
-                                // Tampilkan pesan error jika field kosong
+                                // Show an error message if any field is empty
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text('Please fill all fields')),

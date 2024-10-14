@@ -248,10 +248,10 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            isLoggedIn ? 'Hi, $name!' : 'Hi, Guest!',
+                            'Outcomes',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

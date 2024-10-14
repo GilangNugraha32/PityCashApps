@@ -42,13 +42,27 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
 
   void _handleSubmit() async {
     List<Map<String, dynamic>> allFormData = [];
+    List<File?> selectedImages = []; // Change to File?
 
     // Collecting data from all forms
     for (var key in formKeys) {
-      var data = key.currentState
-          ?.getFormData(); // Ensure you have this method implemented
+      var data = key.currentState?.getFormData();
       if (data != null && data.isNotEmpty) {
         allFormData.add(data);
+
+        // Safely accessing selectedImage and its files
+        if (key.currentState?.selectedImage != null &&
+            key.currentState!.selectedImage!.files.isNotEmpty) {
+          String? imagePath = key.currentState!.selectedImage!.files.first.path;
+          if (imagePath != null) {
+            selectedImages.add(File(imagePath)); // Only add if path is not null
+          } else {
+            selectedImages.add(null); // Handle the null case
+          }
+        } else {
+          selectedImages
+              .add(null); // Allow image to be null if no image is selected
+        }
       }
     }
 
@@ -63,7 +77,6 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
       return;
     }
 
-    // Prepare data for API call
     List<String> names = [];
     List<String> descriptions = [];
     List<int> jumlahs = [];
@@ -72,87 +85,35 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
     List<double> dls = [];
     List<int> categoryIds = [];
 
-    // Format the selected date as parentDate
     String parentDate =
         DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now());
 
-    // Debugging: log the formatted parent date
-    print('Formatted Parent Date: $parentDate');
-
     for (var entry in allFormData) {
-      // Debugging: log the entry being processed
-      print('Processing entry: $entry');
-
-      // Ensure correct data types are used and check for null values
-      if (entry['names'] != null && entry['names'].isNotEmpty) {
-        names.add(entry['names'].first);
-      } else {
-        print('Warning: Names is null or empty in entry: $entry');
-        names.add(''); // Add a default value or handle the error
-      }
-
-      if (entry['descriptions'] != null && entry['descriptions'].isNotEmpty) {
-        descriptions.add(entry['descriptions'].first);
-      } else {
-        print('Warning: Descriptions is null or empty in entry: $entry');
-        descriptions.add(''); // Add a default value or handle the error
-      }
-
-      // Convert numerical values safely
-      if (entry['jumlah'] is List && entry['jumlah'].isNotEmpty) {
-        jumlahs.add((entry['jumlah'] as List).first.toInt());
-      } else {
-        print('Warning: Jumlah is null or empty in entry: $entry');
-        jumlahs.add(0); // Add a default value or handle the error
-      }
-
-      if (entry['jumlahSatuan'] is List && entry['jumlahSatuan'].isNotEmpty) {
-        jumlahSatuans.add((entry['jumlahSatuan'] as List).first.toInt());
-      } else {
-        print('Warning: Jumlah Satuan is null or empty in entry: $entry');
-        jumlahSatuans.add(0); // Add a default value or handle the error
-      }
-
-      if (entry['nominals'] is List && entry['nominals'].isNotEmpty) {
-        nominals.add((entry['nominals'] as List).first.toDouble());
-      } else {
-        print('Warning: Nominals is null or empty in entry: $entry');
-        nominals.add(0.0); // Add a default value or handle the error
-      }
-
-      if (entry['dll'] is List && entry['dll'].isNotEmpty) {
-        dls.add((entry['dll'] as List).first.toDouble());
-      } else {
-        print('Warning: DLL is null or empty in entry: $entry');
-        dls.add(0.0); // Add a default value or handle the error
-      }
-
-      // Safely convert category to int, ensuring it is handled correctly
+      // Safely extracting values and providing defaults
+      names.add((entry['names'].first ?? '').toString());
+      descriptions.add((entry['descriptions'].first ?? '').toString());
+      jumlahs.add((entry['jumlah'] as List).first?.toInt() ?? 0);
+      jumlahSatuans.add((entry['jumlahSatuan'] as List).first?.toInt() ?? 0);
+      nominals.add((entry['nominals'] as List).first?.toDouble() ?? 0.0);
+      dls.add((entry['dll'] as List).first?.toDouble() ?? 0.0);
       categoryIds.add((entry['category'] as num?)?.toInt() ?? 0);
     }
-
-    // Debugging: log final lists before API call
-    print('Names: $names');
-    print('Descriptions: $descriptions');
-    print('Jumlahs: $jumlahs');
-    print('Jumlah Satuans: $jumlahSatuans');
-    print('Nominals: $nominals');
-    print('DLs: $dls');
-    print('Category IDs: $categoryIds');
 
     // Call the API to save data
     try {
       await ApiService().createPengeluaran(
         names,
         descriptions,
-        [parentDate], // Send the formatted parent date as a list
+        [parentDate],
         jumlahs,
         jumlahSatuans,
         nominals,
         dls,
         categoryIds,
-        [], // Assuming empty lists for files and images for now
-        [], // Adjust this based on your requirements
+        selectedImages
+            .where((image) => image != null)
+            .map((image) => image!)
+            .toList(), // Ensure no nulls
       );
 
       // Display success message
@@ -169,7 +130,7 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
       // Handle errors here
       print('Error: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan saat mengirim data')),
+        SnackBar(content: Text('Terjadi kesalahasn saat mengirim data')),
       );
     }
   }
@@ -437,6 +398,7 @@ class PengeluaranForm extends StatefulWidget {
 
   final bool isFirst;
   final Function(List<Map<String, dynamic>>) onSubmit;
+  FilePickerResult? selectedImage; // Store the selected image here
 
   PengeluaranForm({
     required this.onRemove,
@@ -610,6 +572,101 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       controller.dispose();
     }
     super.dispose();
+  }
+
+  void _handleSubmit() async {
+    List<Map<String, dynamic>> allFormData = [];
+    List<File?> selectedImages = []; // Change to File?
+
+    // Collecting data from all forms
+    for (var key in formKeys) {
+      var data = key.currentState?.getFormData();
+      if (data != null && data.isNotEmpty) {
+        allFormData.add(data);
+
+        // Safely accessing selectedImage and its files
+        if (key.currentState?.selectedImage != null &&
+            key.currentState!.selectedImage!.files.isNotEmpty) {
+          String? imagePath = key.currentState!.selectedImage!.files.first.path;
+          if (imagePath != null) {
+            selectedImages.add(File(imagePath)); // Only add if path is not null
+          } else {
+            selectedImages.add(null); // Handle the null case
+          }
+        } else {
+          selectedImages
+              .add(null); // Allow image to be null if no image is selected
+        }
+      }
+    }
+
+    // Debugging: print the data that will be submitted
+    print('Submitting data: $allFormData');
+
+    // Ensure there's data to send
+    if (allFormData.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tidak ada data untuk dikirim')),
+      );
+      return;
+    }
+
+    List<String> names = [];
+    List<String> descriptions = [];
+    List<int> jumlahs = [];
+    List<int> jumlahSatuans = [];
+    List<double> nominals = [];
+    List<double> dls = [];
+    List<int> categoryIds = [];
+
+    String parentDate =
+        DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now());
+
+    for (var entry in allFormData) {
+      // Safely extracting values and providing defaults
+      names.add((entry['names'].first ?? '').toString());
+      descriptions.add((entry['descriptions'].first ?? '').toString());
+      jumlahs.add((entry['jumlah'] as List).first?.toInt() ?? 0);
+      jumlahSatuans.add((entry['jumlahSatuan'] as List).first?.toInt() ?? 0);
+      nominals.add((entry['nominals'] as List).first?.toDouble() ?? 0.0);
+      dls.add((entry['dll'] as List).first?.toDouble() ?? 0.0);
+      categoryIds.add((entry['category'] as num?)?.toInt() ?? 0);
+    }
+
+    // Call the API to save data
+    try {
+      await ApiService().createPengeluaran(
+        names,
+        descriptions,
+        [parentDate],
+        jumlahs,
+        jumlahSatuans,
+        nominals,
+        dls,
+        categoryIds,
+        selectedImages
+            .where((image) => image != null)
+            .map((image) => image!)
+            .toList(), // Ensure no nulls
+      );
+
+      // Display success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Data berhasil dikirim')),
+      );
+
+      // Clear forms after successful submission
+      setState(() {
+        formKeys.clear();
+        Navigator.pop(context); // Add a new form if necessary
+      });
+    } catch (error) {
+      // Handle errors here
+      print('Error: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Terjadi kesalahan saat mengirim data')),
+      );
+    }
   }
 
   @override
@@ -876,7 +933,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }
 
 // Function to calculate the total
-  // Function to calculate the total
   void _calculateTotal(String value) {
     // Remove the "Rp. " prefix and commas for calculations
     double nominal = double.tryParse(nominalControllers.last.text
@@ -1046,22 +1102,16 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     );
   }
 
-// Function to pick an image using FilePicker
+  // Function to pick an image using FilePicker
   Future<void> _pickImage() async {
-    try {
-      selectedImage = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        allowMultiple:
-            false, // Set to true if you want to allow multiple selections
-      );
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
 
-      if (selectedImage != null) {
-        setState(() {
-          // Trigger a rebuild to update the UI
-        });
-      }
-    } catch (e) {
-      print('Error picking image: $e');
+    if (result != null) {
+      setState(() {
+        selectedImage = result; // Save the selected image
+      });
     }
   }
 

@@ -38,7 +38,7 @@ class DetailPemasukan extends StatelessWidget {
                             color: Colors.white,
                           ),
                           onPressed: () {
-                            Navigator.pop(context);
+                            Navigator.pop(context, true);
                           },
                         ),
                       ),
@@ -88,6 +88,22 @@ class DetailPemasukan extends StatelessWidget {
                             width: 80,
                             child: ElevatedButton(
                               onPressed: () {
+                                _showDeleteConfirmationDialog(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Color(0xFF1A3A63),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                              child: Text('Hapus'),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          SizedBox(
+                            width: 80,
+                            child: ElevatedButton(
+                              onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -103,22 +119,6 @@ class DetailPemasukan extends StatelessWidget {
                                 ),
                               ),
                               child: Text('Edit'),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          SizedBox(
-                            width: 80,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _showDeleteConfirmationDialog(context);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                primary: Color(0xFF1A3A63),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                              child: Text('Hapus'),
                             ),
                           ),
                         ],

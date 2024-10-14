@@ -49,17 +49,6 @@ class DetailPengeluaran extends StatelessWidget {
                         ),
                       ),
                       Align(
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Hi, Syahrul!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      Align(
                         alignment: Alignment.centerRight,
                         child: Icon(
                           Icons.notifications,
@@ -105,6 +94,27 @@ class DetailPengeluaran extends StatelessWidget {
                             width: 80,
                             child: ElevatedButton(
                               onPressed: () {
+                                if (pengeluaranList.isNotEmpty) {
+                                  final selectedPengeluaran = pengeluaranList[
+                                      0]; // Replace with the correct index
+                                  _showDeleteConfirmationParentDialog(
+                                      context, selectedPengeluaran.idParent);
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Color(0xFF1A3A63),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                ),
+                              ),
+                              child: Text('Hapus'),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          SizedBox(
+                            width: 80,
+                            child: ElevatedButton(
+                              onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -122,24 +132,9 @@ class DetailPengeluaran extends StatelessWidget {
                               child: Text('Edit'),
                             ),
                           ),
-                          SizedBox(width: 10),
-                          SizedBox(
-                            width: 80,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _showDeleteConfirmationDialog(context);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                primary: Color(0xFF1A3A63),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                ),
-                              ),
-                              child: Text('Hapus'),
-                            ),
-                          ),
                         ],
                       ),
+
                       SizedBox(height: 50),
                       SizedBox(
                         width: 250,
@@ -250,27 +245,31 @@ class DetailPengeluaran extends StatelessWidget {
                                                 ),
                                               ),
                                               // Spacer to push the button to the right
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape
-                                                      .rectangle, // Rectangle box shape
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10), // Rounded corners
-                                                  color: Colors
-                                                      .red, // Red background for the icon button
+                                              if (pengeluaranList.length >
+                                                  1) ...[
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape
+                                                        .rectangle, // Rectangle box shape
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10), // Rounded corners
+                                                    color: Colors
+                                                        .red, // Red background for the icon button
+                                                  ),
+                                                  child: IconButton(
+                                                    icon: Icon(
+                                                        Icons.delete_outline,
+                                                        color: Colors.white),
+                                                    onPressed: () {
+                                                      _showDeleteConfirmationDataDialog(
+                                                          context,
+                                                          pengeluaran
+                                                              .idData); // Use idData instead of id
+                                                    },
+                                                  ),
                                                 ),
-                                                child: IconButton(
-                                                  icon: Icon(
-                                                      Icons.delete_outline,
-                                                      color: Colors
-                                                          .white), // White outlined trash icon
-                                                  onPressed: () {
-                                                    // Action for delete
-                                                    print('Hapus pengeluaran');
-                                                  },
-                                                ),
-                                              ),
+                                              ],
                                             ],
                                           ),
                                           SizedBox(height: 4),
@@ -441,7 +440,7 @@ class DetailPengeluaran extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
+  void _showDeleteConfirmationDataDialog(BuildContext context, int id) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -457,25 +456,70 @@ class DetailPengeluaran extends StatelessWidget {
             ),
             TextButton(
               onPressed: () async {
-                // try {
-                //   final apiService =
-                //       ApiService(); // Create an instance of ApiService
-                //   await apiService
-                //       .deleteIncome(pengeluaran.id); // Call the delete method
+                try {
+                  final apiService =
+                      ApiService(); // Create an instance of ApiService
+                  await apiService.deleteDataPengeluaran(
+                      id); // Call the delete method with the ID
 
-                //   // Show Snackbar for successful deletion
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     SnackBar(content: Text('Berhasil dihapus!')),
-                //   );
+                  // Show Snackbar for successful deletion
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Berhasil dihapus!')),
+                  );
 
-                //   Navigator.of(context).pop(); // Close the dialog
-                //   Navigator.of(context).pop(); // Go back to the previous screen
-                // } catch (e) {
-                //   // Handle error (show a snackbar or dialog)
-                //   ScaffoldMessenger.of(context).showSnackBar(
-                //     SnackBar(content: Text('Gagal menghapus data: $e')),
-                //   );
-                // }
+                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(); // Go back to the previous screen
+                } catch (e) {
+                  // Handle error (show a snackbar or dialog)
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Gagal menghapus data: $e')),
+                  );
+                }
+              },
+              child: Text('Hapus'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmationParentDialog(BuildContext context, int idParent) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Konfirmasi Hapus'),
+          content:
+              Text('Apakah Anda yakin ingin menghapus semua data terkait?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  final apiService =
+                      ApiService(); // Create an instance of ApiService
+                  await apiService.deleteParentPengeluaran(
+                      idParent); // Call the delete method
+
+                  // Show Snackbar for successful deletion
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Semua data berhasil dihapus!')),
+                  );
+
+                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop(); // Go back to the previous screen
+                } catch (e) {
+                  // Handle error (show a snackbar or dialog)
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Gagal menghapus data: $e')),
+                  );
+                }
               },
               child: Text('Hapus'),
             ),

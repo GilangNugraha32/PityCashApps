@@ -130,7 +130,7 @@ class _ProfileSectionState extends State<ProfileSection> {
                 Text(
                   'Profile',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),

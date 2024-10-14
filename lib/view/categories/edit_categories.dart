@@ -4,9 +4,9 @@ import 'package:pity_cash/service/api_service.dart';
 
 class EditCategories extends StatefulWidget {
   final Category category;
+  final VoidCallback onUpdate; // Callback for refresh
 
-  EditCategories({required this.category});
-
+  EditCategories({required this.category, required this.onUpdate});
   @override
   _EditCategoriesState createState() => _EditCategoriesState();
 }
@@ -39,6 +39,7 @@ class _EditCategoriesState extends State<EditCategories> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Category updated successfully!')),
         );
+        widget.onUpdate(); // Call the refresh method after successful update
 
         Navigator.pop(context);
       } catch (e) {
@@ -88,7 +89,7 @@ class _EditCategoriesState extends State<EditCategories> {
                   SizedBox(height: 20),
                   Center(
                     child: Text(
-                      'Edit Category',
+                      'Edit Kategori',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,

@@ -23,63 +23,200 @@ class EditPengeluaran extends StatefulWidget {
 
 class _EditPengeluaranState extends State<EditPengeluaran> {
   List<PengeluaranForm> forms = [];
+  final List<GlobalKey<_PengeluaranFormState>> formKeys = [];
   final ScrollController _scrollController = ScrollController();
-  DateTime? selectedDate; // Initialize selectedDate to hold the selected date
+  DateTime? selectedDate;
+  List<Category> categories = [];
 
   @override
   void initState() {
     super.initState();
-
     // Initialize the selected date from the first pengeluaran in the list if available
     if (widget.pengeluaranList.isNotEmpty) {
-      selectedDate =
-          widget.pengeluaranList.first.tanggal; // Use the first item's date
+      selectedDate = widget.pengeluaranList.first.tanggal;
     }
 
     // Initialize forms based on pengeluaranList
-    print("Pengeluaran List: ${widget.pengeluaranList}"); // Debugging line
     for (var pengeluaran in widget.pengeluaranList) {
+      GlobalKey<_PengeluaranFormState> formKey =
+          GlobalKey<_PengeluaranFormState>();
+      formKeys.add(formKey); // Add key to the list
       forms.add(PengeluaranForm(
-        onRemove: () => _removeForm(forms.length - 1),
-        pengeluaran: pengeluaran, // Pass existing data for pre-filling
+        key: formKey,
+        onRemove: () => _removeForm(formKeys.length - 1),
+        onSubmit: (List<Map<String, dynamic>> pengeluaranList) {
+          // Handle submission of the specific form
+          print('Submitted data for form: $pengeluaranList');
+        },
+        pengeluaran: pengeluaran,
         isLast: pengeluaran == widget.pengeluaranList.last,
-        selectedDate: selectedDate, // Pass the selected date to the form
+        selectedDate: selectedDate,
+        categories: [], // You can populate categories later if needed
       ));
     }
-    print("Forms Initialized: ${forms.length}"); // Debugging line
+  }
+
+  void _handleSubmit() async {
+    List<String> names = [];
+    List<String> descriptions = [];
+    List<int> jumlahs = [];
+    List<int> jumlahSatuans = [];
+    List<double> nominals = [];
+    List<double> dls = [];
+    List<int> categoryIds = [];
+    List<int> dataIds = [];
+    List<File> selectedImages = [];
+    List<String> tanggalList = []; // List to store the dates
+    bool hasValidData = false; // Track if any form has valid data
+
+    // Get the parentId from the pengeluaranList
+    int parentId =
+        widget.pengeluaranList.last.idParent; // Get the last parent's ID
+
+    // Collect data from all forms
+    for (var key in formKeys) {
+      var data = key.currentState?.getFormData();
+      if (data != null && data.isNotEmpty) {
+        print('Data from form: $data'); // Debugging statement
+        hasValidData = true;
+
+        names.add(data['name']);
+        descriptions.add(data['description'] ?? '');
+        jumlahSatuans.add(data['jumlah_satuan']);
+        nominals.add(data['nominal']);
+        dls.add(data['dll']);
+        jumlahs.add(data['jumlah']);
+        categoryIds.add(data['category']);
+        dataIds.add(data['id_data']);
+
+        // Collect the date from the form data
+        String tanggal = data['tanggal'] ?? DateTime.now().toIso8601String();
+        try {
+          DateTime parsedDate = DateTime.parse(tanggal);
+          String formattedDate =
+              "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+          tanggalList.add(formattedDate); // Add to tanggalList
+          print(
+              'Formatted Tanggal from form: $formattedDate'); // Debugging statement
+        } catch (e) {
+          print('Error parsing date: $tanggal. Error: $e');
+        }
+
+        // Handle selected image file if available
+        if (key.currentState?.selectedImage != null &&
+            key.currentState!.selectedImage!.files.isNotEmpty) {
+          String? imagePath = key.currentState!.selectedImage!.files.first.path;
+          selectedImages.add(imagePath != null ? File(imagePath) : File(''));
+        } else {
+          selectedImages.add(File('')); // Empty file for missing images
+        }
+      } else {
+        print("Form data is empty or null for one of the forms.");
+      }
+    }
+
+    if (!hasValidData) {
+      print("Error: No valid form data to submit.");
+      return;
+    }
+
+    // Print the gathered data before submission
+    print('Parent ID: $parentId');
+    print('Names: $names');
+    print('Descriptions: $descriptions');
+    print('Jumlah Satuans: $jumlahSatuans');
+    print('Nominals: $nominals');
+    print('DLLs: $dls');
+    print('Jumlahs: $jumlahs');
+    print('Category IDs: $categoryIds');
+    print('Data IDs: $dataIds');
+    print('Selected Images: $selectedImages');
+    print('Tanggal List: $tanggalList');
+
+    try {
+      // Call the API service to update pengeluaran
+      await ApiService().editPengeluaran(
+        parentId,
+        tanggalList,
+        dataIds,
+        names,
+        descriptions,
+        jumlahs,
+        jumlahSatuans,
+        nominals,
+        dls,
+        categoryIds,
+        selectedImages,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Data berhasil Diubah')),
+      );
+      Navigator.pop(context); // Add a new form if necessary
+
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Data Gagal Diubah')),
+      );
+    }
   }
 
   void _removeForm(int index) {
     setState(() {
-      forms.removeAt(index);
+      if (formKeys.length > 1) {
+        formKeys.removeAt(index);
+        forms.removeAt(
+            index); // Also remove the corresponding form from the list
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Form berhasil dihapus!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Minimal satu form harus ada!'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Form berhasil dihapus!'),
-        duration: Duration(seconds: 2),
-      ),
-    );
   }
 
   void _addForm() {
     setState(() {
+      // Create a new GlobalKey for the new form
+      final newFormKey = GlobalKey<_PengeluaranFormState>();
+      formKeys.add(newFormKey); // Add the new key to the list
       forms.add(PengeluaranForm(
+        key: newFormKey, // Assign the new key to the form
         onRemove: () => _removeForm(forms.length - 1),
+        onSubmit: (data) {
+          // Handle form submission here if needed
+        },
+        selectedDate: selectedDate,
+        categories: categories, // Pass categories to the new form
         isLast: true, // New form is always last
-        selectedDate: selectedDate, // Pass the selected date to the new form
       ));
     });
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+  Future<void> fetchCategories() async {
+    try {
+      ApiService apiService = ApiService();
+      List<Category> allCategories = await apiService.fetchCategories();
+      setState(() {
+        categories = allCategories
+            .where((category) => category.jenisKategori == 2)
+            .toList();
+      });
+    } catch (e) {
+      print('Error fetching categories: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Form baru berhasil ditambahkan!'),
-          duration: Duration(seconds: 1),
-        ),
+        SnackBar(content: Text('Gagal memuat kategori')),
       );
-    });
+    }
   }
 
   @override
@@ -126,14 +263,46 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(height: 15),
-                    _buildDateField(), // Call _buildDateField here
-                    SizedBox(height: 15),
+                    _buildDateField(),
+                    SizedBox(height: 20),
                     Column(
-                      children: List.generate(forms.length, (index) {
-                        return forms[index]; // Use the pre-filled forms
-                      }),
+                      children: forms,
                     ),
                     SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.end, // Align buttons to the right
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // Navigate back to the previous page when Cancel is pressed
+                            Navigator.pop(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Color(
+                                0xFFDA0000), // Set color for Cancel button
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8), // Set radius for Cancel button
+                            ),
+                          ),
+                          child: Text('Cancel'),
+                        ),
+                        SizedBox(width: 8), // Add some spacing between buttons
+                        ElevatedButton(
+                          onPressed: _handleSubmit,
+                          style: ElevatedButton.styleFrom(
+                            primary: Color(
+                                0xFFE85C0D), // Set color for Kirim Semua Form button
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8), // Set radius for Kirim Semua Form button
+                            ),
+                          ),
+                          child: Text('Simpan'),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -142,7 +311,7 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _addForm, // Call function to add form
+        onPressed: _addForm,
         backgroundColor: Color(0xFFEB8153),
         child: Icon(Icons.add),
       ),
@@ -241,20 +410,26 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
 }
 
 class PengeluaranForm extends StatefulWidget {
-  final VoidCallback onRemove;
-  final DateTime? selectedDate; // Callback untuk menghapus form
-  final bool isLast;
-  final Pengeluaran? pengeluaran;
-  // Ensure this is defined
+  final VoidCallback onRemove; // Callback to remove the form
+  final Function(List<Map<String, dynamic>>)
+      onSubmit; // Callback for form submission
+  final bool isLast; // Indicates if this is the last form in the list
+  final DateTime? selectedDate; // Selected date for the form
+  final Pengeluaran? pengeluaran; // Existing Pengeluaran data (if any)
+  final bool isFirst; // Indicates if this is the first form
+  final List<Category> categories; // List of categories to choose from
 
   // Constructor
-  PengeluaranForm({
+  const PengeluaranForm({
+    Key? key,
     required this.onRemove,
+    required this.onSubmit,
     this.isLast = false,
     this.selectedDate,
     this.pengeluaran,
-  });
-
+    this.isFirst = false,
+    required this.categories,
+  }) : super(key: key);
   @override
   _PengeluaranFormState createState() => _PengeluaranFormState();
 }
@@ -269,12 +444,10 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   final TextEditingController jumlahSatuanController = TextEditingController();
   final TextEditingController dllController = TextEditingController();
   final TextEditingController jumlahController = TextEditingController();
-
   DateTime? selectedDate;
-  List<Category> categories = [];
   Category? selectedCategory;
   FilePickerResult? selectedImage;
-
+  List<Category> categories = [];
   @override
   void initState() {
     super.initState();
@@ -288,14 +461,19 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       jumlahSatuanController.text = widget.pengeluaran!.jumlahSatuan.toString();
       dllController.text = widget.pengeluaran!.dll.toString();
       selectedDate = widget.pengeluaran!.tanggal;
-
-      // Set selectedCategory based on pengeluaran
-      selectedCategory = widget.pengeluaran!
-          .category; // Ensure 'category' is part of your Pengeluaran model
+      selectedCategory = widget.pengeluaran!.category;
     } else {
       selectedDate = widget.selectedDate;
     }
+    // Calculate initial total for jumlahController
+    _calculateTotal();
 
+    // Add listeners to the controllers to update the total on changes
+    nominalController.addListener(_calculateTotal);
+    jumlahSatuanController.addListener(_calculateTotal);
+    dllController.addListener(_calculateTotal);
+
+    // Listener for showPrefix
     nominalController.addListener(() {
       setState(() {
         showPrefix = nominalController.text.isNotEmpty;
@@ -303,12 +481,112 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     });
   }
 
+  bool validateForm() {
+    // Check if name is empty
+    if (nameController.text.isEmpty) {
+      print("Validation Error: Name is empty.");
+      return false;
+    }
+
+    // Check if nominal is empty or less than or equal to 0
+    if (nominalController.text.isEmpty ||
+        _parseCurrency(nominalController.text) <= 0) {
+      print("Validation Error: Nominal is invalid.");
+      return false;
+    }
+
+    // Check if jumlahSatuan is empty or less than or equal to 0
+    if (jumlahSatuanController.text.isEmpty ||
+        _parseInteger(jumlahSatuanController.text) <= 0) {
+      print("Validation Error: Jumlah Satuan is invalid.");
+      return false;
+    }
+
+    // Check if category is selected
+    if (selectedCategory == null) {
+      print("Validation Error: Category is not selected.");
+      return false;
+    }
+
+    // Check if selected date is null
+    if (selectedDate == null) {
+      print("Validation Error: Date is not selected.");
+      return false;
+    }
+
+    return true;
+  }
+
+  Map<String, dynamic> getFormData() {
+    if (!validateForm()) {
+      print("Form validation failed.");
+      return {}; // Return an empty map to indicate an error
+    }
+
+    // Gather inputs
+    String name = nameController.text;
+    String description =
+        descriptionController.text.isNotEmpty ? descriptionController.text : '';
+    int jumlahSatuan = _parseInteger(jumlahSatuanController.text);
+    double nominal = _parseCurrency(nominalController.text);
+    int jumlah = _parseInteger(jumlahController.text);
+    double dll = _parseCurrency(dllController.text);
+
+    // Prepare the form data map
+    Map<String, dynamic> formData = {
+      'id_data':
+          widget.pengeluaran?.id ?? 0, // Use the pengeluaran ID if available
+      'name': name,
+      'description': description,
+      'nominal': nominal,
+      'jumlah_satuan': jumlahSatuan,
+      'jumlah': jumlah,
+      'dll': dll,
+      'category': selectedCategory?.id, // Category ID if available
+      'tanggal': selectedDate?.toIso8601String(), // Include the selected date
+    };
+
+    print('Form data gathered: $formData'); // Debugging output
+    return formData;
+  }
+
+// Helper method to parse currency strings
+  // Helper method to parse currency strings
+  // Helper method to parse currency strings
+  double _parseCurrency(String input) {
+    // Remove the currency symbol and any thousands separators
+    String cleanedInput = input
+        .replaceAll('Rp. ', '')
+        .replaceAll('.', '')
+        .replaceAll(',', '.')
+        .trim();
+    try {
+      return double.parse(cleanedInput);
+    } catch (e) {
+      print("Error parsing currency from '$input': $e");
+      return 0.0; // Return a default value on error
+    }
+  }
+
+  // Helper method to parse integers
+  // Helper method to parse integers
+  int _parseInteger(String input) {
+    // Remove any thousands separators and whitespace
+    String cleanedInput = input.replaceAll('.', '').trim();
+    try {
+      return int.parse(cleanedInput);
+    } catch (e) {
+      print("Error parsing integer from '$input': $e");
+      return 0; // Return a default value on error
+    }
+  }
+
   Future<void> fetchCategories() async {
     try {
       ApiService apiService = ApiService();
       List<Category> allCategories = await apiService.fetchCategories();
 
-      // Filter kategori untuk menampilkan hanya yang memiliki jenis_kategori 1 (pemasukan)
+      // Filter categories
       categories = allCategories
           .where((category) => category.jenisKategori == 2)
           .toList();
@@ -330,7 +608,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     super.dispose();
   }
 
-  @override
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(
@@ -347,7 +624,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                 : 'No Date Selected'),
             _buildInputFields(),
             SizedBox(height: 20),
-            if (widget.isLast) _buildActionButtons(),
+            _buildActionButtons(),
           ],
         ),
       ),
@@ -402,9 +679,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         _buildCategoryDropdown(),
         // Field for image input
         SizedBox(height: 15),
-        _buildLabel('Pilih Gambar:'),
+        if (widget.isLast) _buildLabel('Pilih Gambar:'),
         SizedBox(height: 10),
-        _buildImagePicker(),
+        if (widget.isLast) _buildImagePicker(),
       ],
     );
   }
@@ -431,7 +708,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         keyboardType: TextInputType.number, // Allow only numbers
         style: TextStyle(fontSize: 14),
         onChanged: (value) {
-          _calculateTotal(value); // Recalculate total whenever this changes
+          _calculateTotal(); // Recalculate total whenever this changes
         },
         decoration: InputDecoration(
           prefixIcon: Padding(
@@ -476,7 +753,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       hintText: 'Masukkan biaya tambahan (DLL)',
       icon: Icons.attach_money,
       inputFormatters: [ThousandSeparatorInputFormatter()], // Format as needed
-      onChanged: _calculateTotal, // Recalculate total whenever this changes
+      onChanged: (value) {
+        _calculateTotal(); // Recalculate total whenever this changes
+      },
     );
   }
 
@@ -568,7 +847,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 
 // Function to calculate the total
   // Function to calculate the total
-  void _calculateTotal(String value) {
+  void _calculateTotal() {
     // Get previous total value before calculation
     String previousTotal = jumlahController.text;
 
@@ -902,34 +1181,19 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 
   Widget _buildActionButtons() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         ElevatedButton(
-          onPressed:
-              widget.onRemove, // Panggil onRemove untuk menghapus form ini
+          onPressed: widget.onRemove,
           style: ElevatedButton.styleFrom(
-            primary: Color(0xFFDA0000), // Warna untuk "Cancel"
+            primary: Color(0xFFDA0000),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Set radius to 8
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
-          child: Text('Cancel'),
+          child: Text('Hapus Form'),
         ),
-        SizedBox(width: 16), // Tambahkan jarak antar tombol
-
-        ElevatedButton(
-          onPressed: () {
-            // Logika untuk menyimpan data form
-            // Misalnya: submit();
-          },
-          style: ElevatedButton.styleFrom(
-            primary: Color(0xFFE85C0D), // Warna untuk "Simpan"
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Set radius to 8
-            ),
-          ),
-          child: Text('Simpan'),
-        ),
+        SizedBox(width: 16),
       ],
     );
   }

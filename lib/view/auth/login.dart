@@ -18,7 +18,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isLoading = false;
   bool _isChecked = false; // Untuk checkbox "Remember me"
-  String? _errorMessage; // Untuk menampilkan pesan error
+  String? _errorMessage;
+  bool _obscureText = true; // For toggling password visibility
+  // Untuk menampilkan pesan error
 
   Future<void> _login() async {
     final String apiUrl = "http://pitycash.mamorasoft.com/api/login";
@@ -70,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       log('Error: $e');
       setState(() {
-        _errorMessage = 'An error occurred, please try again.';
+        _errorMessage = 'Email dan Password anda salah!';
       });
     } finally {
       setState(() {
@@ -192,8 +194,25 @@ class _LoginScreenState extends State<LoginScreen> {
                                             width: 2.0,
                                           ),
                                         ),
+                                        suffixIcon: IconButton(
+                                          icon: Icon(
+                                            _obscureText
+                                                ? Icons.visibility
+                                                : Icons.visibility_off,
+                                            color: _obscureText
+                                                ? Colors.grey
+                                                : Color(0xFFEB8153),
+                                          ),
+                                          onPressed: () {
+                                            setState(() {
+                                              _obscureText =
+                                                  !_obscureText; // Toggle obscureText
+                                            });
+                                          },
+                                        ),
                                       ),
-                                      obscureText: true,
+                                      obscureText:
+                                          _obscureText, // Toggle password visibility
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           return 'Please enter your password';
