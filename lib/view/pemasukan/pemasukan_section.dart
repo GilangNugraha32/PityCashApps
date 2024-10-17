@@ -31,7 +31,31 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   int currentPage = 1;
   bool isLoading = true;
 
-  @override
+  void _refreshIncomes() {
+    setState(() {
+      currentPage = 1; // Reset to the first page
+      incomes.clear(); // Clear the current income list
+      _fetchIncomes(currentPage); // Fetch the incomes again
+    });
+  }
+
+  // Modify the method for navigating to DetailPemasukan
+  void _navigateToDetail(Pemasukan pemasukan) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailPemasukan(
+          pemasukan: pemasukan,
+          onDelete: _refreshIncomes, // Pass the refresh function here
+        ),
+      ),
+    );
+
+    // You can still check if the result is true, but since we have a callback,
+    // this check is not necessary.
+    // The callback will handle refreshing.
+  }
+
   @override
   void initState() {
     super.initState();
@@ -252,13 +276,15 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       SizedBox(height: 2),
                       Center(
                         child: isLoading
-                            ? CircularProgressIndicator() // Tampilkan loading saat data sedang diambil
+                            ? CircularProgressIndicator() // Show loading indicator while data is being fetched
                             : Text(
                                 NumberFormat.currency(
-                                  locale: 'id_ID', // Format untuk IDR
-                                  symbol: 'Rp', // Simbol mata uang
-                                  decimalDigits: 2, // Jumlah desimal
-                                ).format(saldo), // Tampilkan saldo dari API
+                                  locale: 'id_ID', // Format for IDR
+                                  symbol: 'Rp', // Currency symbol
+                                  decimalDigits:
+                                      0, // Set decimal digits to 0 to remove the cents
+                                ).format(
+                                    saldo), // Display the saldo from the API
                                 style: TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold,
@@ -569,7 +595,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                   ],
                                 ),
                                 trailing: Text(
-                                  '+ Rp.' +
+                                  '+ Rp' +
                                       NumberFormat.currency(
                                         locale: 'id_ID',
                                         symbol: '',

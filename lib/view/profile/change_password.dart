@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pity_cash/service/share_preference.dart';
+import 'package:pity_cash/service/api_service.dart';
 
 class ChangePasswordProfile extends StatefulWidget {
   @override
@@ -8,6 +9,7 @@ class ChangePasswordProfile extends StatefulWidget {
 
 class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
   final SharedPreferencesService _prefsService = SharedPreferencesService();
+  final ApiService _apiService = ApiService();
   final TextEditingController _currentPasswordController =
       TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
@@ -26,7 +28,7 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
   void initState() {
     super.initState();
     _loadProfileData();
-    _prefsService.printUserData(); // Add this line for debugging
+    _prefsService.printUserData();
   }
 
   Future<void> _loadProfileData() async {
@@ -38,28 +40,45 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
     });
   }
 
-  void _updatePassword() async {
+  Future<void> _updatePassword() async {
     final currentPassword = _currentPasswordController.text;
     final newPassword = _newPasswordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (currentPassword.isNotEmpty &&
-        newPassword.isNotEmpty &&
-        confirmPassword.isNotEmpty) {
-      if (newPassword == confirmPassword) {
-        // Update logic can go here, including saving the new password back to SharedPreferences
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password updated successfully')),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('New password and confirm password do not match')),
-        );
-      }
-    } else {
+    if (currentPassword.isEmpty ||
+        newPassword.isEmpty ||
+        confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(content: Text('Mohon isi semua kolom')),
+      );
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Password baru dan konfirmasi password tidak cocok')),
+      );
+      return;
+    }
+
+    try {
+      await _apiService.updatePassword(
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        newPasswordConfirmation: confirmPassword,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Password berhasil diperbarui')),
+      );
+
+      _currentPasswordController.clear();
+      _newPasswordController.clear();
+      _confirmPasswordController.clear();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memperbarui password: ${e.toString()}')),
       );
     }
   }
@@ -116,7 +135,7 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Color(0xFFEB8153), // Background color (orange)
+              color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
                 bottomRight: Radius.circular(20.0),
                 bottomLeft: Radius.circular(20.0),

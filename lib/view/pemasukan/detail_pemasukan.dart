@@ -5,10 +5,58 @@ import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/pemasukan/edit_pemasukan.dart';
 
-class DetailPemasukan extends StatelessWidget {
+class DetailPemasukan extends StatefulWidget {
   final Pemasukan pemasukan;
+  final Function? onDelete; // Callback for delete action
 
-  DetailPemasukan({required this.pemasukan});
+  const DetailPemasukan({Key? key, required this.pemasukan, this.onDelete})
+      : super(key: key);
+
+  @override
+  _DetailPemasukanState createState() => _DetailPemasukanState();
+}
+
+class _DetailPemasukanState extends State<DetailPemasukan> {
+  late Pemasukan pemasukanDetail;
+
+  @override
+  void initState() {
+    super.initState();
+    pemasukanDetail = widget.pemasukan; // Initialize pemasukanDetail
+  }
+
+  void _navigateToEditPage(Pemasukan pemasukan) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditPemasukan(pemasukan: pemasukan),
+      ),
+    );
+
+    if (result == true) {
+      fetchIncomes(); // Refresh the data on the previous screen
+    }
+  }
+
+  Future<void> fetchIncomes({int page = 1}) async {
+    ApiService apiService = ApiService();
+    try {
+      List<Pemasukan> incomes = await apiService.fetchIncomes(page: page);
+      // Update the state with the fetched data
+      setState(() {
+        pemasukanDetail = incomes.firstWhere(
+            (income) => income.idData == pemasukanDetail.idData,
+            orElse: () => pemasukanDetail);
+      });
+      print('Fetched incomes: $incomes');
+    } catch (e) {
+      print('Error fetching incomes: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Gagal mengambil data pemasukan: ${e.toString()}')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,13 +152,7 @@ class DetailPemasukan extends StatelessWidget {
                             width: 80,
                             child: ElevatedButton(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        EditPemasukan(pemasukan: pemasukan),
-                                  ),
-                                );
+                                _navigateToEditPage(pemasukanDetail);
                               },
                               style: ElevatedButton.styleFrom(
                                 primary: Color(0xFFF7941E),
@@ -149,7 +191,7 @@ class DetailPemasukan extends StatelessWidget {
                               Expanded(
                                 child: Container(
                                   alignment: Alignment.centerLeft,
-                                  child: Text(pemasukan.date
+                                  child: Text(pemasukanDetail.date
                                       .toString()), // Menampilkan tanggal pemasukan
                                 ),
                               ),
@@ -175,7 +217,7 @@ class DetailPemasukan extends StatelessWidget {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    pemasukan.name,
+                                    pemasukanDetail.name,
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 19,
@@ -189,7 +231,7 @@ class DetailPemasukan extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(10.0),
                                     ),
                                     child: Text(
-                                      pemasukan.category?.name ??
+                                      pemasukanDetail.category?.name ??
                                           'Tidak ada kategori', // Cek null pada category
                                       style: TextStyle(
                                         color: Colors.orange[800],
@@ -204,7 +246,7 @@ class DetailPemasukan extends StatelessWidget {
                                 'Deskripsi:',
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              Text(pemasukan.description),
+                              Text(pemasukanDetail.description),
                               SizedBox(height: 40),
                               Divider(thickness: 0.5, color: Colors.black54),
                               Row(
@@ -219,11 +261,11 @@ class DetailPemasukan extends StatelessWidget {
                                   Text(
                                     NumberFormat.currency(
                                             locale: 'id_ID',
-                                            symbol: 'Rp ',
+                                            symbol: 'Rp',
                                             decimalDigits: 0)
-                                        .format(
-                                            double.tryParse(pemasukan.jumlah) ??
-                                                0),
+                                        .format(double.tryParse(
+                                                pemasukanDetail.jumlah) ??
+                                            0),
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
@@ -262,20 +304,21 @@ class DetailPemasukan extends StatelessWidget {
             TextButton(
               onPressed: () async {
                 try {
-                  final apiService =
-                      ApiService(); // Create an instance of ApiService
-                  await apiService
-                      .deleteIncome(pemasukan.idData); // Call the delete method
+                  final apiService = ApiService();
+                  await apiService.deleteIncome(
+                      pemasukanDetail.idData); // Call the delete method
 
-                  // Show Snackbar for successful deletion
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Berhasil dihapus!')),
                   );
-
+                  if (widget.onDelete != null) {
+                    widget
+                        .onDelete!(); // Invoke the callback to refresh the list
+                  }
                   Navigator.of(context).pop(); // Close the dialog
-                  Navigator.of(context).pop(); // Go back to the previous screen
+                  Navigator.of(context)
+                      .pop(true); // Go back and indicate success
                 } catch (e) {
-                  // Handle error (show a snackbar or dialog)
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Gagal menghapus data: $e')),
                   );

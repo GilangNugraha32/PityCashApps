@@ -125,13 +125,14 @@ class _HomeSectionState extends State<HomeSection> {
                   SizedBox(height: 2),
                   Center(
                     child: isLoading
-                        ? CircularProgressIndicator() // Tampilkan loading saat data sedang diambil
+                        ? CircularProgressIndicator() // Show loading indicator while data is being fetched
                         : Text(
                             NumberFormat.currency(
-                              locale: 'id_ID', // Format untuk IDR
-                              symbol: 'Rp ', // Simbol mata uang
-                              decimalDigits: 2, // Jumlah desimal
-                            ).format(saldo), // Tampilkan saldo dari API
+                              locale: 'id_ID', // Format for IDR
+                              symbol: 'Rp', // Currency symbol
+                              decimalDigits:
+                                  0, // Set decimal digits to 0 to remove the cents
+                            ).format(saldo), // Display the saldo from the API
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.bold,

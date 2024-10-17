@@ -31,10 +31,12 @@ class _EditPemasukanState extends State<EditPemasukan> {
   final TextEditingController jumlahController = TextEditingController();
 
   String formatCurrency(double amount) {
-    final formatCurrency = NumberFormat.simpleCurrency(locale: 'id_ID');
-    return formatCurrency
-        .format(amount)
-        .replaceAll('Rp', 'Rp.'); // Ensure 'Rp.' is shown correctly
+    final formatCurrency = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0, // Set to 0 to avoid decimal places
+    );
+    return formatCurrency.format(amount);
   }
 
   @override
@@ -93,7 +95,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
 
     // Prepare jumlahValue for parsing and storage
     String formattedAmount = jumlahController.text
-        .replaceAll('Rp. ', '') // Remove 'Rp. ' prefix
+        .replaceAll('Rp', '') // Remove 'Rp. ' prefix
         .replaceAll('Rp', '') // Remove 'Rp' prefix if it exists without dot
         .replaceAll('.', '') // Remove dots (for thousands)
         .replaceAll(',', '.'); // Replace comma with a dot for decimal point
@@ -136,7 +138,8 @@ class _EditPemasukanState extends State<EditPemasukan> {
       });
 
       Future.delayed(Duration(milliseconds: 500), () {
-        Navigator.pop(context); // Go back after a delay
+        Navigator.pop(
+            context, true); // Return true to indicate a successful update
       });
     } catch (e) {
       print('Error: $e');
@@ -344,31 +347,30 @@ class _EditPemasukanState extends State<EditPemasukan> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200], // Sama dengan buildTextField
+        color: Colors.grey[200], // Same as buildTextField
       ),
       child: TextField(
         controller: jumlahController,
         keyboardType: TextInputType.number,
         inputFormatters: [
-          ThousandSeparatorInputFormatter()
-        ], // Tambahkan formatter di sini
-        style: TextStyle(
-            fontSize: 14), // Ukuran teks yang sama dengan buildTextField
+          ThousandSeparatorInputFormatter(), // Custom formatter
+        ],
+        style: TextStyle(fontSize: 14), // Text size same as buildTextField
         decoration: InputDecoration(
           prefixIcon: Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: Container(
-              height: 48, // Sesuaikan tinggi sesuai dengan TextField lainnya
-              width: 48, // Sesuaikan lebar agar berbentuk lingkaran
+              height: 48, // Adjust height according to other TextFields
+              width: 48, // Adjust width to be circular
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFEB8153), // Latar belakang lingkaran
+                color: Color(0xFFEB8153), // Circle background color
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26, // Warna bayangan
+                    color: Colors.black26, // Shadow color
                     blurRadius: 4.0, // Blur radius
-                    spreadRadius: 1.0, // Radius penyebaran bayangan
-                    offset: Offset(0, 2), // Posisi bayangan
+                    spreadRadius: 1.0, // Shadow spread radius
+                    offset: Offset(0, 2), // Shadow position
                   ),
                 ],
               ),
@@ -376,22 +378,17 @@ class _EditPemasukanState extends State<EditPemasukan> {
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
                   Icons.money,
-                  color: Colors.white, // Ubah warna ikon menjadi putih
+                  color: Colors.white, // Change icon color to white
                 ),
               ),
             ),
           ),
-          hintText: 'Masukkan jumlah dalam bentuk Rp', // Hint text yang diminta
+          hintText: 'Masukkan jumlah dalam bentuk Rp', // Hint text
           hintStyle: TextStyle(color: Colors.grey),
-          // Tampilkan 'Rp.' hanya jika ada input
-          prefixStyle: TextStyle(
-            color: Colors.black87,
-            fontSize: 15,
-            fontWeight: FontWeight.normal,
-          ),
+
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
-            vertical: 15, // Jarak vertikal yang sama dengan buildTextField
+            vertical: 15, // Vertical space same as buildTextField
           ),
         ),
       ),
@@ -613,14 +610,15 @@ class ThousandSeparatorInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Menghapus semua karakter non-digit
+    // Remove all non-digit characters
     String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (newText.isEmpty) {
-      return TextEditingValue();
+      return TextEditingValue(
+          text: ''); // Return empty value if there's no input
     }
 
-    // Menggunakan intl package untuk format dengan pemisah ribuan
+    // Format the text with thousand separators
     String formattedText =
         NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
 

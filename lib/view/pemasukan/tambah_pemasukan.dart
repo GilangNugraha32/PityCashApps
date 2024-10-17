@@ -86,7 +86,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
       // Menghapus prefix "Rp. " dan pemisah ribuan (titik atau koma) sebelum parsing
       String jumlahText = jumlahController.text
-          .replaceAll('Rp. ', '')
+          .replaceAll('Rp', '')
           .replaceAll('.', '')
           .replaceAll(',', '');
       double? jumlah = double.tryParse(jumlahText); // Parsing menjadi double
@@ -130,7 +130,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
       // Navigate back to the previous screen with a delay
       Future.delayed(Duration(milliseconds: 500), () {
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       });
     } catch (e) {
       print('Error: $e');
@@ -338,31 +338,31 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200], // Sama dengan buildTextField
+        color: Colors.grey[200], // Same as buildTextField
       ),
       child: TextField(
         controller: jumlahController,
         keyboardType: TextInputType.number,
         inputFormatters: [
-          ThousandSeparatorInputFormatter()
-        ], // Tambahkan formatter di sini
-        style: TextStyle(
-            fontSize: 14), // Ukuran teks yang sama dengan buildTextField
+          FilteringTextInputFormatter.digitsOnly, // Allow only digits
+          ThousandSeparatorInputFormatter(), // Add your custom formatter
+        ],
+        style: TextStyle(fontSize: 14), // Text size same as buildTextField
         decoration: InputDecoration(
           prefixIcon: Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: Container(
-              height: 48, // Sesuaikan tinggi sesuai dengan TextField lainnya
-              width: 48, // Sesuaikan lebar agar berbentuk lingkaran
+              height: 48, // Adjust height according to other TextFields
+              width: 48, // Adjust width to be circular
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFEB8153), // Latar belakang lingkaran
+                color: Color(0xFFEB8153), // Circle background color
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26, // Warna bayangan
+                    color: Colors.black26, // Shadow color
                     blurRadius: 4.0, // Blur radius
-                    spreadRadius: 1.0, // Radius penyebaran bayangan
-                    offset: Offset(0, 2), // Posisi bayangan
+                    spreadRadius: 1.0, // Shadow spread radius
+                    offset: Offset(0, 2), // Shadow position
                   ),
                 ],
               ),
@@ -370,16 +370,15 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
                   Icons.money,
-                  color: Colors.white, // Ubah warna ikon menjadi putih
+                  color: Colors.white, // Change icon color to white
                 ),
               ),
             ),
           ),
-          hintText: 'Masukkan jumlah dalam bentuk Rp', // Hint text yang diminta
+          hintText: 'Masukkan jumlah dalam bentuk Rp', // Hint text
           hintStyle: TextStyle(color: Colors.grey),
-          prefixText: showPrefix
-              ? 'Rp. '
-              : null, // Tampilkan 'Rp.' hanya jika ada input
+          prefixText:
+              showPrefix ? 'Rp' : null, // Show 'Rp' only if there's input
           prefixStyle: TextStyle(
             color: Colors.black87,
             fontSize: 15,
@@ -387,9 +386,12 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
-            vertical: 15, // Jarak vertikal yang sama dengan buildTextField
+            vertical: 15, // Vertical space same as buildTextField
           ),
         ),
+        onChanged: (value) {
+          // Update state if needed, but normally not required here
+        },
       ),
     );
   }
@@ -602,14 +604,15 @@ class ThousandSeparatorInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Menghapus semua karakter non-digit
+    // Remove all non-digit characters
     String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (newText.isEmpty) {
-      return TextEditingValue();
+      // Return an empty value when there's no input
+      return TextEditingValue(text: '');
     }
 
-    // Menggunakan intl package untuk format dengan pemisah ribuan
+    // Format the text with thousand separators
     String formattedText =
         NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
 

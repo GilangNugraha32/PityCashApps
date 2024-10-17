@@ -667,4 +667,92 @@ class ApiService {
       }
     }
   }
+
+  Future<void> updateUserProfile({
+    required String name,
+    required String email,
+    required String kelamin,
+    required String alamat,
+    File? foto_profil,
+  }) async {
+    print('Memperbarui profil pengguna');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      FormData formData = FormData.fromMap({
+        'name': name,
+        'email': email,
+        'kelamin': kelamin,
+        'alamat': alamat,
+      });
+
+      if (foto_profil != null) {
+        String fileName = foto_profil.path.split('/').last;
+        formData.files.add(MapEntry(
+          'foto_profil',
+          await MultipartFile.fromFile(foto_profil.path, filename: fileName),
+        ));
+      }
+
+      final response = await _dio.post(
+        '$baseUrl/user/update-profile',
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        print('Profil pengguna berhasil diperbarui');
+        // Anda mungkin ingin memperbarui data pengguna yang disimpan secara lokal di sini
+      } else {
+        String pesanError =
+            response.data['message'] ?? 'Gagal memperbarui profil pengguna';
+        throw Exception(pesanError);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat memperbarui profil: ${e.response?.data}');
+        throw Exception(
+            'Gagal memperbarui profil: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat memperbarui profil: $e');
+        throw Exception('Gagal memperbarui profil pengguna');
+      }
+    }
+  }
+
+  Future<void> updatePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    print('Memperbarui kata sandi pengguna');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      final response = await _dio.post(
+        '$baseUrl/user/update-password',
+        data: {
+          'current_password': currentPassword,
+          'new_password': newPassword,
+          'new_password_confirmation': newPasswordConfirmation,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Kata sandi pengguna berhasil diperbarui');
+      } else {
+        String pesanError =
+            response.data['message'] ?? 'Gagal memperbarui kata sandi pengguna';
+        throw Exception(pesanError);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat memperbarui kata sandi: ${e.response?.data}');
+        throw Exception(
+            'Gagal memperbarui kata sandi: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat memperbarui kata sandi: $e');
+        throw Exception('Gagal memperbarui kata sandi pengguna');
+      }
+    }
+  }
 }

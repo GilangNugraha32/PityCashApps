@@ -13,7 +13,7 @@ import 'package:pity_cash/service/share_preference.dart';
 
 class EditPengeluaran extends StatefulWidget {
   final List<Pengeluaran> pengeluaranList;
-  final Pengeluaran? pengeluaran; // List of Pengeluaran
+  final Pengeluaran? pengeluaran;
 
   EditPengeluaran({required this.pengeluaranList, this.pengeluaran});
 
@@ -31,27 +31,24 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
   @override
   void initState() {
     super.initState();
-    // Initialize the selected date from the first pengeluaran in the list if available
     if (widget.pengeluaranList.isNotEmpty) {
       selectedDate = widget.pengeluaranList.first.tanggal;
     }
 
-    // Initialize forms based on pengeluaranList
     for (var pengeluaran in widget.pengeluaranList) {
       GlobalKey<_PengeluaranFormState> formKey =
           GlobalKey<_PengeluaranFormState>();
-      formKeys.add(formKey); // Add key to the list
+      formKeys.add(formKey);
       forms.add(PengeluaranForm(
         key: formKey,
         onRemove: () => _removeForm(formKeys.length - 1),
         onSubmit: (List<Map<String, dynamic>> pengeluaranList) {
-          // Handle submission of the specific form
           print('Submitted data for form: $pengeluaranList');
         },
         pengeluaran: pengeluaran,
         isLast: pengeluaran == widget.pengeluaranList.last,
         selectedDate: selectedDate,
-        categories: [], // You can populate categories later if needed
+        categories: [],
       ));
     }
   }
@@ -66,18 +63,15 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
     List<int> categoryIds = [];
     List<int> dataIds = [];
     List<File> selectedImages = [];
-    List<String> tanggalList = []; // List to store the dates
-    bool hasValidData = false; // Track if any form has valid data
+    List<String> tanggalList = [];
+    bool hasValidData = false;
 
-    // Get the parentId from the pengeluaranList
-    int parentId =
-        widget.pengeluaranList.last.idParent; // Get the last parent's ID
+    int parentId = widget.pengeluaranList.last.idParent;
 
-    // Collect data from all forms
     for (var key in formKeys) {
       var data = key.currentState?.getFormData();
       if (data != null && data.isNotEmpty) {
-        print('Data from form: $data'); // Debugging statement
+        print('Data from form: $data');
         hasValidData = true;
 
         names.add(data['name']);
@@ -89,26 +83,23 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         categoryIds.add(data['category']);
         dataIds.add(data['id_data']);
 
-        // Collect the date from the form data
         String tanggal = data['tanggal'] ?? DateTime.now().toIso8601String();
         try {
           DateTime parsedDate = DateTime.parse(tanggal);
           String formattedDate =
               "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
-          tanggalList.add(formattedDate); // Add to tanggalList
-          print(
-              'Formatted Tanggal from form: $formattedDate'); // Debugging statement
+          tanggalList.add(formattedDate);
+          print('Formatted Tanggal from form: $formattedDate');
         } catch (e) {
           print('Error parsing date: $tanggal. Error: $e');
         }
 
-        // Handle selected image file if available
         if (key.currentState?.selectedImage != null &&
             key.currentState!.selectedImage!.files.isNotEmpty) {
           String? imagePath = key.currentState!.selectedImage!.files.first.path;
           selectedImages.add(imagePath != null ? File(imagePath) : File(''));
         } else {
-          selectedImages.add(File('')); // Empty file for missing images
+          selectedImages.add(File(''));
         }
       } else {
         print("Form data is empty or null for one of the forms.");
@@ -120,7 +111,6 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
       return;
     }
 
-    // Print the gathered data before submission
     print('Parent ID: $parentId');
     print('Names: $names');
     print('Descriptions: $descriptions');
@@ -134,7 +124,6 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
     print('Tanggal List: $tanggalList');
 
     try {
-      // Call the API service to update pengeluaran
       await ApiService().editPengeluaran(
         parentId,
         tanggalList,
@@ -152,7 +141,9 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Data berhasil Diubah')),
       );
-      Navigator.pop(context); // Add a new form if necessary
+      
+      // Refresh halaman sebelumnya
+      Navigator.pop(context, true);
 
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -404,22 +395,28 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked; // Update selectedDate state
+        // Update the date for all forms
+        for (var form in forms) {
+          if (form.key is GlobalKey<_PengeluaranFormState>) {
+            (form.key as GlobalKey<_PengeluaranFormState>)
+                .currentState
+                ?.updateDate(selectedDate);
+          }
+        }
       });
     }
   }
 }
 
 class PengeluaranForm extends StatefulWidget {
-  final VoidCallback onRemove; // Callback to remove the form
-  final Function(List<Map<String, dynamic>>)
-      onSubmit; // Callback for form submission
-  final bool isLast; // Indicates if this is the last form in the list
-  final DateTime? selectedDate; // Selected date for the form
-  final Pengeluaran? pengeluaran; // Existing Pengeluaran data (if any)
-  final bool isFirst; // Indicates if this is the first form
-  final List<Category> categories; // List of categories to choose from
+  final VoidCallback onRemove;
+  final Function(List<Map<String, dynamic>>) onSubmit;
+  final bool isLast;
+  final DateTime? selectedDate;
+  final Pengeluaran? pengeluaran;
+  final bool isFirst;
+  final List<Category> categories;
 
-  // Constructor
   const PengeluaranForm({
     Key? key,
     required this.onRemove,
@@ -437,7 +434,6 @@ class PengeluaranForm extends StatefulWidget {
 class _PengeluaranFormState extends State<PengeluaranForm> {
   bool showPrefix = false;
 
-  // Instantiate the controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController nominalController = TextEditingController();
@@ -448,32 +444,29 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   Category? selectedCategory;
   FilePickerResult? selectedImage;
   List<Category> categories = [];
+
   @override
   void initState() {
     super.initState();
     fetchCategories();
 
-    // Initialize fields with pengeluaran data if available
     if (widget.pengeluaran != null) {
       nameController.text = widget.pengeluaran!.name;
       descriptionController.text = widget.pengeluaran!.description;
-      nominalController.text = widget.pengeluaran!.nominal.toString();
+      nominalController.text = _formatCurrency(widget.pengeluaran!.nominal);
       jumlahSatuanController.text = widget.pengeluaran!.jumlahSatuan.toString();
-      dllController.text = widget.pengeluaran!.dll.toString();
+      dllController.text = _formatCurrency(widget.pengeluaran!.dll);
       selectedDate = widget.pengeluaran!.tanggal;
       selectedCategory = widget.pengeluaran!.category;
     } else {
       selectedDate = widget.selectedDate;
     }
-    // Calculate initial total for jumlahController
     _calculateTotal();
 
-    // Add listeners to the controllers to update the total on changes
     nominalController.addListener(_calculateTotal);
     jumlahSatuanController.addListener(_calculateTotal);
     dllController.addListener(_calculateTotal);
 
-    // Listener for showPrefix
     nominalController.addListener(() {
       setState(() {
         showPrefix = nominalController.text.isNotEmpty;
@@ -481,34 +474,35 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     });
   }
 
+  void updateDate(DateTime? newDate) {
+    setState(() {
+      selectedDate = newDate;
+    });
+  }
+
   bool validateForm() {
-    // Check if name is empty
     if (nameController.text.isEmpty) {
       print("Validation Error: Name is empty.");
       return false;
     }
 
-    // Check if nominal is empty or less than or equal to 0
     if (nominalController.text.isEmpty ||
         _parseCurrency(nominalController.text) <= 0) {
       print("Validation Error: Nominal is invalid.");
       return false;
     }
 
-    // Check if jumlahSatuan is empty or less than or equal to 0
     if (jumlahSatuanController.text.isEmpty ||
         _parseInteger(jumlahSatuanController.text) <= 0) {
       print("Validation Error: Jumlah Satuan is invalid.");
       return false;
     }
 
-    // Check if category is selected
     if (selectedCategory == null) {
       print("Validation Error: Category is not selected.");
       return false;
     }
 
-    // Check if selected date is null
     if (selectedDate == null) {
       print("Validation Error: Date is not selected.");
       return false;
@@ -520,64 +514,51 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   Map<String, dynamic> getFormData() {
     if (!validateForm()) {
       print("Form validation failed.");
-      return {}; // Return an empty map to indicate an error
+      return {};
     }
 
-    // Gather inputs
     String name = nameController.text;
     String description =
         descriptionController.text.isNotEmpty ? descriptionController.text : '';
     int jumlahSatuan = _parseInteger(jumlahSatuanController.text);
     double nominal = _parseCurrency(nominalController.text);
-    int jumlah = _parseInteger(jumlahController.text);
+    int jumlah =
+        _parseInteger(jumlahController.text.replaceAll(RegExp(r'[^0-9]'), ''));
     double dll = _parseCurrency(dllController.text);
 
-    // Prepare the form data map
     Map<String, dynamic> formData = {
-      'id_data':
-          widget.pengeluaran?.id ?? 0, // Use the pengeluaran ID if available
+      'id_data': widget.pengeluaran?.id ?? 0,
       'name': name,
       'description': description,
       'nominal': nominal,
       'jumlah_satuan': jumlahSatuan,
       'jumlah': jumlah,
       'dll': dll,
-      'category': selectedCategory?.id, // Category ID if available
-      'tanggal': selectedDate?.toIso8601String(), // Include the selected date
+      'category': selectedCategory?.id,
+      'tanggal': selectedDate?.toIso8601String(),
     };
 
-    print('Form data gathered: $formData'); // Debugging output
+    print('Form data gathered: $formData');
     return formData;
   }
 
-// Helper method to parse currency strings
-  // Helper method to parse currency strings
-  // Helper method to parse currency strings
   double _parseCurrency(String input) {
-    // Remove the currency symbol and any thousands separators
-    String cleanedInput = input
-        .replaceAll('Rp. ', '')
-        .replaceAll('.', '')
-        .replaceAll(',', '.')
-        .trim();
+    String cleanedInput = input.replaceAll('Rp', '').replaceAll('.', '').trim();
     try {
       return double.parse(cleanedInput);
     } catch (e) {
       print("Error parsing currency from '$input': $e");
-      return 0.0; // Return a default value on error
+      return 0.0;
     }
   }
 
-  // Helper method to parse integers
-  // Helper method to parse integers
   int _parseInteger(String input) {
-    // Remove any thousands separators and whitespace
     String cleanedInput = input.replaceAll('.', '').trim();
     try {
       return int.parse(cleanedInput);
     } catch (e) {
       print("Error parsing integer from '$input': $e");
-      return 0; // Return a default value on error
+      return 0;
     }
   }
 
@@ -585,12 +566,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     try {
       ApiService apiService = ApiService();
       List<Category> allCategories = await apiService.fetchCategories();
-
-      // Filter categories
       categories = allCategories
           .where((category) => category.jenisKategori == 2)
           .toList();
-
       setState(() {});
     } catch (e) {
       print('Error fetching categories: $e');
@@ -656,20 +634,14 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         SizedBox(height: 10),
         _buildNominalTextField(),
         SizedBox(height: 15),
-
-        // Field Jumlah Satuan
         _buildLabel('Jumlah Satuan'),
         SizedBox(height: 10),
         _buildJumlahSatuanTextField(),
         SizedBox(height: 15),
-
-        // Field Dll
         _buildLabel('Biaya Tambahan (DLL)'),
         SizedBox(height: 10),
         _buildDllTextField(),
         SizedBox(height: 15),
-
-        // Field Jumlah (Auto-calculated)
         _buildLabel('Jumlah'),
         SizedBox(height: 10),
         _buildJumlahField(),
@@ -677,7 +649,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         _buildLabel('Kategori:'),
         SizedBox(height: 10),
         _buildCategoryDropdown(),
-        // Field for image input
         SizedBox(height: 15),
         if (widget.isLast) _buildLabel('Pilih Gambar:'),
         SizedBox(height: 10),
@@ -686,17 +657,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     );
   }
 
-  Widget _buildNominalTextField() {
-    return _buildCustomTextField(
-      controller: nominalController,
-      hintText: 'Masukkan jumlah dalam bentuk Rp',
-      icon: Icons.money,
-      inputFormatters: [ThousandSeparatorInputFormatter()],
-      prefixText: showPrefix ? 'Rp. ' : null,
-    );
-  }
-
-// TextField for "Jumlah Satuan"
   Widget _buildJumlahSatuanTextField() {
     return Container(
       decoration: BoxDecoration(
@@ -705,10 +665,10 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       ),
       child: TextField(
         controller: jumlahSatuanController,
-        keyboardType: TextInputType.number, // Allow only numbers
+        keyboardType: TextInputType.number,
         style: TextStyle(fontSize: 14),
         onChanged: (value) {
-          _calculateTotal(); // Recalculate total whenever this changes
+          _calculateTotal();
         },
         decoration: InputDecoration(
           prefixIcon: Padding(
@@ -731,7 +691,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
-                  Icons.format_list_numbered, // Icon for the field
+                  Icons.format_list_numbered,
                   color: Colors.white,
                 ),
               ),
@@ -746,42 +706,78 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     );
   }
 
-// TextField for "Dll" (Biaya Tambahan)
+  Widget _buildJumlahField() {
+    return _buildCustomTextField(
+      controller: jumlahController,
+      hintText: 'Jumlah total akan dihitung otomatis',
+      readOnly: true,
+      icon: Icons.receipt,
+    );
+  }
+
+  void _calculateTotal() {
+    double nominal = _parseCurrency(nominalController.text);
+    int satuan = int.tryParse(jumlahSatuanController.text) ?? 0;
+    double dll = _parseCurrency(dllController.text);
+
+    if (nominal > 0 && satuan > 0) {
+      double total = (nominal * satuan) + dll;
+      setState(() {
+        jumlahController.text = _formatCurrency(total);
+      });
+    }
+  }
+
+  String _formatCurrency(double amount) {
+    return NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    ).format(amount);
+  }
+
   Widget _buildDllTextField() {
     return _buildCustomTextField(
       controller: dllController,
       hintText: 'Masukkan biaya tambahan (DLL)',
       icon: Icons.attach_money,
-      inputFormatters: [ThousandSeparatorInputFormatter()], // Format as needed
       onChanged: (value) {
-        _calculateTotal(); // Recalculate total whenever this changes
+        String numericValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+        double amount = double.tryParse(numericValue) ?? 0;
+        dllController.value = TextEditingValue(
+          text: _formatCurrency(amount),
+          selection:
+              TextSelection.collapsed(offset: _formatCurrency(amount).length),
+        );
+        _calculateTotal();
       },
     );
   }
 
-// Field for "Jumlah" (Auto-calculated)
-  Widget _buildJumlahField() {
+  Widget _buildNominalTextField() {
     return _buildCustomTextField(
-      controller: jumlahController,
-      hintText: 'Jumlah total akan dihitung otomatis',
-      readOnly: true, // Keep it read-only as per your requirement
-      icon: Icons.receipt,
-      inputFormatters: [
-        ThousandSeparatorInputFormatter()
-      ], // Format with thousand separators
+      controller: nominalController,
+      hintText: 'Masukkan jumlah',
+      icon: Icons.money,
+      onChanged: (value) {
+        String numericValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+        double amount = double.tryParse(numericValue) ?? 0;
+        nominalController.value = TextEditingValue(
+          text: _formatCurrency(amount),
+          selection:
+              TextSelection.collapsed(offset: _formatCurrency(amount).length),
+        );
+        _calculateTotal();
+      },
     );
   }
 
-// Helper function for creating custom text fields
   Widget _buildCustomTextField({
     required TextEditingController controller,
     required String hintText,
     required IconData icon,
     bool readOnly = false,
-    List<TextInputFormatter>? inputFormatters,
-    String? prefixText,
-    TextInputType keyboardType =
-        TextInputType.number, // Restrict to number input
+    TextInputType keyboardType = TextInputType.number,
     ValueChanged<String>? onChanged,
   }) {
     return Container(
@@ -793,101 +789,43 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         controller: controller,
         readOnly: readOnly,
         keyboardType: keyboardType,
-        inputFormatters: inputFormatters ??
-            [FilteringTextInputFormatter.digitsOnly], // Only allow digits
         style: TextStyle(fontSize: 14),
-        onChanged: (value) {
-          if (onChanged != null) onChanged(value);
-        },
+        onChanged: onChanged,
         decoration: InputDecoration(
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFEB8153),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    spreadRadius: 1.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
+          prefixIcon: _buildPrefixIcon(icon),
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 15),
-          // Adjusted to show the prefix text only when the field is focused
-          prefixText: controller.text.isEmpty
-              ? null
-              : (prefixText ??
-                  'Rp. '), // Show prefix when the text is not empty
-          prefixStyle: TextStyle(
-            color: Colors.black87,
-            fontSize: 15,
-            fontWeight: FontWeight.normal,
-          ),
+          contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
         ),
       ),
     );
   }
 
-// Function to calculate the total
-  // Function to calculate the total
-  void _calculateTotal() {
-    // Get previous total value before calculation
-    String previousTotal = jumlahController.text;
-
-    // Remove the "Rp. " prefix and commas for calculations
-    double nominal = double.tryParse(nominalController.text
-            .replaceAll('Rp. ', '')
-            .replaceAll('.', '')
-            .replaceAll(',', '.')) ??
-        0;
-    int satuan = int.tryParse(jumlahSatuanController.text) ?? 0;
-    double dll = double.tryParse(dllController.text
-            .replaceAll('Rp. ', '')
-            .replaceAll('.', '')
-            .replaceAll(',', '.')) ??
-        0;
-
-    // Check if all necessary fields have values
-    if (nominal > 0 && satuan > 0) {
-      // Calculate the total
-      double total = (nominal * satuan) + dll;
-
-      setState(() {
-        // Format the total as "Rp. 62.222"
-        jumlahController.text = _formatCurrency(total);
-      });
-    } else {
-      // Retain previous total if any field is empty
-      setState(() {
-        jumlahController.text = previousTotal; // Keep the previous value
-      });
-    }
-  }
-
-// Helper function to format currency
-  String _formatCurrency(double amount) {
-    // Use the number format to display in the desired format
-    return amount.toStringAsFixed(0).replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (Match match) => '${match[1]}.',
-        );
+  Widget _buildPrefixIcon(IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Container(
+        height: 48,
+        width: 48,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFFEB8153),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 4.0,
+              spreadRadius: 1.0,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 
   Widget _buildLabel(String text) {
@@ -912,23 +850,22 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       ),
       child: TextField(
         controller: controller,
-        style: TextStyle(fontSize: 14), // Ukuran teks di dalam TextField
+        style: TextStyle(fontSize: 14),
         decoration: InputDecoration(
           prefixIcon: Padding(
-            padding:
-                const EdgeInsets.only(right: 8.0), // Jarak antara ikon dan teks
+            padding: const EdgeInsets.only(right: 8.0),
             child: Container(
-              height: 48, // Sesuaikan tinggi sesuai dengan TextField
-              width: 48, // Sesuaikan lebar agar berbentuk lingkaran
+              height: 48,
+              width: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFEB8153), // Latar belakang lingkaran
+                color: Color(0xFFEB8153),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26, // Warna bayangan
-                    blurRadius: 4.0, // Blur radius
-                    spreadRadius: 1.0, // Radius penyebaran bayangan
-                    offset: Offset(0, 5), // Posisi bayangan
+                    color: Colors.black26,
+                    blurRadius: 4.0,
+                    spreadRadius: 1.0,
+                    offset: Offset(0, 5),
                   ),
                 ],
               ),
@@ -936,7 +873,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
                   icon,
-                  color: Colors.white, // Ubah warna ikon menjadi putih
+                  color: Colors.white,
                 ),
               ),
             ),
@@ -945,7 +882,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           hintStyle: TextStyle(color: Colors.grey),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
-            vertical: 15, // Jarak vertikal dalam TextField
+            vertical: 15,
           ),
         ),
       ),
@@ -957,38 +894,37 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
-          onTap: _pickImage, // Trigger image picking on tap
+          onTap: _pickImage,
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Colors.grey[200],
             ),
-            height: 60, // Height of the image picker area
+            height: 60,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    height:
-                        40, // Adjust height to match the date field icon size
-                    width: 40, // Adjust width to match the date field icon size
+                    height: 40,
+                    width: 40,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFFEB8153), // Background color
+                      color: Color(0xFFEB8153),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black26, // Shadow color
-                          blurRadius: 4.0, // Blur radius
-                          spreadRadius: 1.0, // Shadow spread radius
-                          offset: Offset(0, 5), // Shadow position
+                          color: Colors.black26,
+                          blurRadius: 4.0,
+                          spreadRadius: 1.0,
+                          offset: Offset(0, 5),
                         ),
                       ],
                     ),
                     child: Icon(
                       Icons.image,
-                      color: Colors.white, // Icon color
-                      size: 24, // Icon size
+                      color: Colors.white,
+                      size: 24,
                     ),
                   ),
                 ),
@@ -996,7 +932,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                 Expanded(
                   child: Text(
                     selectedImage != null
-                        ? 'Pilih gambar: ${selectedImage!.files.first.name}' // Display the selected image name
+                        ? 'Pilih gambar: ${selectedImage!.files.first.name}'
                         : 'Pilih gambar dari Galeri',
                     style: TextStyle(fontSize: 14),
                   ),
@@ -1005,40 +941,30 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             ),
           ),
         ),
-        SizedBox(
-            height:
-                10), // Space between the image picker and the selected image display
-        // Only display the image if it's selected
+        SizedBox(height: 10),
         if (selectedImage != null && selectedImage!.files.isNotEmpty)
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Image.file(
-              File(selectedImage!
-                  .files.first.path!), // Use path safely with null check
-              height: 200, // Height for the displayed image
-              width: double.infinity, // Full width
-              fit: BoxFit
-                  .cover, // Cover the space while maintaining aspect ratio
+              File(selectedImage!.files.first.path!),
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
           ),
       ],
     );
   }
 
-// Function to pick an image using FilePicker
   Future<void> _pickImage() async {
     try {
       selectedImage = await FilePicker.platform.pickFiles(
         type: FileType.image,
-        allowMultiple:
-            false, // Set to true if you want to allow multiple selections
+        allowMultiple: false,
       );
 
-      // Update the state only if an image is selected
       if (selectedImage != null) {
-        setState(() {
-          // Trigger a rebuild to update the UI
-        });
+        setState(() {});
       }
     } catch (e) {
       print('Error picking image: $e');
@@ -1118,31 +1044,29 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Colors
-              .grey[200], // Menggunakan warna yang sama dengan buildTextField
+          color: Colors.grey[200],
         ),
         child: TextField(
-          enabled: false, // Disable text editing, only allow date picker
+          enabled: false,
           decoration: InputDecoration(
             hintText: selectedDate == null
                 ? 'Pilih Tanggal'
                 : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
             hintStyle: TextStyle(color: Colors.grey),
             prefixIcon: Padding(
-              padding: const EdgeInsets.only(
-                  right: 8.0), // Jarak antara ikon dan teks
+              padding: const EdgeInsets.only(right: 8.0),
               child: Container(
-                height: 48, // Sesuaikan tinggi sesuai dengan TextField
-                width: 48, // Sesuaikan lebar agar berbentuk lingkaran
+                height: 48,
+                width: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFEB8153), // Latar belakang lingkaran
+                  color: Color(0xFFEB8153),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black26, // Warna bayangan
-                      blurRadius: 4.0, // Blur radius
-                      spreadRadius: 1.0, // Radius penyebaran bayangan
-                      offset: Offset(0, 5), // Posisi bayangan
+                      color: Colors.black26,
+                      blurRadius: 4.0,
+                      spreadRadius: 1.0,
+                      offset: Offset(0, 5),
                     ),
                   ],
                 ),
@@ -1158,7 +1082,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             ),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
-              vertical: 15, // Jarak vertikal dalam TextField
+              vertical: 15,
             ),
           ),
         ),
@@ -1195,30 +1119,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         ),
         SizedBox(width: 16),
       ],
-    );
-  }
-}
-
-class ThousandSeparatorInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    // Menghapus semua karakter non-digit
-    String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (newText.isEmpty) {
-      return TextEditingValue();
-    }
-
-    // Menggunakan intl package untuk format dengan pemisah ribuan
-    String formattedText =
-        NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
-
-    return TextEditingValue(
-      text: formattedText,
-      selection: TextSelection.collapsed(offset: formattedText.length),
     );
   }
 }

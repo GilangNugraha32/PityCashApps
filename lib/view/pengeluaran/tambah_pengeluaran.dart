@@ -234,6 +234,16 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                           selectedDate: selectedDate,
                           categories: categories,
                           isFirst: index == 0, // Pass categories to form
+                          onDateChanged: (DateTime newDate) {
+                            setState(() {
+                              selectedDate = newDate;
+                              // Update date for all forms
+                              for (var key in formKeys) {
+                                (key.currentState as _PengeluaranFormState)
+                                    .updateDate(newDate);
+                              }
+                            });
+                          },
                         );
                       }),
                     ),
@@ -379,6 +389,10 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
+        // Update date for all forms
+        for (var key in formKeys) {
+          (key.currentState as _PengeluaranFormState).updateDate(picked);
+        }
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -398,11 +412,13 @@ class PengeluaranForm extends StatefulWidget {
 
   final bool isFirst;
   final Function(List<Map<String, dynamic>>) onSubmit;
+  final Function(DateTime) onDateChanged;
   FilePickerResult? selectedImage; // Store the selected image here
 
   PengeluaranForm({
     required this.onRemove,
     required this.onSubmit,
+    required this.onDateChanged,
     this.selectedDate,
     this.isLast = false,
     this.isFirst = false,
@@ -448,7 +464,16 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       jumlahSatuanControllers.add(TextEditingController());
       dllControllers.add(TextEditingController());
       jumlahControllers.add(TextEditingController());
-      selectedDates.add(DateTime.now());
+      selectedDates.add(selectedDate ?? DateTime.now());
+    });
+  }
+
+  void updateDate(DateTime newDate) {
+    setState(() {
+      selectedDate = newDate;
+      for (int i = 0; i < selectedDates.length; i++) {
+        selectedDates[i] = newDate;
+      }
     });
   }
 
@@ -574,101 +599,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     super.dispose();
   }
 
-  void _handleSubmit() async {
-    List<Map<String, dynamic>> allFormData = [];
-    List<File?> selectedImages = []; // Change to File?
-
-    // Collecting data from all forms
-    for (var key in formKeys) {
-      var data = key.currentState?.getFormData();
-      if (data != null && data.isNotEmpty) {
-        allFormData.add(data);
-
-        // Safely accessing selectedImage and its files
-        if (key.currentState?.selectedImage != null &&
-            key.currentState!.selectedImage!.files.isNotEmpty) {
-          String? imagePath = key.currentState!.selectedImage!.files.first.path;
-          if (imagePath != null) {
-            selectedImages.add(File(imagePath)); // Only add if path is not null
-          } else {
-            selectedImages.add(null); // Handle the null case
-          }
-        } else {
-          selectedImages
-              .add(null); // Allow image to be null if no image is selected
-        }
-      }
-    }
-
-    // Debugging: print the data that will be submitted
-    print('Submitting data: $allFormData');
-
-    // Ensure there's data to send
-    if (allFormData.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tidak ada data untuk dikirim')),
-      );
-      return;
-    }
-
-    List<String> names = [];
-    List<String> descriptions = [];
-    List<int> jumlahs = [];
-    List<int> jumlahSatuans = [];
-    List<double> nominals = [];
-    List<double> dls = [];
-    List<int> categoryIds = [];
-
-    String parentDate =
-        DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now());
-
-    for (var entry in allFormData) {
-      // Safely extracting values and providing defaults
-      names.add((entry['names'].first ?? '').toString());
-      descriptions.add((entry['descriptions'].first ?? '').toString());
-      jumlahs.add((entry['jumlah'] as List).first?.toInt() ?? 0);
-      jumlahSatuans.add((entry['jumlahSatuan'] as List).first?.toInt() ?? 0);
-      nominals.add((entry['nominals'] as List).first?.toDouble() ?? 0.0);
-      dls.add((entry['dll'] as List).first?.toDouble() ?? 0.0);
-      categoryIds.add((entry['category'] as num?)?.toInt() ?? 0);
-    }
-
-    // Call the API to save data
-    try {
-      await ApiService().createPengeluaran(
-        names,
-        descriptions,
-        [parentDate],
-        jumlahs,
-        jumlahSatuans,
-        nominals,
-        dls,
-        categoryIds,
-        selectedImages
-            .where((image) => image != null)
-            .map((image) => image!)
-            .toList(), // Ensure no nulls
-      );
-
-      // Display success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Data berhasil dikirim')),
-      );
-
-      // Clear forms after successful submission
-      setState(() {
-        formKeys.clear();
-        Navigator.pop(context); // Add a new form if necessary
-      });
-    } catch (error) {
-      // Handle errors here
-      print('Error: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan saat mengirim data')),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -682,7 +612,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              'Tanggal: ${DateFormat('dd/MM/yyyy').format(selectedDates.last)}',
+              'Tanggal: ${DateFormat('dd/MM/yyyy').format(selectedDate ?? DateTime.now())}',
             ),
             SizedBox(height: 10),
             _buildInputFields(),
