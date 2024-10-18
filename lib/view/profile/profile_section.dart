@@ -1,4 +1,8 @@
+// For mobile (iOS, Android)
+import 'dart:io' if (dart.library.html) 'dart:html';
+
 import 'package:flutter/material.dart';
+import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/profile/change_password.dart';
 import 'package:pity_cash/view/profile/edit_profile.dart';
 import 'package:pity_cash/service/share_preference.dart';
@@ -11,7 +15,8 @@ class ProfileSection extends StatefulWidget {
 class _ProfileSectionState extends State<ProfileSection> {
   String? token;
   String? name = 'Guest';
-  String? email = 'guest@gmail.com'; // Default email
+  String? email = 'guest@gmail.com';
+  String? photoUrl;
   bool isLoggedIn = false;
   final SharedPreferencesService _prefsService = SharedPreferencesService();
 
@@ -25,81 +30,29 @@ class _ProfileSectionState extends State<ProfileSection> {
     token = await _prefsService.getToken();
     name = await _prefsService.getUserName();
     email = await _prefsService.getUserEmail();
+    photoUrl = await _prefsService.getUserPhotoUrl();
     setState(() {
       isLoggedIn = token != null;
     });
   }
 
   Future<void> logout(BuildContext context) async {
-    // Clear user token and any other relevant data from SharedPreferences
-    await _prefsService
-        .removeToken(); // Use the new method in SharedPreferencesService
-    await _prefsService
-        .removeUserData(); // Use the new method in SharedPreferencesService
-
-    // Optionally, navigate to the login screen or home screen
-    Navigator.of(context)
-        .pushReplacementNamed('/login'); // Adjust the route name as needed
+    await _prefsService.removeToken();
+    await _prefsService.removeUserData();
+    Navigator.of(context).pushReplacementNamed('/login');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          // Bagian Atas Profil
-          _buildProfileHeader(),
-
-          SizedBox(height: 20),
-
-          // Bagian Bawah dengan Tombol-tombol
-          Expanded(
-            child: Center(
-              child: ListView(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                children: [
-                  _buildButton(
-                    context,
-                    'Edit Profile',
-                    Icons.person_outline,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => EditProfile()),
-                      );
-                    },
-                  ),
-                  _buildButton(
-                    context,
-                    'Change Password',
-                    Icons.lock_outline_sharp,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ChangePasswordProfile()),
-                      );
-                      // Aksi untuk mengubah password
-                    },
-                  ),
-                  _buildButton(
-                    context,
-                    'Logout',
-                    Icons.logout_outlined,
-                    onPressed: () {
-                      logout(
-                          context); // Call the logout function when the button is pressed
-
-                      // Aksi untuk logout
-                    },
-                  ),
-                  SizedBox(height: 20), // Space at the bottom
-                ],
-              ),
-            ),
-          ),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildProfileHeader(),
+            SizedBox(height: 30),
+            _buildProfileOptions(),
+          ],
+        ),
       ),
     );
   }
@@ -108,68 +61,100 @@ class _ProfileSectionState extends State<ProfileSection> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Color(0xFFEB8153), // Background color (orange)
-        borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(20.0),
-          bottomLeft: Radius.circular(20.0),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
         ),
+        borderRadius: BorderRadius.only(
+          bottomRight: Radius.circular(30.0),
+          bottomLeft: Radius.circular(30.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 7,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Header dengan ikon di pojok kiri dan kanan
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 24,
-                ),
                 Text(
                   'Profile',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                Icon(
-                  Icons.notifications,
-                  color: Colors.white,
-                  size: 24,
+                IconButton(
+                  icon: Icon(Icons.notifications, color: Colors.white),
+                  onPressed: () {
+                    // Implementasi notifikasi
+                  },
                 ),
               ],
             ),
-
-            SizedBox(height: 24),
-
-            // Avatar
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage('assets/piticash_log.png'),
-              backgroundColor: Colors.transparent,
+            SizedBox(height: 30),
+            FutureBuilder<String>(
+              future: ApiService().showProfilePicture(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return CircleAvatar(
+                    radius: 60,
+                    backgroundImage: AssetImage('assets/piticash_log.png'),
+                    backgroundColor: Colors.white,
+                  );
+                } else if (snapshot.hasData && snapshot.data != null) {
+                  return Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: NetworkImage(snapshot.data!),
+                        fit: BoxFit.cover,
+                      ),
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 3,
+                      ),
+                    ),
+                  );
+                } else {
+                  return CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.grey,
+                    child: Icon(Icons.person, size: 60, color: Colors.white),
+                  );
+                }
+              },
             ),
-
-            SizedBox(height: 8),
-
-            // Nama dan email berdasarkan login status
+            SizedBox(height: 15),
             Text(
               isLoggedIn ? '$name' : 'Hi, Guest!',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 2),
+            SizedBox(height: 5),
             Text(
               isLoggedIn ? '$email' : 'guest@gmail.com',
               style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w300,
-                color: Colors.white,
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.8),
               ),
             ),
           ],
@@ -178,50 +163,84 @@ class _ProfileSectionState extends State<ProfileSection> {
     );
   }
 
-  Widget _buildButton(BuildContext context, String label, IconData icon,
-      {required VoidCallback onPressed}) {
-    return Center(
-      child: Container(
-        margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 24.0),
-        width: MediaQuery.of(context).size.width * 0.9,
-        height: 45,
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFFEB8153), // Background color (orange)
-            foregroundColor: Colors.white, // Text color (white)
-            padding: EdgeInsets.zero, // Remove default padding
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+  Widget _buildProfileOptions() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        children: [
+          _buildOptionButton(
+            icon: Icons.person_outline,
+            label: 'Edit Profile',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => EditProfile()),
             ),
           ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: Colors.white.withOpacity(0.2),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  alignment: Alignment.center,
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold // White text
-                        ),
-                  ),
-                ),
-              ),
-            ],
+          SizedBox(height: 15),
+          _buildOptionButton(
+            icon: Icons.lock_outline,
+            label: 'Change Password',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ChangePasswordProfile()),
+            ),
+          ),
+          SizedBox(
+            height: 15,
+          ),
+          _buildOptionButton(
+            icon: Icons.settings,
+            label: 'Settings',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ChangePasswordProfile()),
+            ),
+          ),
+          SizedBox(height: 15),
+          _buildOptionButton(
+            icon: Icons.logout,
+            label: 'Logout',
+            onTap: () => logout(context),
+            color: Colors.red,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionButton({
+    required IconData icon,
+    required String label,
+    required void Function() onTap,
+    Color color = const Color(0xFFEB8153),
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: color.withOpacity(0.1),
+          child: Icon(icon, color: color),
+        ),
+        title: Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
         ),
+        trailing: Icon(Icons.arrow_forward_ios, color: color, size: 18),
+        onTap: onTap,
       ),
     );
   }

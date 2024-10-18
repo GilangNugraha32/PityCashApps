@@ -82,11 +82,23 @@ class _HomeSectionState extends State<HomeSection> {
             width: double.infinity,
             padding: EdgeInsets.only(bottom: 16.0),
             decoration: BoxDecoration(
-              color: Color(0xFFEB8153),
-              borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(16.0),
-                bottomLeft: Radius.circular(16.0),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
               ),
+              borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(30.0),
+                bottomLeft: Radius.circular(30.0),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 7,
+                  offset: Offset(0, 3),
+                ),
+              ],
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),

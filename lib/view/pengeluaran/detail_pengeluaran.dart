@@ -7,21 +7,18 @@ import 'package:pity_cash/view/pemasukan/edit_pemasukan.dart';
 import 'package:pity_cash/view/pengeluaran/edit_pengeluaran.dart';
 
 class DetailPengeluaran extends StatelessWidget {
-  final List<Pengeluaran> pengeluaranList; // Daftar pengeluaran yang diteruskan
+  final List<Pengeluaran> pengeluaranList;
 
   DetailPengeluaran({required this.pengeluaranList});
 
   @override
   Widget build(BuildContext context) {
     print("Pengeluaran List: $pengeluaranList");
-// Cek nilai tanggal
-    final String baseUrl =
-        "http://pitycash.mamorasoft.com/api"; // Ganti dengan base URL Anda
+    final String baseUrl = "http://pitycash.mamorasoft.com/api";
 
     return Scaffold(
       body: Column(
         children: [
-          // Bagian Atas Profil (Warna Oranye)
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -39,22 +36,14 @@ class DetailPengeluaran extends StatelessWidget {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: IconButton(
-                          icon: Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
+                          icon: Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
                         ),
                       ),
                       Align(
                         alignment: Alignment.centerRight,
-                        child: Icon(
-                          Icons.notifications,
-                          color: Colors.white,
-                          size: 24,
-                        ),
+                        child: Icon(Icons.notifications,
+                            color: Colors.white, size: 24),
                       ),
                     ],
                   ),
@@ -91,29 +80,39 @@ class DetailPengeluaran extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           SizedBox(
-                            width: 80,
-                            child: ElevatedButton(
+                            width: 110,
+                            child: ElevatedButton.icon(
                               onPressed: () {
                                 if (pengeluaranList.isNotEmpty) {
-                                  final selectedPengeluaran = pengeluaranList[
-                                      0]; // Replace with the correct index
                                   _showDeleteConfirmationParentDialog(
-                                      context, selectedPengeluaran.idParent);
+                                      context, pengeluaranList[0].idParent);
                                 }
                               },
-                              style: ElevatedButton.styleFrom(
-                                primary: Color(0xFF1A3A63),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
+                              icon: Icon(Icons.delete,
+                                  color: Color(0xFF1A3A63), size: 18),
+                              label: Text(
+                                'Hapus',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
                                 ),
                               ),
-                              child: Text('Hapus'),
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.white,
+                                onPrimary: Color(0xFF1A3A63),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  side: BorderSide(color: Color(0xFF1A3A63)),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                              ),
                             ),
                           ),
-                          SizedBox(width: 10),
+                          SizedBox(width: 12),
                           SizedBox(
-                            width: 80,
-                            child: ElevatedButton(
+                            width: 110,
+                            child: ElevatedButton.icon(
                               onPressed: () {
                                 Navigator.push(
                                   context,
@@ -123,71 +122,32 @@ class DetailPengeluaran extends StatelessWidget {
                                   ),
                                 );
                               },
-                              style: ElevatedButton.styleFrom(
-                                primary: Color(0xFFF7941E),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.0),
+                              icon: Icon(Icons.edit,
+                                  color: Color(0xFFF7941E), size: 18),
+                              label: Text(
+                                'Edit',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
                                 ),
                               ),
-                              child: Text('Edit'),
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.white,
+                                onPrimary: Color(0xFFF7941E),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  side: BorderSide(color: Color(0xFFF7941E)),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                              ),
                             ),
                           ),
                         ],
                       ),
-
-                      SizedBox(height: 50),
-                      SizedBox(
-                        width: 250,
-                        height: 40,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[300],
-                            foregroundColor: Colors.black87,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 18,
-                                backgroundColor: Color(0xFFEB8153),
-                                child: Icon(Icons.date_range_outlined,
-                                    color: Colors.white, size: 22),
-                              ),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: Container(
-                                  alignment: Alignment.centerLeft,
-                                  padding: EdgeInsets.all(
-                                      8.0), // Increased padding for better aesthetics
-                                  child: Text(
-                                    // Pastikan kita mendapatkan tanggal dari pengeluaranList
-                                    pengeluaranList.isNotEmpty &&
-                                            pengeluaranList[0].tanggal != null
-                                        ? DateFormat('d MMMM yyyy')
-                                            .format(pengeluaranList[0].tanggal!)
-                                        : 'Tidak ada data',
-                                    style: TextStyle(
-                                      fontSize:
-                                          14, // Sesuaikan ukuran font sesuai kebutuhan
-                                      color: Colors
-                                          .black87, // Sesuaikan warna teks
-                                    ),
-                                    overflow: TextOverflow
-                                        .ellipsis, // Prevent text from overflowing
-                                    maxLines: 1, // Limit to one line
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      // Menampilkan detail pengeluaran secara dinamis
+                      SizedBox(height: 15),
+                      _buildDateButton(pengeluaranList),
+                      SizedBox(height: 10),
                       ListView.builder(
                         itemCount: pengeluaranList.length,
                         shrinkWrap: true,
@@ -197,230 +157,125 @@ class DetailPengeluaran extends StatelessWidget {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 16.0),
                             child: Card(
-                              color: Colors.grey[300],
+                              color: Color(0xFFFFF5E6), // Warna cream
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
+                                borderRadius: BorderRadius.circular(15.0),
+                                side: BorderSide(
+                                    color: Color(0xFFEB8153),
+                                    width: 1.5), // Outline
                               ),
-                              child: Container(
-                                width: double.infinity,
+                              elevation: 3,
+                              child: Padding(
                                 padding: const EdgeInsets.all(16.0),
-                                child: Row(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Left side: Image
-                                    Container(
-                                      width: 60,
-                                      height: 60,
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                        image: DecorationImage(
-                                          image: NetworkImage(
+                                    Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          child: Image.network(
                                             pengeluaran.image != null
-                                                ? '$baseUrl/${pengeluaran.image}' // Menggunakan base URL
-                                                : 'https://via.placeholder.com/60', // Gambar placeholder jika null
+                                                ? '$baseUrl/${pengeluaran.image}'
+                                                : 'https://via.placeholder.com/60',
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Container(
+                                                width: 60,
+                                                height: 60,
+                                                color: Colors.grey[300],
+                                                child: Icon(Icons.error,
+                                                    color: Colors.red),
+                                              );
+                                            },
                                           ),
-                                          fit: BoxFit.cover,
                                         ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                        width:
-                                            16), // Space between image and text
-                                    // Right side: Text details
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
+                                        SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              // Name
-                                              Expanded(
+                                              Text(
+                                                pengeluaran.name,
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 19),
+                                              ),
+                                              SizedBox(height: 4),
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 8.0,
+                                                    vertical: 4.0),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.orange[100],
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
                                                 child: Text(
-                                                  pengeluaran.name,
+                                                  pengeluaran.category?.name ??
+                                                      'Tidak ada kategori',
                                                   style: TextStyle(
+                                                      color: Colors.orange[800],
                                                       fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 19),
+                                                          FontWeight.bold),
                                                 ),
-                                              ),
-                                              // Spacer to push the button to the right
-                                              if (pengeluaranList.length >
-                                                  1) ...[
-                                                Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape
-                                                        .rectangle, // Rectangle box shape
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10), // Rounded corners
-                                                    color: Colors
-                                                        .red, // Red background for the icon button
-                                                  ),
-                                                  child: IconButton(
-                                                    icon: Icon(
-                                                        Icons.delete_outline,
-                                                        color: Colors.white),
-                                                    onPressed: () {
-                                                      _showDeleteConfirmationDataDialog(
-                                                          context,
-                                                          pengeluaran
-                                                              .idData); // Use idData instead of id
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            ],
-                                          ),
-                                          SizedBox(height: 4),
-                                          // Category
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 8.0, vertical: 4.0),
-                                            decoration: BoxDecoration(
-                                              color: Colors.orange[100],
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                            ),
-                                            child: Text(
-                                              pengeluaran.category?.name ??
-                                                  'Tidak ada kategori',
-                                              style: TextStyle(
-                                                color: Colors.orange[800],
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(height: 8),
-                                          // Description
-
-                                          Text(pengeluaran.description),
-                                          SizedBox(
-                                              height:
-                                                  15), // Space before amount
-                                          Column(
-                                            crossAxisAlignment: CrossAxisAlignment
-                                                .start, // Ensure alignment of the content
-                                            children: [
-                                              // First row (Jumlah Satuan and Nominal Rp)
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    flex:
-                                                        1, // Set a consistent width for the label section
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          'Jumlah Satuan : ',
-                                                          style: TextStyle(
-                                                              fontSize: 13),
-                                                        ),
-                                                        Text(
-                                                          '${pengeluaran.jumlahSatuan}',
-                                                          style: TextStyle(
-                                                              fontSize: 13,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    flex:
-                                                        1, // Set a consistent width for the value section
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          'Nominal Rp : ',
-                                                          style: TextStyle(
-                                                              fontSize: 13),
-                                                        ),
-                                                        Text(
-                                                          '${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(pengeluaran.nominal)}',
-                                                          style: TextStyle(
-                                                              fontSize: 13,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              SizedBox(
-                                                  height:
-                                                      8), // Space between rows
-
-                                              // Second row (DLL and Jumlah)
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    flex:
-                                                        1, // Align this row exactly like the first row
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          'DLL : ',
-                                                          style: TextStyle(
-                                                              fontSize: 13),
-                                                        ),
-                                                        Text(
-                                                          '${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(pengeluaran.dll)}',
-                                                          style: TextStyle(
-                                                              fontSize: 13,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    flex:
-                                                        1, // Align this row exactly like the first row
-                                                    child: Row(
-                                                      children: [
-                                                        Text(
-                                                          'Jumlah : ',
-                                                          style: TextStyle(
-                                                              fontSize: 13),
-                                                        ),
-                                                        Text(
-                                                          '${NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0).format(pengeluaran.jumlah)}',
-                                                          style: TextStyle(
-                                                              fontSize: 13,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
                                               ),
                                             ],
                                           ),
-                                          SizedBox(
-                                              height:
-                                                  8), // Space before the created and updated timestamps
-                                          // Created and updated timestamps
-                                          Text(
-                                            'Dibuat pada: ${pengeluaran.createdAt.toLocal().toString().split(' ')[0]}',
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey),
+                                        ),
+                                        if (pengeluaranList.length > 1)
+                                          IconButton(
+                                            icon: Icon(Icons.delete_outline,
+                                                color: Colors.red),
+                                            onPressed: () =>
+                                                _showDeleteConfirmationDataDialog(
+                                                    context,
+                                                    pengeluaran.idData),
                                           ),
-                                          Text(
-                                            'Diperbarui pada: ${pengeluaran.updatedAt.toLocal().toString().split(' ')[0]}',
-                                            style: TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey),
-                                          ),
-                                        ],
-                                      ),
+                                      ],
                                     ),
+                                    SizedBox(height: 16),
+                                    Text(pengeluaran.description,
+                                        style: TextStyle(fontSize: 14)),
+                                    SizedBox(height: 16),
+                                    _buildInfoRow(
+                                        'Jumlah Satuan',
+                                        '${pengeluaran.jumlahSatuan}',
+                                        'Nominal',
+                                        NumberFormat.currency(
+                                                locale: 'id_ID',
+                                                symbol: 'Rp ',
+                                                decimalDigits: 0)
+                                            .format(pengeluaran.nominal)),
+                                    SizedBox(height: 8),
+                                    _buildInfoRow(
+                                        'DLL',
+                                        NumberFormat.currency(
+                                                locale: 'id_ID',
+                                                symbol: 'Rp ',
+                                                decimalDigits: 0)
+                                            .format(pengeluaran.dll),
+                                        'Jumlah',
+                                        NumberFormat.currency(
+                                                locale: 'id_ID',
+                                                symbol: 'Rp ',
+                                                decimalDigits: 0)
+                                            .format(pengeluaran.jumlah)),
+                                    SizedBox(height: 16),
+                                    Text(
+                                        'Dibuat pada: ${DateFormat('dd MMM yyyy').format(pengeluaran.createdAt.toLocal())}',
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.grey)),
+                                    Text(
+                                        'Diperbarui pada: ${DateFormat('dd MMM yyyy').format(pengeluaran.updatedAt.toLocal())}',
+                                        style: TextStyle(
+                                            fontSize: 12, color: Colors.grey)),
                                   ],
                                 ),
                               ),
@@ -440,6 +295,72 @@ class DetailPengeluaran extends StatelessWidget {
     );
   }
 
+  Widget _buildDateButton(List<Pengeluaran> pengeluaranList) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 1),
+      child: Card(
+        elevation: 4,
+        color: Color(0xFFFFF5E6), // Warna cream untuk background
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Colors.orange.shade300, width: 2),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            children: [
+              Icon(Icons.calendar_today, color: Color(0xFFEB8153), size: 28),
+              SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  pengeluaranList.isNotEmpty &&
+                          pengeluaranList[0].tanggal != null
+                      ? DateFormat('d MMMM yyyy')
+                          .format(pengeluaranList[0].tanggal!)
+                      : 'Tidak ada data',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFEB8153),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+      String label1, String value1, String label2, String value2) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildInfoItem(label1, value1),
+        ),
+        SizedBox(width: 16),
+        Expanded(
+          child: _buildInfoItem(label2, value2),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey)),
+        SizedBox(height: 4),
+        Text(value,
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
   void _showDeleteConfirmationDataDialog(BuildContext context, int id) {
     showDialog(
       context: context,
@@ -449,28 +370,20 @@ class DetailPengeluaran extends StatelessWidget {
           content: Text('Apakah Anda yakin ingin menghapus data ini?'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: Text('Batal'),
             ),
             TextButton(
               onPressed: () async {
                 try {
-                  final apiService =
-                      ApiService(); // Create an instance of ApiService
-                  await apiService.deleteDataPengeluaran(
-                      id); // Call the delete method with the ID
-
-                  // Show Snackbar for successful deletion
+                  final apiService = ApiService();
+                  await apiService.deleteDataPengeluaran(id);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Berhasil dihapus!')),
                   );
-
-                  Navigator.of(context).pop(); // Close the dialog
-                  Navigator.of(context).pop(); // Go back to the previous screen
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 } catch (e) {
-                  // Handle error (show a snackbar or dialog)
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Gagal menghapus data: $e')),
                   );
@@ -494,28 +407,20 @@ class DetailPengeluaran extends StatelessWidget {
               Text('Apakah Anda yakin ingin menghapus semua data terkait?'),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: Text('Batal'),
             ),
             TextButton(
               onPressed: () async {
                 try {
-                  final apiService =
-                      ApiService(); // Create an instance of ApiService
-                  await apiService.deleteParentPengeluaran(
-                      idParent); // Call the delete method
-
-                  // Show Snackbar for successful deletion
+                  final apiService = ApiService();
+                  await apiService.deleteParentPengeluaran(idParent);
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Semua data berhasil dihapus!')),
                   );
-
-                  Navigator.of(context).pop(); // Close the dialog
-                  Navigator.of(context).pop(); // Go back to the previous screen
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 } catch (e) {
-                  // Handle error (show a snackbar or dialog)
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Gagal menghapus data: $e')),
                   );

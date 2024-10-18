@@ -88,49 +88,64 @@ class _TambahCategoriesState extends State<TambahCategories> {
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold)),
                       SizedBox(height: 6),
-                      TextField(
-                        controller: nameController,
-                        decoration: InputDecoration(
-                          hintText: 'Masukkan nama kategori',
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide.none,
+                      Container(
+                        height: 50,
+                        child: TextField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan nama kategori',
+                            hintStyle: TextStyle(fontSize: 12),
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12.0, vertical: 8.0),
+                            prefixIcon: Icon(Icons.category_outlined,
+                                color: Color(0xFFEB8153)),
                           ),
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 8.0),
                         ),
                       ),
-                      SizedBox(height: 6),
+                      SizedBox(height: 12),
                       Text('Jenis Kategori',
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold)),
                       SizedBox(height: 6),
-                      DropdownButtonFormField<int>(
-                        value: selectedJenisKategori,
-                        onChanged: (int? newValue) {
-                          setState(() {
-                            selectedJenisKategori = newValue;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide.none,
+                      Container(
+                        height: 50,
+                        child: DropdownButtonFormField<int>(
+                          value: selectedJenisKategori,
+                          onChanged: (int? newValue) {
+                            setState(() {
+                              selectedJenisKategori = newValue;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12.0, vertical: 8.0),
+                            prefixIcon:
+                                Icon(Icons.list, color: Color(0xFFEB8153)),
                           ),
+                          items: jenisKategoriOptions.map((option) {
+                            return DropdownMenuItem<int>(
+                              value: option['value'],
+                              child: Text(option['label'],
+                                  style: TextStyle(fontSize: 12)),
+                            );
+                          }).toList(),
+                          hint: Text('Pilih jenis kategori',
+                              style: TextStyle(fontSize: 12)),
                         ),
-                        items: jenisKategoriOptions.map((option) {
-                          return DropdownMenuItem<int>(
-                            value: option['value'],
-                            child: Text(option['label']),
-                          );
-                        }).toList(),
-                        hint: Text('Pilih jenis kategori'),
                       ),
-                      SizedBox(height: 6),
+                      SizedBox(height: 12),
                       Text('Deskripsi',
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold)),
@@ -139,6 +154,7 @@ class _TambahCategoriesState extends State<TambahCategories> {
                         controller: descriptionController,
                         decoration: InputDecoration(
                           hintText: 'Masukkan deskripsi kategori',
+                          hintStyle: TextStyle(fontSize: 12),
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
@@ -147,19 +163,24 @@ class _TambahCategoriesState extends State<TambahCategories> {
                           ),
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 12.0, vertical: 8.0),
+                          prefixIcon: Icon(Icons.description_outlined,
+                              color: Color(0xFFEB8153)),
+                          alignLabelWithHint: true,
                         ),
                         maxLines: 3,
+                        textAlignVertical: TextAlignVertical.top,
                       ),
+                      SizedBox(height: 24),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           ElevatedButton(
                             onPressed: () {
-                              Navigator.pop(context); // Navigate back
+                              Navigator.pop(context);
                             },
                             child: Text('Cancel'),
                             style: ElevatedButton.styleFrom(
-                              primary: Color(0xFFDA0000), // Red color
+                              primary: Color(0xFFDA0000),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
@@ -171,29 +192,23 @@ class _TambahCategoriesState extends State<TambahCategories> {
                               String name = nameController.text;
                               String description = descriptionController.text;
 
-                              // Check if the required fields are not empty
                               if (name.isNotEmpty &&
                                   selectedJenisKategori != null) {
                                 try {
-                                  // Call the createCategory function from ApiService
                                   await ApiService().createCategory(
                                     name,
-                                    selectedJenisKategori!, // Ensure this is not null
+                                    selectedJenisKategori!,
                                     description,
                                   );
 
-                                  // Show a Snackbar if the category is successfully added
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content: Text(
                                             'Kategori berhasil ditambahkan')),
                                   );
 
-                                  // Navigate back to the previous screen and pass 'success' as a result
-                                  Navigator.pop(context,
-                                      'success'); // Pass a result to the previous page
+                                  Navigator.pop(context, 'success');
                                 } catch (e) {
-                                  // Show an error message if there's an issue
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content:
@@ -201,7 +216,6 @@ class _TambahCategoriesState extends State<TambahCategories> {
                                   );
                                 }
                               } else {
-                                // Show an error message if any field is empty
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                       content: Text('Please fill all fields')),
@@ -210,7 +224,7 @@ class _TambahCategoriesState extends State<TambahCategories> {
                             },
                             child: Text('Submit'),
                             style: ElevatedButton.styleFrom(
-                              primary: Color(0xFFE85C0D), // Orange color
+                              primary: Color(0xFFE85C0D),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                               ),

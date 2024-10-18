@@ -1,10 +1,14 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
-import 'package:pity_cash/service/api_service.dart'; // Import API service
+import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/pemasukan/detail_pemasukan.dart';
 import 'package:pity_cash/view/pemasukan/tambah_pemasukan.dart';
 import 'package:pity_cash/view/pengeluaran/detail_pengeluaran.dart';
@@ -17,22 +21,21 @@ class PengeluaranSection extends StatefulWidget {
 }
 
 class _PengeluaranSectionState extends State<PengeluaranSection> {
-  List<Pengeluaran> expenses = []; // Updated to use Pengeluaran
+  List<Pengeluaran> expenses = [];
   List<Pengeluaran> filteredExpenses = [];
   Map<int, List<Pengeluaran>> groupedFilteredExpenses = {};
 
-  DateTimeRange? selectedDateRange; // Daftar yang sudah difilter
+  DateTimeRange? selectedDateRange;
 
-  // Other variables remain unchanged
-  double saldo = 0.0; // State untuk menyimpan saldo
-  bool isLoading = true; // State untuk loading status
+  double saldo = 0.0;
+  bool isLoading = true;
   bool isOutcomeSelected = true;
   String? token;
   String? name;
   bool isLoggedIn = false;
   TextEditingController _searchController = TextEditingController();
   final SharedPreferencesService _prefsService = SharedPreferencesService();
-  final ApiService _apiService = ApiService(); // Instantiate ApiService
+  final ApiService _apiService = ApiService();
 
   bool isLoadingMore = false;
   int currentPage = 1;
@@ -42,24 +45,22 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     super.initState();
     _getSaldo();
     _checkLoginStatus();
-    _fetchExpenses(currentPage); // Ambil data awal
-    _searchController
-        .addListener(_filterExpenses); // Dengarkan perubahan di search field
+    _fetchExpenses(currentPage);
+    _searchController.addListener(_filterExpenses);
   }
 
   Future<void> _getSaldo() async {
     try {
-      final fetchedSaldo =
-          await _apiService.fetchSaldo(); // Panggil fungsi fetchSaldo
+      final fetchedSaldo = await _apiService.fetchSaldo();
       setState(() {
-        saldo = fetchedSaldo; // Update saldo dengan hasil dari API
-        isLoading = false; // Matikan loading setelah saldo berhasil diambil
+        saldo = fetchedSaldo;
+        isLoading = false;
       });
     } catch (e) {
       print('Failed to load saldo: $e');
       setState(() {
-        saldo = 0.0; // Atur saldo ke 0 jika gagal
-        isLoading = false; // Matikan loading jika gagal mengambil saldo
+        saldo = 0.0;
+        isLoading = false;
       });
     }
   }
@@ -73,43 +74,46 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   }
 
   Future<void> _fetchExpenses(int page) async {
-    if (isLoadingMore) return; // Prevent fetching if already loading more data
+    if (isLoadingMore) return;
 
     setState(() {
-      isLoadingMore = true; // Start loading
+      isLoadingMore = true;
     });
 
     try {
-      // Add debug print to verify the API call
       print(
-          'Fetching expenses for page: $page with date range: $selectedDateRange');
+          'Mengambil pengeluaran untuk halaman: $page dengan rentang tanggal: $selectedDateRange');
 
-      // Panggil fetchExpenses dari api_service dengan pagination dan date range
       final fetchedExpenses = await _apiService.fetchExpenses(
         page: page,
-        dateRange: selectedDateRange, // Tambahkan date range jika dipilih
+        dateRange: selectedDateRange,
       );
 
-      // Debug print the response from the API
-      print('Fetched expenses: ${fetchedExpenses.toString()}');
+      print('Pengeluaran yang diambil: ${fetchedExpenses.toString()}');
 
       setState(() {
         if (page == 1) {
-          expenses = fetchedExpenses; // Replace list for first page
+          expenses = fetchedExpenses;
         } else {
-          expenses.addAll(fetchedExpenses); // Append for subsequent pages
+          expenses.addAll(fetchedExpenses);
         }
 
-        currentPage++; // Increment current page for pagination
-        _filterExpenses(); // Update filtered expenses after fetching
+        _filterExpenses();
+        currentPage++;
       });
+
+      // Periksa apakah masih ada data yang bisa dimuat
+      if (fetchedExpenses.isEmpty) {
+        setState(() {
+          isLoadingMore = false;
+        });
+      }
     } catch (e) {
-      print('Error fetching expenses: $e'); // Log error message
-      _showErrorSnackbar('Error fetching expenses. Please try again.');
+      print('Error saat mengambil pengeluaran: $e');
     } finally {
       setState(() {
-        isLoading = false; // Stop loading
-        isLoadingMore = false; // Reset loadingMore state
+        isLoading = false;
+        isLoadingMore = false;
       });
     }
   }
@@ -143,7 +147,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       setState(() {
         selectedDateRange = picked;
       });
-      _filterExpenses(); // Reapply filters when date range is selected
+      _filterExpenses();
     }
   }
 
@@ -151,7 +155,6 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     String query = _searchController.text.toLowerCase();
 
     setState(() {
-      // Step 1: Filter expenses by date range if a date range is selected
       List<Pengeluaran> dateRangeFilteredExpenses = expenses;
       if (selectedDateRange != null) {
         dateRangeFilteredExpenses = expenses.where((pengeluaran) {
@@ -165,13 +168,10 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         }).toList();
       }
 
-      // Step 2: If query is empty, just show the date-range filtered expenses
       if (query.isEmpty) {
         filteredExpenses = List.from(dateRangeFilteredExpenses);
       } else {
-        // Step 3: Apply search query filtering on top of date-range filtered results
         filteredExpenses = dateRangeFilteredExpenses.where((pengeluaran) {
-          // Filter by name or tanggal (date)
           bool matchesName = pengeluaran.name.toLowerCase().contains(query);
           bool matchesDate = DateFormat('dd MMMM yyyy')
               .format(pengeluaran.tanggal!)
@@ -182,7 +182,6 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         }).toList();
       }
 
-      // Step 4: Group filtered expenses by parentId
       groupedFilteredExpenses = {};
       for (var pengeluaran in filteredExpenses) {
         int parentId = pengeluaran.idParent;
@@ -203,9 +202,9 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     setState(() {
       isOutcomeSelected = isOutcome;
       if (isOutcome) {
-        currentPage = 1; // Reset current page for expenses
-        expenses.clear(); // Clear current expense list
-        _fetchExpenses(currentPage); // Fetch expenses again
+        currentPage = 1;
+        expenses.clear();
+        _fetchExpenses(currentPage);
       } else {
         // Implement income fetching if needed
       }
@@ -226,519 +225,14 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         children: [
           Column(
             children: [
-              // Fixed orange background section
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.only(bottom: 16.0),
-                decoration: BoxDecoration(
-                  color: Color(0xFFEB8153),
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(16.0),
-                    bottomLeft: Radius.circular(16.0),
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Outcomes',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Icon(
-                            Icons.notifications,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 30),
-                      Center(
-                        child: Text(
-                          'Saldo Pity Cash',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Center(
-                        child: isLoading
-                            ? CircularProgressIndicator() // Show loading indicator while data is being fetched
-                            : Text(
-                                NumberFormat.currency(
-                                  locale: 'id_ID', // Format for IDR
-                                  symbol: 'Rp', // Currency symbol
-                                  decimalDigits:
-                                      0, // Set decimal digits to 0 to remove the cents
-                                ).format(
-                                    saldo), // Display the saldo from the API
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                      ),
-
-                      SizedBox(height: 12),
-                      // Custom Toggle button for Income and Expense
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 60),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        padding: EdgeInsets.all(6),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => _handleSectionClick(false),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        !isOutcomeSelected // ! karena Income adalah kebalikan dari Expense
-                                            ? Color(
-                                                0xFFEB8153) // Warna oranye untuk Income jika dipilih
-                                            : Colors.white,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Income',
-                                      style: TextStyle(
-                                        color: !isOutcomeSelected
-                                            ? Colors.white
-                                            : Color(
-                                                0xFFB8B8B8), // Warna teks abu-abu jika tidak dipilih
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => _handleSectionClick(true),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color:
-                                        isOutcomeSelected // Menampilkan warna oranye saat Expense dipilih
-                                            ? Color(0xFFEB8153)
-                                            : Colors.white,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Outcome',
-                                      style: TextStyle(
-                                        color: isOutcomeSelected
-                                            ? Colors.white
-                                            : Color(
-                                                0xFFB8B8B8), // Warna teks abu-abu jika tidak dipilih
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              _buildOrangeBackgroundSection(),
               SizedBox(height: 10),
-
-              // Search Form
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white, // White background color
-                    borderRadius:
-                        BorderRadius.circular(12.0), // Rounded corners
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3), // Shadow color
-                        spreadRadius: 1, // Spread radius
-                        blurRadius: 5, // Blur radius
-                        offset: Offset(0, 6), // Shadow offset
-                      ),
-                    ],
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Cari...',
-                      prefixIcon: Icon(Icons.search),
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(14.0), // Rounded corners
-                        borderSide: BorderSide.none, // Remove border
-                      ),
-                    ),
-                    onChanged: (value) {
-                      // Panggil fungsi pencarian setiap kali nilai berubah
-                      _filterExpenses();
-                    },
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              // Categories List
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(20.0)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .spaceBetween, // Distribute space evenly
-                        children: [
-                          SizedBox(
-                            width: 225, // Adjust width as needed
-                            child: GestureDetector(
-                              onTap: () => _selectDateRange(
-                                  context), // Open date range picker on tap
-                              child: AbsorbPointer(
-                                // Prevents text editing
-                                child: TextField(
-                                  enabled: false, // Disable text editing
-                                  decoration: InputDecoration(
-                                    hintText: selectedDateRange == null
-                                        ? 'Pilih Tanggal'
-                                        : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
-                                    hintStyle: TextStyle(
-                                      color: Colors.black54,
-                                      fontSize:
-                                          13, // Ukuran font yang lebih kecil
-                                    ),
-                                    prefixIcon: Padding(
-                                      padding: const EdgeInsets.only(
-                                          right:
-                                              8.0), // Space between icon and text
-                                      child: Container(
-                                        height:
-                                            48, // Adjust height for TextField
-                                        width:
-                                            48, // Adjust width to be circular
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Color(
-                                              0xFFEB8153), // Background color of circle
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors
-                                                  .black26, // Shadow color
-                                              blurRadius: 4.0, // Blur radius
-                                              spreadRadius:
-                                                  1.0, // Spread radius
-                                              offset: Offset(
-                                                  0, 5), // Shadow position
-                                            ),
-                                          ],
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Icon(
-                                            Icons.calendar_today,
-                                            color: Colors.white,
-                                            size: 22,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    filled:
-                                        true, // Enables the background color
-                                    fillColor: Colors.grey[
-                                        200], // Sets the background color to light grey
-                                    border: OutlineInputBorder(
-                                      borderSide:
-                                          BorderSide.none, // Removes the border
-                                      borderRadius: BorderRadius.circular(
-                                          24.0), // Adds rounded corners
-                                    ),
-                                    contentPadding: EdgeInsets.symmetric(
-                                      vertical:
-                                          15, // Vertical padding inside TextField
-                                      horizontal:
-                                          20, // Horizontal padding for text
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // Buttons Row
-                          Row(
-                            children: [
-                              SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: CircleAvatar(
-                                  backgroundColor: Color(0xFF51A6F5),
-                                  child: IconButton(
-                                    icon: Icon(Icons.print_outlined),
-                                    color: Colors.white,
-                                    iconSize: 28,
-                                    onPressed: () {
-                                      // Add your print action here
-                                    },
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: CircleAvatar(
-                                  backgroundColor: Color(0xFF68CF29),
-                                  child: IconButton(
-                                    icon: Icon(Icons.arrow_circle_down_sharp),
-                                    color: Colors.white,
-                                    iconSize: 28,
-                                    onPressed: () {
-                                      // Add your download action here
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Expanded(
-                        child: LazyLoadScrollView(
-                          onEndOfPage: () {
-                            if (!isLoading && !isLoadingMore) {
-                              _fetchExpenses(currentPage); // Load more expenses
-                            }
-                          },
-                          child: ListView.builder(
-                            padding: const EdgeInsets.all(0),
-                            itemCount: groupedFilteredExpenses.length,
-                            itemBuilder: (context, groupIndex) {
-                              int parentId = groupedFilteredExpenses.keys
-                                  .elementAt(groupIndex);
-                              List<Pengeluaran> groupItems =
-                                  groupedFilteredExpenses[parentId]!;
-                              double totalJumlah = groupItems.fold(
-                                  0, (sum, item) => sum + item.jumlah);
-
-                              return GestureDetector(
-                                onTap: () {
-                                  if (groupItems.isNotEmpty) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => DetailPengeluaran(
-                                          pengeluaranList:
-                                              groupItems, // Pass the entire groupItems list
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 16.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 8.0),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            groupItems.isNotEmpty &&
-                                                    groupItems.first
-                                                            .parentPengeluaran !=
-                                                        null &&
-                                                    groupItems.first.tanggal !=
-                                                        null
-                                                ? DateFormat('dd MMMM yyyy')
-                                                    .format(groupItems
-                                                        .first.tanggal!)
-                                                : 'Tidak ada tanggal',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-
-                                      Divider(
-                                        color: Colors.grey[400],
-                                        thickness: 1,
-                                        height: 15,
-                                      ),
-                                      // Display all expenses in this group
-                                      ListView.builder(
-                                        shrinkWrap: true,
-                                        physics: NeverScrollableScrollPhysics(),
-                                        itemCount: groupItems.length,
-                                        itemBuilder: (context, transIndex) {
-                                          final pengeluaran =
-                                              groupItems[transIndex];
-                                          return Container(
-                                            padding: EdgeInsets.symmetric(
-                                                vertical: 5.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                CircleAvatar(
-                                                  backgroundColor:
-                                                      Color(0xFFEB8153),
-                                                  child: Icon(
-                                                    Icons
-                                                        .monetization_on_outlined,
-                                                    color: Colors.white70,
-                                                  ),
-                                                ),
-                                                SizedBox(width: 16.0),
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        pengeluaran
-                                                                .name.isNotEmpty
-                                                            ? pengeluaran.name
-                                                            : 'Tidak ada nama',
-                                                        style: TextStyle(
-                                                          fontSize: 16,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        pengeluaran.category
-                                                                ?.name ??
-                                                            'Tidak ada kategori',
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                          color:
-                                                              Colors.grey[600],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                Text(
-                                                  NumberFormat.currency(
-                                                    locale: 'id_ID',
-                                                    symbol: 'Rp',
-                                                    decimalDigits: 0,
-                                                  ).format(pengeluaran.jumlah),
-                                                  style: TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                      SizedBox(height: 8.0),
-                                      Divider(
-                                        color: Colors.grey[400],
-                                        thickness: 1,
-                                        height: 15,
-                                      ),
-                                      // Display the total amount
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Total: ',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Text(
-                                            NumberFormat.currency(
-                                              locale: 'id_ID',
-                                              symbol: 'Rp',
-                                              decimalDigits: 0,
-                                            ).format(totalJumlah),
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.red,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                          height:
-                                              20.0), // Add space between groups
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
+              _buildSearchForm(),
+              SizedBox(height: 20),
+              _buildCategoriesList(groupedFilteredExpenses),
             ],
           ),
-
-          if (isLoading)
-            Center(
-                child:
-                    CircularProgressIndicator()), // Show loading indicator for the entire screen
+          if (isLoading) Center(child: CircularProgressIndicator()),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -749,8 +243,6 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
               builder: (context) => TambahPengeluaran(),
             ),
           );
-
-          // Implement the action for adding a new income
         },
         backgroundColor: Color(0xFFE51A6F5),
         child: Icon(Icons.add),
@@ -758,9 +250,875 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     );
   }
 
+  Widget _buildOrangeBackgroundSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.only(bottom: 16.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
+        ),
+        borderRadius: BorderRadius.only(
+          bottomRight: Radius.circular(30.0),
+          bottomLeft: Radius.circular(30.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 2,
+            blurRadius: 7,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeaderRow(),
+            SizedBox(height: 30),
+            _buildSaldoSection(),
+            SizedBox(height: 12),
+            _buildToggleButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          'Outcomes',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Icon(
+          Icons.notifications,
+          color: Colors.white,
+          size: 24,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSaldoSection() {
+    return Column(
+      children: [
+        Center(
+          child: Text(
+            'Saldo Pity Cash',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        SizedBox(height: 2),
+        Center(
+          child: isLoading
+              ? CircularProgressIndicator()
+              : Text(
+                  NumberFormat.currency(
+                    locale: 'id_ID',
+                    symbol: 'Rp',
+                    decimalDigits: 0,
+                  ).format(saldo),
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToggleButton() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 60),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: EdgeInsets.all(6),
+      child: Row(
+        children: [
+          _buildToggleOption('Income', !isOutcomeSelected),
+          _buildToggleOption('Outcome', isOutcomeSelected),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleOption(String text, bool isSelected) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _handleSectionClick(text == 'Outcome'),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 14),
+          decoration: BoxDecoration(
+            color: isSelected ? Color(0xFFEB8153) : Colors.white,
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Color(0xFFB8B8B8),
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchForm() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 6),
+            ),
+          ],
+        ),
+        child: TextField(
+          controller: _searchController,
+          decoration: InputDecoration(
+            hintText: 'Cari...',
+            prefixIcon: Icon(Icons.search),
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14.0),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          onChanged: (value) {
+            _filterExpenses();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoriesList(
+      Map<int, List<Pengeluaran>> groupedFilteredExpenses) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            _buildDateRangeAndActionButtons(),
+            SizedBox(height: 10),
+            Expanded(
+              child: _buildExpensesList(groupedFilteredExpenses),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateRangeAndActionButtons() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildDateRangeSelector(),
+        ),
+        SizedBox(width: 8),
+        _buildActionButtons(),
+      ],
+    );
+  }
+
+  Widget _buildDateRangeSelector() {
+    return GestureDetector(
+      onTap: () => _selectDateRange(context),
+      child: AbsorbPointer(
+        child: TextField(
+          enabled: false,
+          decoration: InputDecoration(
+            hintText: selectedDateRange == null
+                ? 'Pilih Tanggal'
+                : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
+            hintStyle: TextStyle(
+              color: Colors.black54,
+              fontSize: 13,
+            ),
+            prefixIcon: Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Container(
+                height: 48,
+                width: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFEB8153),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4.0,
+                      spreadRadius: 1.0,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.calendar_today,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+            filled: true,
+            fillColor: Colors.grey[200],
+            border: OutlineInputBorder(
+              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(24.0),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              vertical: 15,
+              horizontal: 20,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        _buildCircularButton(
+          color: Color(0xFF51A6F5),
+          icon: Icons.print_outlined,
+          onPressed: () {
+            _showPrintDialog(context);
+          },
+        ),
+        SizedBox(width: 8),
+        _buildCircularButton(
+          color: Color(0xFF68CF29),
+          icon: Icons.arrow_circle_down_sharp,
+          onPressed: () {
+            _showDragAndDropModal(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showPrintDialog(BuildContext context) {
+    String? selectedFormat;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          title: Text(
+            'Cetak Laporan',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFEB8153),
+              fontSize: 22,
+            ),
+          ),
+          content: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pilih format laporan:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(height: 15),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 15),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          canvasColor: Colors.white,
+                        ),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            value: selectedFormat,
+                            hint: Text('Pilih format'),
+                            onChanged: (String? newValue) {
+                              setState(() {
+                                selectedFormat = newValue;
+                              });
+                            },
+                            items: <String>['PDF', 'Excel']
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(vertical: 10),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    value,
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                            dropdownColor: Colors.white,
+                            elevation: 8,
+                            style: TextStyle(color: Colors.black, fontSize: 16),
+                            icon: Icon(Icons.arrow_drop_down,
+                                color: Color(0xFFEB8153)),
+                            menuMaxHeight: 300,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          actions: [
+            ElevatedButton(
+              child: Text(
+                'Batal',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Cetak', style: TextStyle(fontSize: 16)),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFEB8153),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () async {
+                if (selectedFormat != null) {
+                  try {
+                    String filePath;
+                    if (selectedFormat == 'PDF') {
+                      filePath = await ApiService().exportPdfPengeluaran();
+                    } else if (selectedFormat == 'Excel') {
+                      filePath = await ApiService().exportExcelPengeluaran();
+                    } else {
+                      throw Exception('Format tidak valid');
+                    }
+
+                    final downloadsDir = await getExternalStorageDirectory();
+                    if (downloadsDir != null) {
+                      final fileName = filePath.split('/').last;
+                      final newPath = '${downloadsDir.path}/Download/$fileName';
+                      await File(filePath).copy(newPath);
+                      await File(filePath).delete();
+
+                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text('File berhasil diekspor ke: $newPath')),
+                      );
+                    } else {
+                      throw Exception(
+                          'Tidak dapat menemukan direktori Downloads');
+                    }
+                  } catch (e) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Gagal mengekspor file: $e')),
+                    );
+                  }
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Pilih format terlebih dahulu',
+                          style: TextStyle(fontSize: 16)),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDragAndDropModal(BuildContext context) {
+    String? selectedFilePath;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(16.0),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Import Data Pengeluaran',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: Colors.grey),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'File Excel yang diunggah',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Center(
+                    child: _buildDragAndDropZone(
+                      context,
+                      selectedFilePath,
+                      (String? filePath) {
+                        setState(() {
+                          selectedFilePath = filePath;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () async {
+                        try {
+                          String filePath =
+                              await ApiService().downloadOutcomeTemplate();
+                          Directory? downloadsDirectory =
+                              await getExternalStorageDirectory();
+                          if (downloadsDirectory != null) {
+                            String fileName = 'template_pengeluaran.xlsx';
+                            String savePath =
+                                '${downloadsDirectory.path}/Download/$fileName';
+                            await Directory(
+                                    '${downloadsDirectory.path}/Download')
+                                .create(recursive: true);
+                            await File(filePath).copy(savePath);
+                            await File(filePath).delete();
+                            if (mounted) {
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Template berhasil diunduh: $savePath')),
+                              );
+                            }
+                          } else {
+                            throw Exception(
+                                'Tidak dapat menemukan folder Download');
+                          }
+                        } catch (e) {
+                          print('Error saat mengunduh template: $e');
+                          if (mounted) {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text('Gagal mengunduh template: $e')),
+                            );
+                          }
+                        }
+                      },
+                      child: Text(
+                        'Download Template Excel',
+                        style: TextStyle(color: Color(0xFFEB8153)),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: selectedFilePath != null
+                        ? () {
+                            _importFile(context, selectedFilePath!);
+                            Navigator.of(context).pop();
+                          }
+                        : null,
+                    child: Text('Upload'),
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFFEB8153),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: MediaQuery.of(context).size.width * 0.2,
+                      ),
+                      minimumSize: Size(double.infinity, 0),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDragAndDropZone(
+    BuildContext context,
+    String? selectedFilePath,
+    Function(String?) onFileSelected,
+  ) {
+    return GestureDetector(
+      onTap: () => _pickFile(context, onFileSelected),
+      child: Container(
+        height: 175,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          border: Border.all(color: Color(0xFFEB8153)),
+          borderRadius: BorderRadius.circular(8.0),
+          color: Colors.grey[200],
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.cloud_upload_outlined,
+                  size: 40, color: Color(0xFFEB8153)),
+              SizedBox(height: 10),
+              Text(
+                selectedFilePath != null
+                    ? 'File terpilih: ${selectedFilePath.split('/').last}'
+                    : 'Tap to upload, xlsx or xls',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _pickFile(BuildContext context, Function(String?) onFileSelected) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['xlsx', 'xls'],
+    );
+
+    if (result != null) {
+      PlatformFile file = result.files.first;
+      onFileSelected(file.path);
+    }
+  }
+
+  void _importFile(BuildContext context, String filePath) async {
+    try {
+      await ApiService().importIncomeFromExcel(filePath);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Data pemasukan berhasil diimpor')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengimpor data pemasukan: $e')),
+      );
+    }
+  }
+
+  Widget _buildCircularButton({
+    required Color color,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return SizedBox(
+      width: 50,
+      height: 50,
+      child: CircleAvatar(
+        backgroundColor: color,
+        child: IconButton(
+          icon: Icon(icon),
+          color: Colors.white,
+          iconSize: 28,
+          onPressed: onPressed,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpensesList(
+      Map<int, List<Pengeluaran>> groupedFilteredExpenses) {
+    return LazyLoadScrollView(
+      onEndOfPage: () {
+        if (!isLoading && !isLoadingMore) {
+          _fetchExpenses(currentPage);
+        }
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(8),
+        itemCount: groupedFilteredExpenses.length,
+        itemBuilder: (context, groupIndex) {
+          int parentId = groupedFilteredExpenses.keys.elementAt(groupIndex);
+          List<Pengeluaran> groupItems = groupedFilteredExpenses[parentId]!;
+          double totalJumlah =
+              groupItems.fold(0, (sum, item) => sum + item.jumlah);
+
+          return _buildExpenseGroup(groupItems, totalJumlah);
+        },
+      ),
+    );
+  }
+
+  Widget _buildExpenseGroup(List<Pengeluaran> groupItems, double totalJumlah) {
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: BorderSide(color: Colors.grey[300]!, width: 1),
+      ),
+      child: InkWell(
+        onTap: () {
+          if (groupItems.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailPengeluaran(
+                  pengeluaranList: groupItems,
+                ),
+              ),
+            );
+          }
+        },
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildExpenseGroupHeader(groupItems),
+              Divider(color: Colors.grey[300], thickness: 0.5, height: 15),
+              _buildExpenseItems(groupItems),
+              Divider(color: Colors.grey[300], thickness: 0.5, height: 15),
+              _buildExpenseGroupTotal(totalJumlah),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpenseGroupHeader(List<Pengeluaran> groupItems) {
+    return Text(
+      groupItems.isNotEmpty &&
+              groupItems.first.parentPengeluaran != null &&
+              groupItems.first.tanggal != null
+          ? DateFormat('dd MMMM yyyy').format(groupItems.first.tanggal!)
+          : 'Tidak ada tanggal',
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  Widget _buildExpenseItems(List<Pengeluaran> groupItems) {
+    return Column(
+      children: groupItems
+          .map((pengeluaran) => _buildExpenseItem(pengeluaran))
+          .toList(),
+    );
+  }
+
+  Widget _buildExpenseItem(Pengeluaran pengeluaran) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Color(0xFFFFF5EE),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.description_outlined,
+                color: Color(0xFFEB8153), size: 20),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  pengeluaran.name.isNotEmpty
+                      ? pengeluaran.name
+                      : 'Tidak ada nama',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFFF5EE),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    pengeluaran.category?.name ?? 'Tidak ada kategori',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFFEB8153),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            NumberFormat.currency(
+              locale: 'id_ID',
+              symbol: 'Rp',
+              decimalDigits: 0,
+            ).format(pengeluaran.jumlah),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpenseGroupTotal(double totalJumlah) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Color(0xFFFFF5EE),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.calculate_outlined,
+                  color: Color(0xFFEB8153), size: 20),
+            ),
+            SizedBox(width: 12),
+            Text(
+              'Total: ',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        Text(
+          NumberFormat.currency(
+            locale: 'id_ID',
+            symbol: 'Rp',
+            decimalDigits: 0,
+          ).format(totalJumlah),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.red,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   void dispose() {
-    _searchController.dispose(); // Dispose of the controller
+    _searchController.dispose();
     super.dispose();
   }
 }

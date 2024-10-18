@@ -27,12 +27,17 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
   final ScrollController _scrollController = ScrollController();
   DateTime? selectedDate;
   List<Category> categories = [];
+  final TextEditingController _dateController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     if (widget.pengeluaranList.isNotEmpty) {
-      selectedDate = widget.pengeluaranList.first.tanggal;
+      selectedDate = widget.pengeluaranList.isNotEmpty
+          ? widget.pengeluaranList.first.tanggal
+          : DateTime.now();
+
+      _dateController.text = DateFormat('dd MMMM yyyy').format(selectedDate!);
     }
 
     for (var pengeluaran in widget.pengeluaranList) {
@@ -141,10 +146,9 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Data berhasil Diubah')),
       );
-      
+
       // Refresh halaman sebelumnya
       Navigator.pop(context, true);
-
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Data Gagal Diubah')),
@@ -1045,45 +1049,51 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: Colors.grey[200],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: TextField(
           enabled: false,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
           decoration: InputDecoration(
-            hintText: selectedDate == null
-                ? 'Pilih Tanggal'
-                : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
-            hintStyle: TextStyle(color: Colors.grey),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFEB8153),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4.0,
-                      spreadRadius: 1.0,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.calendar_today,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
+            hintText: 'Pilih Tanggal',
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            prefixIcon: Container(
+              margin: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFFEB8153),
               ),
+              child: Icon(
+                Icons.calendar_today,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            suffixIcon: Icon(
+              Icons.arrow_drop_down,
+              color: Color(0xFFEB8153),
+              size: 30,
             ),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
               vertical: 15,
+              horizontal: 16,
             ),
+          ),
+          controller: TextEditingController(
+            text: selectedDate == null
+                ? ''
+                : DateFormat('d MMMM yyyy', 'id_ID').format(selectedDate!),
           ),
         ),
       ),

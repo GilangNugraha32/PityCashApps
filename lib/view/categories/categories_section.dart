@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/service/share_preference.dart';
@@ -135,11 +139,23 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                 width: double.infinity,
                 padding: EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
                 decoration: BoxDecoration(
-                  color: Color(0xFFEB8153),
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(16.0),
-                    bottomLeft: Radius.circular(16.0),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
                   ),
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 7,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +214,6 @@ class _CategoriesSectionState extends State<CategoriesSection> {
               // Categories List
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius:
@@ -215,87 +230,111 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                   child: Column(
                     children: [
                       // Buttons in the upper right corner
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: CircleAvatar(
-                              backgroundColor: Color(0xFF51A6F5),
-                              child: IconButton(
-                                icon: Icon(Icons.print_outlined),
-                                color: Colors.white,
-                                iconSize: 28,
-                                onPressed: () {
-                                  // Add your print action here
-                                },
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16.0, top: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: CircleAvatar(
+                                backgroundColor: Color(0xFF51A6F5),
+                                child: IconButton(
+                                  icon: Icon(Icons.print_outlined),
+                                  color: Colors.white,
+                                  iconSize: 28,
+                                  onPressed: () {
+                                    _showExportPDFDialog(context);
+                                  },
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(width: 8),
-                          SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: CircleAvatar(
-                              backgroundColor: Color(0xFF68CF29),
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_circle_down_sharp),
-                                color: Colors.white,
-                                iconSize: 28,
-                                onPressed: () {
-                                  _showDragAndDropModal(context);
-                                  // Add your download action here
-                                },
+                            SizedBox(width: 8),
+                            SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: CircleAvatar(
+                                backgroundColor: Color(0xFF68CF29),
+                                child: IconButton(
+                                  icon: Icon(Icons.arrow_circle_down_sharp),
+                                  color: Colors.white,
+                                  iconSize: 28,
+                                  onPressed: () {
+                                    _showDragAndDropModal(context);
+                                  },
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      SizedBox(height: 10), // Spacing between buttons and list
                       Expanded(
                         child: LazyLoadScrollView(
                           onEndOfPage: () {
-                            _fetchCategories(
-                                currentPage); // Load more categories when reaching the end
+                            _fetchCategories(currentPage);
                           },
                           child: RefreshIndicator(
-                            onRefresh:
-                                _refreshCategoryList, // Pull down to refresh the list
+                            onRefresh: _refreshCategoryList,
                             child: ListView.separated(
-                              padding: const EdgeInsets.all(0),
+                              padding: EdgeInsets.zero,
                               itemCount: filteredCategories.length +
-                                  (isLoadingMore
-                                      ? 1
-                                      : 0), // Show loading indicator if loading more
-                              separatorBuilder: (context, index) => Divider(),
+                                  (isLoadingMore ? 1 : 0),
+                              separatorBuilder: (context, index) => Divider(
+                                color: Colors.grey[300],
+                                height: 1,
+                              ),
                               itemBuilder: (context, index) {
                                 if (index == filteredCategories.length) {
                                   return Center(
-                                    child: CircularProgressIndicator(),
-                                  ); // Show a loading indicator when loading more categories
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Color(0xFFEB8153)),
+                                    ),
+                                  );
                                 }
-                                final category = filteredCategories[
-                                    index]; // Use filtered categories
+                                final category = filteredCategories[index];
                                 return ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: Color(0xFFEB8153),
-                                    child: Icon(Icons.monetization_on_outlined,
-                                        color: Colors.white),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                  leading: Container(
+                                    padding: EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: category.jenisKategori == 1
+                                          ? Color(0xFFE6F7FF)
+                                          : Color(0xFFFFE6E6),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      category.jenisKategori == 1
+                                          ? Icons.trending_up
+                                          : Icons.trending_down,
+                                      color: category.jenisKategori == 1
+                                          ? Colors.blue
+                                          : Colors.red,
+                                      size: 24,
+                                    ),
                                   ),
                                   title: Text(
                                     category.name,
                                     style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   subtitle: Text(
                                     category.jenisKategori == 1
                                         ? 'Pemasukan'
                                         : 'Pengeluaran',
                                     style: TextStyle(
-                                        fontSize: 14, color: Colors.grey[600]),
+                                      fontSize: 14,
+                                      color: category.jenisKategori == 1
+                                          ? Colors.green
+                                          : Colors.red,
+                                    ),
                                   ),
+                                  trailing: Icon(Icons.chevron_right,
+                                      color: Color(0xFFEB8153)),
                                   onTap: () {
                                     _showDetailsModal(context, category.id);
                                   },
@@ -322,7 +361,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
             ),
           );
           if (result == 'success') {
-            _refreshCategoryList(); // Refresh the list if a category was successfully added
+            _refreshCategoryList();
           }
         },
         backgroundColor: Colors.orange,
@@ -335,105 +374,315 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     );
   }
 
-  void _showDragAndDropModal(BuildContext context) {
-    showModalBottomSheet(
+  void _showExportPDFDialog(BuildContext context) {
+    showDialog(
       context: context,
-      isScrollControlled: true, // Modal appears from top
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(16.0),
-        ),
-      ),
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Import Data Kategori',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: const Offset(0.0, 10.0),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  'Cetak Kategori',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  'Apakah Anda yakin ingin mengekspor daftar kategori ke PDF?',
+                  style: TextStyle(fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Container(
+                      width: 120,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 3,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextButton(
+                        child: Text(
+                          'Batal',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: Colors.grey),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'File Excel yang diunggah',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                    Container(
+                      width: 120,
+                      height: 40,
+                      child: ElevatedButton(
+                        child: Text('Cetak'),
+                        style: ElevatedButton.styleFrom(
+                          primary: Color(0xFFEB8153),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: () async {
+                          try {
+                            final pdfPath =
+                                await ApiService().exportCategoryPDF();
+                            final downloadsDir =
+                                await getExternalStorageDirectory();
+                            if (downloadsDir != null) {
+                              final fileName = pdfPath.split('/').last;
+                              final newPath =
+                                  '${downloadsDir.path}/Download/$fileName';
+                              await File(pdfPath).copy(newPath);
+                              await File(pdfPath).delete();
+                              Navigator.of(context)
+                                  .pop(); // Menutup dialog setelah berhasil
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'PDF berhasil diekspor ke: $newPath')),
+                              );
+                            } else {
+                              throw Exception(
+                                  'Tidak dapat menemukan direktori Downloads');
+                            }
+                          } catch (e) {
+                            Navigator.of(context)
+                                .pop(); // Menutup dialog jika terjadi kesalahan
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('Gagal mengekspor PDF: $e')),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              SizedBox(height: 10), // Space between the gray text and the zone
-              Center(
-                child: _buildDragAndDropZone(), // Custom drag-and-drop zone
-              ),
-              SizedBox(height: 20), // Space between zone and template text
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton(
-                  onPressed: () {
-                    // Function to download the template Excel can be added here later
-                  },
-                  child: Text(
-                    'Download Template Excel',
-                    style: TextStyle(
-                        color:
-                            Color(0xFFEB8153)), // Changed color for visibility
-                  ),
-                ),
-              ),
-              SizedBox(height: 10), // Space between template text and button
-              ElevatedButton(
-                onPressed: () {
-                  _pickFile(); // Call the function to pick a file
-                },
-                child: Text('Upload'),
-                style: ElevatedButton.styleFrom(
-                  primary: Color(0xFFEB8153), // Background color
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8), // Rounded corners
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    vertical: 15,
-                    horizontal: MediaQuery.of(context).size.width *
-                        0.2, // Adjust padding for the button
-                  ),
-                  minimumSize: Size(double.infinity, 0), // Full width button
-                ),
-              ),
-              SizedBox(height: 10), // Space at the bottom of the modal
-            ],
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-// Widget for the drag and drop zone
-  Widget _buildDragAndDropZone() {
+  void _showDragAndDropModal(BuildContext context) {
+    String? selectedFilePath;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(16.0),
+        ),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Import Data Kategori',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close, color: Colors.grey),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'File Excel yang diunggah',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Center(
+                    child: _buildDragAndDropZone(
+                      context,
+                      selectedFilePath,
+                      (String? filePath) {
+                        setState(() {
+                          selectedFilePath = filePath;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () async {
+                        try {
+                          String filePath =
+                              await apiService.downloadCategoryTemplate();
+                          Directory? downloadsDirectory =
+                              await getExternalStorageDirectory();
+                          if (downloadsDirectory != null) {
+                            String fileName = 'template_kategori.xlsx';
+                            String savePath =
+                                '${downloadsDirectory.path}/Download/$fileName';
+                            await Directory(
+                                    '${downloadsDirectory.path}/Download')
+                                .create(recursive: true);
+                            await File(filePath).copy(savePath);
+                            await File(filePath).delete();
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                      'Template berhasil diunduh: $savePath')),
+                            );
+                          } else {
+                            throw Exception(
+                                'Tidak dapat menemukan folder Download');
+                          }
+                        } catch (e) {
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Gagal mengunduh template: $e')),
+                          );
+                        }
+                      },
+                      child: Text(
+                        'Download Template Excel',
+                        style: TextStyle(color: Color(0xFFEB8153)),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: selectedFilePath != null
+                        ? () async {
+                            try {
+                              final response = await ApiService()
+                                  .importCategoryFromExcel(selectedFilePath!);
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Gagal mengimpor kategori: $e')),
+                              );
+                            }
+                          }
+                        : null,
+                    child: Text('Upload'),
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFFEB8153),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 15,
+                        horizontal: MediaQuery.of(context).size.width * 0.2,
+                      ),
+                      minimumSize: Size(double.infinity, 0),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showImportedDataDialog(
+      BuildContext context, List<dynamic> importedData) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Data Berhasil Diimpor'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: importedData
+                  .map((data) => ListTile(
+                        title: Text(data['Nama'] as String),
+                        subtitle: Text(
+                            'Jenis Kategori: ${data['Jenis Kategori']}\nDeskripsi: ${data['Deskripsi'] as String}'),
+                      ))
+                  .toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Tutup'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildDragAndDropZone(
+    BuildContext context,
+    String? selectedFilePath,
+    Function(String?) onFileSelected,
+  ) {
     return InkWell(
-      onTap: _pickFile, // Action to pick a file when tapped
+      onTap: () => _pickFile(context, onFileSelected),
       child: Container(
-        height: 175, // Height of the drop zone
+        height: 175,
         width: double.infinity,
         decoration: BoxDecoration(
           border: Border.all(color: Color(0xFFEB8153)),
           borderRadius: BorderRadius.circular(8.0),
-          color: Colors.grey[200], // Background color for the drop zone
+          color: Colors.grey[200],
         ),
         child: Center(
           child: Column(
@@ -443,7 +692,9 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                   size: 40, color: Color(0xFFEB8153)),
               SizedBox(height: 10),
               Text(
-                'Drag and drop your files here\nor click to upload, xlsx or xls',
+                selectedFilePath != null
+                    ? 'File terpilih: ${selectedFilePath.split('/').last}'
+                    : 'Drag and drop your files here\nor click to upload, xlsx or xls',
                 style: TextStyle(fontSize: 16, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
@@ -454,46 +705,55 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     );
   }
 
-// Function to pick files
-  void _pickFile() async {
+  void _pickFile(BuildContext context, Function(String?) onFileSelected) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['xlsx', 'xls'], // Allow only Excel files
+      allowedExtensions: ['xlsx', 'xls'],
     );
 
     if (result != null) {
       PlatformFile file = result.files.first;
+      onFileSelected(file.path);
+    }
+  }
 
-      print('File picked: ${file.name}'); // Display picked file name
-      // You can now upload the file to the server or do other actions.
-    } else {
-      // User canceled the picker
+  void _importFile(BuildContext context, String filePath) async {
+    try {
+      final response = await apiService.importCategoryFromExcel(filePath);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengimpor kategori: $e')),
+      );
     }
   }
 
   void _showDetailsModal(BuildContext context, int categoryId) async {
-    // Ambil detail kategori menggunakan fetchCategoryDetail
     Category category;
     try {
       category = await ApiService().fetchCategoryDetail(categoryId);
     } catch (e) {
-      // Tampilkan pesan kesalahan jika gagal mengambil detail
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal memuat detail kategori: $e')),
       );
-      return; // Keluarkan dari fungsi jika terjadi kesalahan
+      return;
     }
 
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(16.0),
+          top: Radius.circular(20.0),
         ),
       ),
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
+        return Container(
+          padding: const EdgeInsets.all(24.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(20.0),
+            ),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -504,7 +764,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                   Text(
                     'Detail Kategori',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -526,15 +786,26 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                         Expanded(
                           child: Container(
                             margin: EdgeInsets.only(bottom: 4, right: 4),
-                            padding: EdgeInsets.all(8.0),
+                            padding: EdgeInsets.all(12.0),
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(color: Colors.grey[300]!),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.category, color: Colors.grey),
-                                SizedBox(width: 14),
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFFFFF5EE),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.category_outlined,
+                                    color: Color(0xFFEB8153),
+                                  ),
+                                ),
+                                SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -544,15 +815,13 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                         'Nama Kategori',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
+                                          fontSize: 16,
                                         ),
                                       ),
-                                      SizedBox(height: 6),
-                                      TextFormField(
-                                        initialValue: category.name,
-                                        decoration: InputDecoration(
-                                          border: InputBorder.none,
-                                        ),
-                                        enabled: false,
+                                      SizedBox(height: 8),
+                                      Text(
+                                        category.name,
+                                        style: TextStyle(fontSize: 14),
                                       ),
                                     ],
                                   ),
@@ -564,15 +833,26 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                         Expanded(
                           child: Container(
                             margin: EdgeInsets.only(bottom: 4, left: 8),
-                            padding: EdgeInsets.all(8.0),
+                            padding: EdgeInsets.all(12.0),
                             decoration: BoxDecoration(
-                              color: Colors.grey[200],
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(color: Colors.grey[300]!),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.type_specimen, color: Colors.grey),
-                                SizedBox(width: 2),
+                                Container(
+                                  padding: EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Color(0xFFFFF5EE),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.type_specimen_outlined,
+                                    color: Color(0xFFEB8153),
+                                  ),
+                                ),
+                                SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -582,18 +862,15 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                         'Jenis Kategori',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
+                                          fontSize: 16,
                                         ),
                                       ),
-                                      SizedBox(height: 6),
-                                      TextFormField(
-                                        initialValue:
-                                            category.jenisKategori == 1
-                                                ? 'Pemasukan'
-                                                : 'Pengeluaran',
-                                        decoration: InputDecoration(
-                                          border: InputBorder.none,
-                                        ),
-                                        enabled: false,
+                                      SizedBox(height: 8),
+                                      Text(
+                                        category.jenisKategori == 1
+                                            ? 'Pemasukan'
+                                            : 'Pengeluaran',
+                                        style: TextStyle(fontSize: 14),
                                       ),
                                     ],
                                   ),
@@ -605,15 +882,27 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                       ],
                     ),
                     Container(
-                      padding: EdgeInsets.all(8.0),
+                      margin: EdgeInsets.only(top: 12),
+                      padding: EdgeInsets.all(12.0),
                       decoration: BoxDecoration(
-                        color: Colors.grey[200],
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(8.0),
+                        border: Border.all(color: Colors.grey[300]!),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.description, color: Colors.grey),
-                          SizedBox(width: 14),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFFFF5EE),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.description_outlined,
+                              color: Color(0xFFEB8153),
+                            ),
+                          ),
+                          SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,15 +911,13 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                   'Deskripsi',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
                                 ),
-                                SizedBox(height: 6),
-                                TextFormField(
-                                  initialValue: category.description,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                  ),
-                                  enabled: false,
+                                SizedBox(height: 8),
+                                Text(
+                                  category.description,
+                                  style: TextStyle(fontSize: 14),
                                 ),
                               ],
                             ),
@@ -647,8 +934,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      _confirmDelete(context,
-                          category.id); // Panggil fungsi konfirmasi hapus
+                      _confirmDelete(context, category.id);
                     },
                     child: Text(
                       'Hapus',
@@ -662,6 +948,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
+                      minimumSize: Size(100, 40), // Ukuran minimum yang sama
                       padding:
                           EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                     ),
@@ -669,15 +956,14 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                   SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context); // Close the modal first
+                      Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => EditCategories(
                                   category: category,
                                   onUpdate: _refreshCategoryList,
-                                ) // Pass the refresh function
-                            ),
+                                )),
                       );
                     },
                     child: Text(
@@ -692,6 +978,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
+                      minimumSize: Size(100, 40), // Ukuran minimum yang sama
                       padding:
                           EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                     ),
@@ -711,38 +998,66 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Konfirmasi Hapus'),
-          content: Text('Apakah Anda yakin ingin menghapus kategori ini?'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          title: Text(
+            'Konfirmasi Hapus',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFE85C0D),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 16),
+              Text(
+                'Apakah Anda yakin ingin menghapus kategori ini?',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Tutup dialog
               },
-              child: Text('Batal'),
+              child: Text(
+                'Batal',
+                style: TextStyle(color: Colors.grey),
+              ),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () async {
                 try {
-                  await apiService
-                      .deleteCategory(categoryId); // Call delete function
-                  Navigator.of(context).pop(); // Close the confirmation dialog
-                  Navigator.of(context).pop(); // Close the modal sheet
-
-                  // Call refresh function to reload the updated category list
+                  await apiService.deleteCategory(categoryId);
+                  Navigator.of(context).pop(); // Tutup dialog konfirmasi
+                  Navigator.of(context).pop(); // Tutup modal sheet
                   _refreshCategoryList();
-
-                  // Optionally, you can also show a success message
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Kategori berhasil dihapus')),
+                    SnackBar(
+                      content: Text('Kategori berhasil dihapus'),
+                      backgroundColor: Colors.green,
+                    ),
                   );
                 } catch (e) {
-                  // Show error message if deletion fails
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Gagal menghapus kategori: $e')),
+                    SnackBar(
+                      content: Text('Gagal menghapus kategori: $e'),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               },
               child: Text('Hapus'),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFDA0000),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
             ),
           ],
         );

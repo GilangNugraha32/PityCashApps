@@ -22,13 +22,10 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
   bool _isNewPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  String? _selectedGender;
-
   @override
   void initState() {
     super.initState();
     _loadProfileData();
-    _prefsService.printUserData();
   }
 
   Future<void> _loadProfileData() async {
@@ -48,17 +45,12 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
     if (currentPassword.isEmpty ||
         newPassword.isEmpty ||
         confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mohon isi semua kolom')),
-      );
+      _showSnackBar('Mohon isi semua kolom');
       return;
     }
 
     if (newPassword != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Password baru dan konfirmasi password tidak cocok')),
-      );
+      _showSnackBar('Password baru dan konfirmasi password tidak cocok');
       return;
     }
 
@@ -69,22 +61,26 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
         newPasswordConfirmation: confirmPassword,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Password berhasil diperbarui')),
-      );
-
-      _currentPasswordController.clear();
-      _newPasswordController.clear();
-      _confirmPasswordController.clear();
+      _showSnackBar('Password berhasil diperbarui');
+      _clearFields();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memperbarui password: ${e.toString()}')),
-      );
+      _showSnackBar('Gagal memperbarui password: ${e.toString()}');
     }
   }
 
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _clearFields() {
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
+  }
+
   Widget _buildPasswordField(String label, TextEditingController controller,
-      bool isVisible, Function() toggleVisibility) {
+      bool isVisible, VoidCallback toggleVisibility) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -96,29 +92,23 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
           obscureText: !isVisible,
           decoration: InputDecoration(
             suffixIcon: IconButton(
-              icon: Icon(
-                  isVisible
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: Colors.black),
+              icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Color(0xFFEB8153)),
               onPressed: toggleVisibility,
             ),
-            hintText: 'Enter your $label',
+            hintText: 'Masukkan $label',
             fillColor: Colors.grey[200],
             filled: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide(color: Color(0xFFEB8153)),
+              borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide(color: Color(0xFFEB8153)),
+              borderSide: BorderSide(color: Color(0xFFEB8153), width: 2.0),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide(color: Color(0xFFEB8153)),
-            ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
           ),
         ),
         SizedBox(height: 16),
@@ -129,20 +119,22 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Color(0xFFEB8153),
-              borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(20.0),
-                bottomLeft: Radius.circular(20.0),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
               child: Column(
                 children: [
                   Row(
@@ -153,110 +145,79 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
                         onPressed: () => Navigator.pop(context),
                       ),
                       Text(
-                        'Change Password',
+                        'Ubah Password',
                         style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
-                      Icon(
-                        Icons.notifications,
-                        color: Colors.white,
-                        size: 24,
-                      ),
+                      SizedBox(width: 40),
                     ],
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 20),
                   CircleAvatar(
                     radius: 50,
                     backgroundImage: AssetImage('assets/piticash_log.png'),
-                    backgroundColor: Colors.transparent,
+                    backgroundColor: Colors.white,
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 10),
                   Text(
                     _usernameController.text,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
-                  SizedBox(height: 2),
                   Text(
                     _emailController.text,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w300,
-                      color: Colors.white,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                 ],
               ),
             ),
-          ),
-          SizedBox(height: 8),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20.0),
-                  topRight: Radius.circular(20.0),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(height: 16),
-                      _buildPasswordField(
-                          'Current Password',
-                          _currentPasswordController,
-                          _isCurrentPasswordVisible, () {
-                        setState(() {
-                          _isCurrentPasswordVisible =
-                              !_isCurrentPasswordVisible;
-                        });
-                      }),
-                      _buildPasswordField('New Password',
-                          _newPasswordController, _isNewPasswordVisible, () {
-                        setState(() {
-                          _isNewPasswordVisible = !_isNewPasswordVisible;
-                        });
-                      }),
-                      _buildPasswordField(
-                          'Confirm Password',
-                          _confirmPasswordController,
-                          _isConfirmPasswordVisible, () {
-                        setState(() {
-                          _isConfirmPasswordVisible =
-                              !_isConfirmPasswordVisible;
-                        });
-                      }),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: _updatePassword,
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16.0),
-                          backgroundColor: Color(0xFFEB8153),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                        ),
-                        child: Text('Update Password',
-                            style: TextStyle(fontSize: 16)),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildPasswordField(
+                        'Password Saat Ini',
+                        _currentPasswordController,
+                        _isCurrentPasswordVisible, () {
+                      setState(() => _isCurrentPasswordVisible =
+                          !_isCurrentPasswordVisible);
+                    }),
+                    _buildPasswordField('Password Baru', _newPasswordController,
+                        _isNewPasswordVisible, () {
+                      setState(
+                          () => _isNewPasswordVisible = !_isNewPasswordVisible);
+                    }),
+                    _buildPasswordField(
+                        'Konfirmasi Password',
+                        _confirmPasswordController,
+                        _isConfirmPasswordVisible, () {
+                      setState(() => _isConfirmPasswordVisible =
+                          !_isConfirmPasswordVisible);
+                    }),
+                    SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: _updatePassword,
+                      style: ElevatedButton.styleFrom(
+                        primary: Color(0xFFEB8153),
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
-                    ],
-                  ),
+                      child: Text('Perbarui Password',
+                          style: TextStyle(fontSize: 16)),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

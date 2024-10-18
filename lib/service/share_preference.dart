@@ -58,6 +58,16 @@ class SharedPreferencesService {
     return user?['alamat']; // Get user's address
   }
 
+  Future<String?> getUserPhotoUrl() async {
+    final user = await getUser();
+    if (user != null && user['profile_picture'] != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userPhotoUrl', user['profile_picture']);
+      return user['profile_picture'];
+    }
+    return null;
+  }
+
   Future<void> removeUser() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userKey);

@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:dio/dio.dart';
 import 'package:pity_cash/models/incomes_model.dart';
@@ -141,6 +144,35 @@ class ApiService {
     }
   }
 
+  // Menampilkan foto profil pengguna
+  Future<String> showProfilePicture() async {
+    print('Menampilkan foto profil');
+    try {
+      await _setAuthToken();
+
+      final response = await _dio.get(
+        '$baseUrl/user/profile-picture',
+      );
+
+      if (response.statusCode == 200) {
+        print('Foto profil berhasil ditampilkan');
+        // Mengakses data sesuai struktur respons API
+        final data = response.data['data'];
+        final profilePictureUrl = data['profile_picture_url'];
+        return profilePictureUrl;
+      } else {
+        throw Exception('Gagal menampilkan foto profil');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat menampilkan foto profil: ${e.response?.data}');
+      } else {
+        print('Error saat menampilkan foto profil: $e');
+      }
+      throw Exception('Gagal menampilkan foto profil');
+    }
+  }
+
   // Create category
   Future<void> createCategory(
       String name, int jenisKategori, String description) async {
@@ -193,6 +225,181 @@ class ApiService {
       } else {
         print('Error deleting category: $e');
         throw Exception('Failed to delete category');
+      }
+    }
+  }
+
+  // Unduh template Excel kategori
+  Future<String> downloadCategoryTemplate() async {
+    print('Mengunduh template Excel kategori');
+    try {
+      await _setAuthToken(); // Set auth token if necessary
+
+      // Request permission to write to external storage
+      var status = await Permission.storage.request();
+      if (!status.isGranted) {
+        throw Exception('Izin penyimpanan tidak diberikan');
+      }
+
+      final response = await _dio.get(
+        '$baseUrl/category/template',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        final bytes = response.data;
+
+        // Gunakan direktori Download untuk penyimpanan internal
+        Directory? downloadsDir = await getApplicationDocumentsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Tidak dapat menemukan direktori Download');
+        }
+
+        String downloadsPath = '${downloadsDir.path}/Download';
+        // Pastikan direktori Download ada
+        await Directory(downloadsPath).create(recursive: true);
+
+        final file = File('$downloadsPath/template_kategori.xlsx');
+
+        await file.writeAsBytes(bytes);
+        print('Template kategori berhasil diunduh: ${file.path}');
+        return file.path;
+      } else {
+        throw Exception('Gagal mengunduh template kategori');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengunduh template: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengunduh template: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengunduh template: $e');
+        throw Exception('Gagal mengunduh template kategori');
+      }
+    }
+  }
+
+  // Import kategori menggunakan Excel
+  Future<List<Map<String, dynamic>>> importCategoryFromExcel(
+      String filePath) async {
+    print('Mengimpor kategori dari Excel: $filePath');
+    try {
+      await _setAuthToken(); // Pastikan token otorisasi diset sebelum request
+
+      // Buat FormData untuk mengirim file
+      var formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath,
+            filename: 'template_kategori.xlsx'),
+      });
+
+      final response = await _dio.post(
+        '$baseUrl/category/import',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      print('Respons server: ${response.data}');
+
+      if (response.statusCode == 200) {
+        print('Kategori berhasil diimpor');
+
+        if (response.data is Map<String, dynamic>) {
+          final status = response.data['status'];
+          final message = response.data['message'];
+          final importedData = response.data['data'];
+
+          if (status == 200 &&
+              message == "Data berhasil diimpor" &&
+              importedData != null &&
+              importedData is List) {
+            print('Data yang diimpor:');
+            List<Map<String, dynamic>> importedCategories = [];
+            for (var item in importedData) {
+              print(
+                  '- Nama: ${item['Nama']}, Jenis Kategori: ${item['Jenis Kategori']}, Deskripsi: ${item['Deskripsi']}');
+              importedCategories.add({
+                'Nama': item['Nama'],
+                'Jenis Kategori': item['Jenis Kategori'],
+                'Deskripsi': item['Deskripsi'],
+              });
+            }
+            return importedCategories;
+          } else {
+            print(
+                'Tidak ada data kategori yang diimpor atau format data tidak sesuai.');
+            return [];
+          }
+        } else {
+          throw Exception('Format respons tidak sesuai');
+        }
+      } else {
+        throw Exception('Gagal mengimpor kategori: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        // Tangani kesalahan dari Dio (request ke server)
+        final responseData = e.response?.data;
+        final errorMessage =
+            responseData != null && responseData is Map<String, dynamic>
+                ? responseData['message'] ?? 'Error tidak diketahui'
+                : 'Error tidak diketahui';
+
+        print('DioError saat mengimpor kategori: $responseData');
+        throw Exception('Gagal mengimpor kategori: $errorMessage');
+      } else {
+        // Tangani kesalahan lainnya
+        print('Error saat mengimpor kategori: $e');
+        throw Exception('Gagal mengimpor kategori: $e');
+      }
+    }
+  }
+
+  Future<String> exportCategoryPDF() async {
+    print('Mengekspor kategori ke PDF');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      final response = await _dio.get(
+        '$baseUrl/category/export',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        // Mendapatkan direktori dokumen
+        Directory? downloadsDir = await getApplicationDocumentsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Tidak dapat menemukan direktori Download');
+        }
+
+        String downloadsPath = '${downloadsDir.path}/Download';
+        // Pastikan direktori Download ada
+        await Directory(downloadsPath).create(recursive: true);
+
+        final fileName =
+            'kategori_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final filePath = '$downloadsPath/$fileName';
+
+        // Menyimpan file PDF
+        File(filePath).writeAsBytesSync(response.data);
+
+        print('PDF kategori berhasil diekspor ke: $filePath');
+        return filePath;
+      } else {
+        throw Exception(
+            'Gagal mengekspor kategori ke PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengekspor kategori: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengekspor kategori: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengekspor kategori: $e');
+        throw Exception('Gagal mengekspor kategori ke PDF');
       }
     }
   }
@@ -378,15 +585,185 @@ class ApiService {
     }
   }
 
+  Future<String> downloadIncomeTemplate() async {
+    try {
+      await _setAuthToken(); // Pastikan token auth telah diatur
+
+      final response = await _dio.get(
+        '$baseUrl/income/template',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        // Mendapatkan direktori temporary untuk menyimpan file
+        final tempDir = await getTemporaryDirectory();
+        final tempPath = tempDir.path;
+        final fileName = 'template_pemasukan.xlsx';
+        final filePath = '$tempPath/$fileName';
+
+        // Menulis data response ke file
+        File file = File(filePath);
+        await file.writeAsBytes(response.data);
+
+        print('Template pemasukan berhasil diunduh: $filePath');
+        return filePath;
+      } else {
+        throw Exception(
+            'Gagal mengunduh template pemasukan: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print(
+            'DioError saat mengunduh template pemasukan: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengunduh template pemasukan: ${e.response?.data['message'] ?? 'Kesalahan tidak diketahui'}');
+      } else {
+        print('Error saat mengunduh template pemasukan: $e');
+        throw Exception('Gagal mengunduh template pemasukan');
+      }
+    }
+  }
+
+  Future<void> importIncomeFromExcel(String filePath) async {
+    print('Mengimpor data pemasukan dari Excel: $filePath');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      // Buat FormData untuk mengirim file
+      var formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath,
+            filename: 'income_import.xlsx'),
+      });
+
+      final response = await _dio.post(
+        '$baseUrl/income/import',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print('Data pemasukan berhasil diimpor');
+      } else {
+        throw Exception(
+            'Gagal mengimpor data pemasukan: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengimpor data pemasukan: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengimpor data pemasukan: ${e.response?.data['message'] ?? 'Kesalahan tidak diketahui'}');
+      } else {
+        print('Error saat mengimpor data pemasukan: $e');
+        throw Exception('Gagal mengimpor data pemasukan');
+      }
+    }
+  }
+
+  Future<String> exportIncomePDF() async {
+    print('Mengekspor pemasukan ke PDF');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      final response = await _dio.get(
+        '$baseUrl/income/export/pdf',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        // Mendapatkan direktori dokumen
+        Directory? downloadsDir = await getApplicationDocumentsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Tidak dapat menemukan direktori Download');
+        }
+
+        String downloadsPath = '${downloadsDir.path}/Download';
+        // Pastikan direktori Download ada
+        await Directory(downloadsPath).create(recursive: true);
+
+        final fileName =
+            'pemasukan_${DateTime.now().millisecondsSinceEpoch}.pdf';
+        final filePath = '$downloadsPath/$fileName';
+
+        // Menyimpan file PDF
+        File(filePath).writeAsBytesSync(response.data);
+
+        print('PDF pemasukan berhasil diekspor ke: $filePath');
+        return filePath;
+      } else {
+        throw Exception(
+            'Gagal mengekspor pemasukan ke PDF: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengekspor pemasukan: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengekspor pemasukan: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengekspor pemasukan: $e');
+        throw Exception('Gagal mengekspor pemasukan ke PDF: $e');
+      }
+    }
+  }
+  // End of Selection
+
+  Future<String> exportIncomeExcel() async {
+    print('Mengekspor pemasukan ke Excel');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      final response = await _dio.post(
+        '$baseUrl/income/export/excel',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        // Mendapatkan direktori dokumen
+        Directory? downloadsDir = await getApplicationDocumentsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Tidak dapat menemukan direktori Download');
+        }
+
+        String downloadsPath = '${downloadsDir.path}/Download';
+        // Pastikan direktori Download ada
+        await Directory(downloadsPath).create(recursive: true);
+
+        final fileName =
+            'pemasukan_${DateTime.now().millisecondsSinceEpoch}.xlsx';
+        final filePath = '$downloadsPath/$fileName';
+
+        // Menyimpan file Excel
+        File(filePath).writeAsBytesSync(response.data);
+
+        print('Excel pemasukan berhasil diekspor ke: $filePath');
+        return filePath;
+      } else {
+        throw Exception(
+            'Gagal mengekspor pemasukan ke Excel: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengekspor pemasukan: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengekspor pemasukan: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengekspor pemasukan: $e');
+        throw Exception('Gagal mengekspor pemasukan ke Excel');
+      }
+    }
+  }
+
   Future<List<Pengeluaran>> fetchExpenses({
     int page = 1,
-    DateTimeRange? dateRange, // Menambahkan parameter date range
+    DateTimeRange? dateRange,
   }) async {
-    print('Fetching expenses from page: $page');
+    print('Mengambil data pengeluaran dari halaman: $page');
     try {
-      await _setAuthToken(); // Ensure the auth token is set
+      await _setAuthToken();
 
-      // Menambahkan query parameter untuk date range jika ada
       final Map<String, dynamic> queryParams = {'page': page};
 
       if (dateRange != null) {
@@ -398,28 +775,27 @@ class ApiService {
 
       final response = await _dio.get(
         '$baseUrl/outcome/all',
-        queryParameters: queryParams, // Menambahkan queryParams
+        queryParameters: queryParams,
       );
 
-      print('Status code: ${response.statusCode}');
       if (response.statusCode == 200) {
-        final expenseData = response.data['data']['data'] as List;
-        print('Expenses fetched: $expenseData');
+        final List<dynamic> expenseData = response.data['data']['data'];
+        print('Data pengeluaran berhasil diambil: ${expenseData.length} item');
 
-        // Create a list of Pengeluaran from the fetched expense data
-        return expenseData.map((expenseJson) {
-          return Pengeluaran.fromJson(expenseJson); // Call with single argument
-        }).toList();
+        return expenseData.map((json) => Pengeluaran.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load expenses: ${response.statusCode}');
+        throw Exception(
+            'Gagal mengambil data pengeluaran: ${response.statusCode}');
       }
     } catch (e) {
       if (e is DioError) {
-        print('DioError fetching expenses: ${e.response?.data}');
+        print('DioError saat mengambil data pengeluaran: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengambil data pengeluaran: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
       } else {
-        print('Error fetching expenses: $e');
+        print('Error saat mengambil data pengeluaran: $e');
+        throw Exception('Gagal mengambil data pengeluaran');
       }
-      throw Exception('Failed to load expenses');
     }
   }
 
@@ -432,6 +808,29 @@ class ApiService {
       2: DateTime.parse('2024-01-02'),
       // Tambahkan sesuai kebutuhan
     };
+  }
+
+  Future<Pengeluaran> fetchPengeluaranDetail(int id) async {
+    print('Mengambil detail pengeluaran untuk ID: $id');
+    try {
+      await _setAuthToken();
+      final response = await _dio.get('$baseUrl/outcome/detail/$id');
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        return Pengeluaran.fromJson(data);
+      } else {
+        throw Exception('Gagal memuat detail pengeluaran');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print(
+            'DioError saat mengambil detail pengeluaran: ${e.response?.data}');
+      } else {
+        print('Error saat mengambil detail pengeluaran: $e');
+      }
+      throw Exception('Gagal memuat detail pengeluaran');
+    }
   }
 
   Future<void> createPengeluaran(
@@ -752,6 +1151,153 @@ class ApiService {
       } else {
         print('Error saat memperbarui kata sandi: $e');
         throw Exception('Gagal memperbarui kata sandi pengguna');
+      }
+    }
+  }
+
+  Future<String> exportPdfPengeluaran() async {
+    print('Mengekspor PDF pengeluaran');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      final response = await _dio.get(
+        '$baseUrl/outcome/export/pdf',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        // Simpan file PDF ke penyimpanan lokal
+        final bytes = response.data;
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/pengeluaran_export.pdf');
+        await file.writeAsBytes(bytes);
+
+        print('PDF pengeluaran berhasil diekspor: ${file.path}');
+        return file.path;
+      } else {
+        String pesanError =
+            response.data['message'] ?? 'Gagal mengekspor PDF pengeluaran';
+        throw Exception(pesanError);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengekspor PDF: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengekspor PDF: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengekspor PDF: $e');
+        throw Exception('Gagal mengekspor PDF pengeluaran');
+      }
+    }
+  }
+
+  Future<String> exportExcelPengeluaran() async {
+    print('Mengekspor Excel pengeluaran');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      final response = await _dio.post(
+        '$baseUrl/outcome/export/excel',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        // Simpan file Excel ke penyimpanan lokal
+        final bytes = response.data;
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/pengeluaran_export.xlsx');
+        await file.writeAsBytes(bytes);
+
+        print('Excel pengeluaran berhasil diekspor: ${file.path}');
+        return file.path;
+      } else {
+        String pesanError =
+            response.data['message'] ?? 'Gagal mengekspor Excel pengeluaran';
+        throw Exception(pesanError);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengekspor Excel: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengekspor Excel: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengekspor Excel: $e');
+        throw Exception('Gagal mengekspor Excel pengeluaran');
+      }
+    }
+  }
+
+  Future<String> downloadOutcomeTemplate() async {
+    print('Mengunduh template pengeluaran');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      final response = await _dio.get(
+        '$baseUrl/outcome/template',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        // Simpan file template ke penyimpanan lokal
+        final bytes = response.data;
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/template_pengeluaran.xlsx');
+        await file.writeAsBytes(bytes);
+
+        print('Template pengeluaran berhasil diunduh: ${file.path}');
+        return file.path;
+      } else {
+        String pesanError =
+            response.data['message'] ?? 'Gagal mengunduh template pengeluaran';
+        throw Exception(pesanError);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengunduh template: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengunduh template: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengunduh template: $e');
+        throw Exception('Gagal mengunduh template pengeluaran');
+      }
+    }
+  }
+
+  Future<void> importOutcomeData(File file) async {
+    print('Mengimpor data pengeluaran');
+    try {
+      await _setAuthToken(); // Pastikan token autentikasi diatur
+
+      String fileName = file.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(file.path, filename: fileName),
+      });
+
+      final response = await _dio.post(
+        '$baseUrl/outcome/import',
+        data: formData,
+        options: Options(
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        print('Data pengeluaran berhasil diimpor');
+      } else {
+        String pesanError =
+            response.data['message'] ?? 'Gagal mengimpor data pengeluaran';
+        throw Exception(pesanError);
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengimpor data: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengimpor data: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengimpor data: $e');
+        throw Exception('Gagal mengimpor data pengeluaran');
       }
     }
   }
