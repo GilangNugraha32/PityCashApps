@@ -606,6 +606,14 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                             try {
                               final response = await ApiService()
                                   .importCategoryFromExcel(selectedFilePath!);
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Data berhasil diimpor'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                              _showImportedDataDialog(context, response);
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -644,21 +652,102 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Data Berhasil Diimpor'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: importedData
-                  .map((data) => ListTile(
-                        title: Text(data['Nama'] as String),
-                        subtitle: Text(
-                            'Jenis Kategori: ${data['Jenis Kategori']}\nDeskripsi: ${data['Deskripsi'] as String}'),
-                      ))
-                  .toList(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Column(
+            children: [
+              Text(
+                'Data Kategori Berhasil di Import',
+                style: TextStyle(
+                  color: Color(0xFFEB8153),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              Divider(
+                color: Color(0xFFEB8153),
+                thickness: 2,
+              ),
+            ],
+          ),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: importedData.length,
+              itemBuilder: (context, index) {
+                final data = importedData[index];
+                return Card(
+                  elevation: 0,
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Color(0xFFEB8153), width: 1.5),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Color(0xFFFFF5EE),
+                          radius: 25,
+                          child: Text(
+                            data['Nama'][0],
+                            style: TextStyle(
+                              color: Color(0xFFEB8153),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data['Nama'] as String,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(0xFFEB8153),
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                'Jenis Kategori: ${data['Jenis Kategori'] == 1 ? 'Pemasukan' : 'Pengeluaran'}',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              SizedBox(height: 3),
+                              Text(
+                                'Deskripsi: ${data['Deskripsi'] as String}',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
           actions: <Widget>[
-            TextButton(
-              child: Text('Tutup'),
+            ElevatedButton(
+              child: Text(
+                'Tutup',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFEB8153),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -720,6 +809,8 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   void _importFile(BuildContext context, String filePath) async {
     try {
       final response = await apiService.importCategoryFromExcel(filePath);
+      // Menghapus peringatan tentang jumlah data yang diimpor
+      _showImportedDataDialog(context, response);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Gagal mengimpor kategori: $e')),

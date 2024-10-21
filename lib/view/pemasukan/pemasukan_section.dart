@@ -6,9 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pity_cash/models/incomes_model.dart';
+import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/pemasukan/detail_pemasukan.dart';
+import 'package:pity_cash/view/pemasukan/edit_pemasukan.dart';
 import 'package:pity_cash/view/pemasukan/tambah_pemasukan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -52,15 +54,269 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     });
   }
 
-  void _navigateToDetail(Pemasukan pemasukan) async {
-    await Navigator.push(
+  void _showDetailDialog(Pemasukan pemasukan) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.fromLTRB(24, 24, 24, 24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: const Offset(0.0, 10.0),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Detail Pemasukan',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  DateFormat('d MMMM yyyy')
+                      .format(DateTime.parse(pemasukan.date)),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 4),
+                Divider(color: Colors.grey[300], thickness: 1),
+                SizedBox(height: 16),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Nama',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A3A63),
+                              fontSize: 14,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            pemasukan.name,
+                            style:
+                                TextStyle(color: Colors.black87, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Kategori',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1A3A63),
+                              fontSize: 14,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 56, 175, 52)
+                                  .withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              pemasukan.category?.name ?? 'Tidak ada kategori',
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 56, 175, 52),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Deskripsi',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A3A63),
+                    fontSize: 14,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  pemasukan.description,
+                  style: TextStyle(color: Colors.black87, fontSize: 16),
+                ),
+                SizedBox(height: 16),
+                Divider(color: Colors.grey[300], thickness: 1),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Jumlah',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A3A63),
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      'Rp${NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(double.tryParse(pemasukan.jumlah) ?? 0)}',
+                      style: TextStyle(
+                        color: Color(0xFFEB8153),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    child: Text('Hapus', style: TextStyle(color: Colors.red)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _showDeleteConfirmationDialog(context, pemasukan);
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 1),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    child: Text('Edit',
+                        style: TextStyle(color: Color(0xFFF7941E))),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _navigateToEditPage(pemasukan);
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Color(0xFFF7941E)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateToEditPage(Pemasukan pemasukan) {
+    // Implementasi navigasi ke halaman edit
+    Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetailPemasukan(
-          pemasukan: pemasukan,
-          onDelete: _refreshIncomes,
-        ),
+        builder: (context) => EditPemasukan(pemasukan: pemasukan),
       ),
+    ).then((_) => _refreshIncomes());
+  }
+
+  void _showDeleteConfirmationDialog(
+      BuildContext context, Pemasukan pemasukan) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Text(
+            'Konfirmasi Hapus',
+            style: TextStyle(color: Colors.red),
+          ),
+          content: Text('Apakah Anda yakin ingin menghapus data ini?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Batal',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await _apiService.deleteIncome(pemasukan.idData);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Berhasil dihapus!')),
+                  );
+                  _refreshIncomes();
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Gagal menghapus data: $e')),
+                  );
+                }
+              },
+              child: Text('Hapus'),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -463,7 +719,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () => _navigateToDetail(pemasukan),
+        onTap: () => _showDetailDialog(pemasukan),
         child: Padding(
           padding: EdgeInsets.all(16),
           child: Column(
@@ -507,16 +763,14 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                           padding:
                               EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.green[
-                                50], // Warna latar belakang hijau sangat muda
+                            color: Colors.green[50],
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             pemasukan.category!.name,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors
-                                  .green[400], // Warna teks hijau lebih terang
+                              color: Colors.green[400],
                               fontWeight: FontWeight.normal,
                             ),
                           ),
@@ -870,9 +1124,26 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                   SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: selectedFilePath != null
-                        ? () {
-                            _importFile(context, selectedFilePath!);
-                            Navigator.of(context).pop();
+                        ? () async {
+                            try {
+                              List<Map<String, dynamic>> importedData =
+                                  await ApiService()
+                                      .importIncomeFromExcel(selectedFilePath!);
+                              Navigator.of(context).pop();
+                              _showImportedDataDialog(context, importedData);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Data pemasukan berhasil diimpor')),
+                              );
+                              _refreshIncomes();
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Gagal mengimpor data pemasukan: $e')),
+                              );
+                            }
                           }
                         : null,
                     child: Text('Upload'),
@@ -946,18 +1217,121 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     }
   }
 
-  void _importFile(BuildContext context, String filePath) async {
-    try {
-      await ApiService().importIncomeFromExcel(filePath);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Data pemasukan berhasil diimpor')),
-      );
-      _refreshIncomes();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengimpor data pemasukan: $e')),
-      );
-    }
+  void _showImportedDataDialog(
+      BuildContext context, List<Map<String, dynamic>> importedIncome) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Column(
+            children: [
+              Text(
+                'Data Pemasukan Berhasil di Import',
+                style: TextStyle(
+                  color: Color(0xFFEB8153),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              Divider(
+                color: Color(0xFFEB8153),
+                thickness: 2,
+              ),
+            ],
+          ),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: importedIncome.length,
+              itemBuilder: (context, index) {
+                final data = importedIncome[index];
+                return Card(
+                  elevation: 0,
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(color: Color(0xFFEB8153), width: 1.5),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Color(0xFFFFF5EE),
+                          radius: 25,
+                          child: Text(
+                            data['Nama'][0],
+                            style: TextStyle(
+                              color: Color(0xFFEB8153),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                data['Nama'] as String,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(0xFFEB8153),
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                'Tanggal: ${data['Tanggal']}',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              SizedBox(height: 3),
+                              Text(
+                                'Jumlah: ${data['Jumlah']}',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              SizedBox(height: 3),
+                              Text(
+                                'Kode Kategori: ${data['Kode Kategori']}',
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              child: Text(
+                'Tutup',
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFEB8153),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildDateRangeIcon() {

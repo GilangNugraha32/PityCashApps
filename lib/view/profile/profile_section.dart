@@ -37,9 +37,50 @@ class _ProfileSectionState extends State<ProfileSection> {
   }
 
   Future<void> logout(BuildContext context) async {
-    await _prefsService.removeToken();
-    await _prefsService.removeUserData();
-    Navigator.of(context).pushReplacementNamed('/login');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Konfirmasi Logout',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFEB8153),
+            ),
+          ),
+          content: Text('Apakah Anda yakin ingin keluar?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Batal',
+                style: TextStyle(color: Colors.grey),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Logout'),
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFFEB8153),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () async {
+                await _prefsService.removeToken();
+                await _prefsService.removeUserData();
+                Navigator.of(context).pop();
+                Navigator.of(context).pushReplacementNamed('/login');
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

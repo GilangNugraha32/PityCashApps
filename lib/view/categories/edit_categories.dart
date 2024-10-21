@@ -74,13 +74,14 @@ class _EditCategoriesState extends State<EditCategories> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        icon: Icon(Icons.arrow_back_outlined,
+                            color: Colors.white),
                         onPressed: () {
                           Navigator.pop(context);
                         },
                       ),
                       Icon(
-                        Icons.notifications,
+                        Icons.notifications_outlined,
                         color: Colors.white,
                         size: 24,
                       ),
@@ -97,16 +98,7 @@ class _EditCategoriesState extends State<EditCategories> {
                       ),
                     ),
                   ),
-                  // Menyembunyikan ID Kategori
                   SizedBox(height: 12),
-                  // Text(
-                  //   'ID Kategori: ${widget.category.id}',
-                  //   style: TextStyle(
-                  //     fontSize: 16,
-                  //     color: Colors.white,
-                  //   ),
-                  // ),
-                  // SizedBox(height: 12),
                   Spacer(),
                 ],
               ),
@@ -121,7 +113,7 @@ class _EditCategoriesState extends State<EditCategories> {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -134,19 +126,29 @@ class _EditCategoriesState extends State<EditCategories> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 6),
+                        SizedBox(height: 8),
                         TextFormField(
                           initialValue: _namaKategori,
                           decoration: InputDecoration(
                             hintText: 'Masukkan nama kategori',
                             filled: true,
-                            fillColor: Colors.grey[200],
+                            fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide.none,
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Color(0xFFEB8153)),
                             ),
                             contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 8.0),
+                                horizontal: 16.0, vertical: 16.0),
+                            prefixIcon: Icon(Icons.category_outlined,
+                                color: Color(0xFFEB8153)),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -158,7 +160,7 @@ class _EditCategoriesState extends State<EditCategories> {
                             _namaKategori = value;
                           },
                         ),
-                        SizedBox(height: 6),
+                        SizedBox(height: 16),
                         Text(
                           'Jenis Kategori',
                           style: TextStyle(
@@ -166,17 +168,29 @@ class _EditCategoriesState extends State<EditCategories> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 6),
+                        SizedBox(height: 8),
                         DropdownButtonFormField<int>(
                           value: _jenisKategori,
                           decoration: InputDecoration(
                             hintText: 'Pilih jenis kategori',
                             filled: true,
-                            fillColor: Colors.grey[200],
+                            fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide.none,
+                              borderSide: BorderSide(color: Colors.grey[300]!),
                             ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Color(0xFFEB8153)),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 16.0),
+                            prefixIcon: Icon(Icons.list_alt_outlined,
+                                color: Color(0xFFEB8153)),
                           ),
                           items: [
                             DropdownMenuItem(
@@ -198,7 +212,7 @@ class _EditCategoriesState extends State<EditCategories> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 6),
+                        SizedBox(height: 16),
                         Text(
                           'Deskripsi',
                           style: TextStyle(
@@ -206,19 +220,29 @@ class _EditCategoriesState extends State<EditCategories> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 6),
+                        SizedBox(height: 8),
                         TextFormField(
                           initialValue: _deskripsi,
                           decoration: InputDecoration(
                             hintText: 'Masukkan deskripsi kategori',
                             filled: true,
-                            fillColor: Colors.grey[200],
+                            fillColor: Colors.grey[100],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide.none,
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Color(0xFFEB8153)),
                             ),
                             contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 8.0),
+                                horizontal: 16.0, vertical: 16.0),
+                            prefixIcon: Icon(Icons.description_outlined,
+                                color: Color(0xFFEB8153)),
                           ),
                           maxLines: 3,
                           validator: (value) {
@@ -231,7 +255,7 @@ class _EditCategoriesState extends State<EditCategories> {
                             _deskripsi = value;
                           },
                         ),
-                        SizedBox(height: 16),
+                        SizedBox(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -245,9 +269,11 @@ class _EditCategoriesState extends State<EditCategories> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
                               ),
                             ),
-                            SizedBox(width: 12),
+                            SizedBox(width: 16),
                             ElevatedButton(
                               onPressed: _updateCategory,
                               child: Text('Submit'),
@@ -256,6 +282,8 @@ class _EditCategoriesState extends State<EditCategories> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12.0),
                                 ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
                               ),
                             ),
                           ],

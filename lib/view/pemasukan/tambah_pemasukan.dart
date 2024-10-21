@@ -32,7 +32,6 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
     fetchCategories();
     jumlahController.addListener(() {
       setState(() {
-        // Tampilkan 'Rp.' hanya jika ada teks yang diinput
         showPrefix = jumlahController.text.isNotEmpty;
       });
     });
@@ -48,12 +47,9 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
     try {
       ApiService apiService = ApiService();
       List<Category> allCategories = await apiService.fetchCategories();
-
-      // Filter kategori untuk menampilkan hanya yang memiliki jenis_kategori 1 (pemasukan)
       categories = allCategories
           .where((category) => category.jenisKategori == 1)
           .toList();
-
       setState(() {});
     } catch (e) {
       print('Error fetching categories: $e');
@@ -62,47 +58,45 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
   void submit() async {
     try {
-      // Validasi input
       if (nameController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Nama tidak boleh kosong')),
         );
-        return; // Keluar jika nama kosong
+        return;
       }
 
       if (descriptionController.text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Deskripsi tidak boleh kosong')),
         );
-        return; // Keluar jika deskripsi kosong
+        return;
       }
 
       if (selectedDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Tanggal tidak boleh kosong')),
         );
-        return; // Keluar jika tanggal kosong
+        return;
       }
 
-      // Menghapus prefix "Rp. " dan pemisah ribuan (titik atau koma) sebelum parsing
       String jumlahText = jumlahController.text
           .replaceAll('Rp', '')
           .replaceAll('.', '')
           .replaceAll(',', '');
-      double? jumlah = double.tryParse(jumlahText); // Parsing menjadi double
+      double? jumlah = double.tryParse(jumlahText);
 
       if (jumlah == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Jumlah harus berupa angka')),
         );
-        return; // Keluar jika jumlah tidak valid
+        return;
       }
 
       if (selectedCategory == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Kategori tidak boleh kosong')),
         );
-        return; // Keluar jika kategori kosong
+        return;
       }
 
       ApiService apiService = ApiService();
@@ -111,7 +105,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         name: nameController.text,
         description: descriptionController.text,
         date: selectedDate?.toIso8601String() ?? '',
-        jumlah: jumlah.toString(), // Menggunakan nilai jumlah yang valid
+        jumlah: jumlah.toString(),
         jenisKategori: selectedCategory?.id ?? 0,
       );
 
@@ -119,7 +113,6 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         SnackBar(content: Text('Pemasukan berhasil ditambahkan')),
       );
 
-      // Clear fields after submission
       nameController.clear();
       descriptionController.clear();
       jumlahController.clear();
@@ -128,7 +121,6 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         selectedCategory = null;
       });
 
-      // Navigate back to the previous screen with a delay
       Future.delayed(Duration(milliseconds: 500), () {
         Navigator.pop(context, true);
       });
@@ -145,13 +137,13 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
     return Scaffold(
       body: Column(
         children: [
-          // Header Section
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(90.0),
+                bottomRight: Radius.circular(24.0),
+                bottomLeft: Radius.circular(24.0),
               ),
             ),
             child: Padding(
@@ -173,7 +165,6 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
               ),
             ),
           ),
-          // Main Content
           Expanded(
             child: Container(
               width: double.infinity,
@@ -181,16 +172,17 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(90.0),
+                  topRight: Radius.circular(90.0),
                 ),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(30.0),
                 child: SingleChildScrollView(
                   child: Card(
+                    elevation: 4,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    color: Colors.grey[350],
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: Column(
@@ -259,7 +251,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         SizedBox(height: 15),
         _buildLabel('Tanggal'),
         SizedBox(height: 10),
-        _buildDateField(), // Use the updated date field
+        _buildDateField(),
         SizedBox(height: 15),
         _buildLabel('Jumlah:'),
         SizedBox(height: 10),

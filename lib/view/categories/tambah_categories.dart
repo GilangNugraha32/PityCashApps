@@ -94,18 +94,23 @@ class _TambahCategoriesState extends State<TambahCategories> {
                           controller: nameController,
                           decoration: InputDecoration(
                             hintText: 'Masukkan nama kategori',
-                            hintStyle: TextStyle(fontSize: 12),
+                            hintStyle: TextStyle(fontSize: 16),
                             filled: true,
                             fillColor: Colors.grey[200],
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
                               borderSide: BorderSide.none,
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Color(0xFFEB8153), width: 2.0),
+                            ),
                             contentPadding: EdgeInsets.symmetric(
                                 horizontal: 12.0, vertical: 8.0),
                             prefixIcon: Icon(Icons.category_outlined,
                                 color: Color(0xFFEB8153)),
                           ),
+                          style: TextStyle(fontSize: 16),
                         ),
                       ),
                       SizedBox(height: 12),
@@ -129,6 +134,10 @@ class _TambahCategoriesState extends State<TambahCategories> {
                               borderRadius: BorderRadius.circular(12.0),
                               borderSide: BorderSide.none,
                             ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                              borderSide: BorderSide(color: Color(0xFFEB8153), width: 2.0),
+                            ),
                             contentPadding: EdgeInsets.symmetric(
                                 horizontal: 12.0, vertical: 8.0),
                             prefixIcon:
@@ -138,11 +147,11 @@ class _TambahCategoriesState extends State<TambahCategories> {
                             return DropdownMenuItem<int>(
                               value: option['value'],
                               child: Text(option['label'],
-                                  style: TextStyle(fontSize: 12)),
+                                  style: TextStyle(fontSize: 16)),
                             );
                           }).toList(),
                           hint: Text('Pilih jenis kategori',
-                              style: TextStyle(fontSize: 12)),
+                              style: TextStyle(fontSize: 16)),
                         ),
                       ),
                       SizedBox(height: 12),
@@ -154,12 +163,16 @@ class _TambahCategoriesState extends State<TambahCategories> {
                         controller: descriptionController,
                         decoration: InputDecoration(
                           hintText: 'Masukkan deskripsi kategori',
-                          hintStyle: TextStyle(fontSize: 12),
+                          hintStyle: TextStyle(fontSize: 16),
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
                             borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: BorderSide(color: Color(0xFFEB8153), width: 2.0),
                           ),
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 12.0, vertical: 8.0),

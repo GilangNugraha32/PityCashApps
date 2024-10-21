@@ -62,9 +62,9 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else {
         setState(() {
-          _errorMessage = jsonResponse['message'] ?? 'Login failed';
+          _errorMessage = jsonResponse['message'] ?? 'Login gagal';
         });
-        log(_errorMessage ?? 'Unknown error occurred');
+        log(_errorMessage ?? 'Terjadi kesalahan yang tidak diketahui');
       }
     } catch (e) {
       log('Error: $e');
@@ -80,152 +80,182 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
-      backgroundColor: Color(0xFFEB8153),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 150,
-                  height: 150,
-                  child: Image.asset("assets/piticash_log.png"),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: Text(
-                    "Login to your account",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24.0,
-                      fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Center(
+                  child: Hero(
+                    tag: 'logo',
+                    child: Container(
+                      height: 120,
+                      child: Image.asset("assets/piticash_log.png"),
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
+              ),
+              Expanded(
+                flex: 5,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
                   ),
-                  elevation: 6,
-                  child: Padding(
-                    padding: const EdgeInsets.all(22.0),
-                    child: Form(
-                      key: _formKey,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            'Email',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          TextFormField(
-                            controller: _emailController,
-                            decoration: InputDecoration(
-                              hintText: 'Masukkan email',
-                              prefixIcon:
-                                  Icon(Icons.email, color: Color(0xFFEB8153)),
-                              filled: true,
-                              fillColor: Colors.grey[200],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                            textAlign: TextAlign.center,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Masukkan email';
-                              }
-                              return null;
-                            },
-                          ),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           SizedBox(height: 20),
                           Text(
-                            'Password',
+                            "Selamat Datang !",
                             style: TextStyle(
+                              color: Color(0xFFEB8153),
+                              fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
                             ),
                           ),
                           SizedBox(height: 8),
-                          TextFormField(
-                            controller: _passwordController,
-                            decoration: InputDecoration(
-                              hintText: 'Masukkan password',
-                              prefixIcon:
-                                  Icon(Icons.lock, color: Color(0xFFEB8153)),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscureText
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: Color(0xFFEB8153),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureText = !_obscureText;
-                                  });
-                                },
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey[200],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                                borderSide: BorderSide.none,
-                              ),
+                          Text(
+                            "Silakan masuk ke akun Anda",
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 16,
                             ),
-                            textAlign: TextAlign.center,
-                            obscureText: _obscureText,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Masukkan password';
-                              }
-                              return null;
-                            },
                           ),
-                          SizedBox(height: 30),
+                          SizedBox(height: 40),
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Email',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _emailController,
+                                  decoration: InputDecoration(
+                                    hintText: 'Masukkan alamat email Anda',
+                                    prefixIcon: Icon(Icons.email,
+                                        color: Color(0xFFEB8153)),
+                                    filled: true,
+                                    fillColor: Colors.grey[200],
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Masukkan email';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'Password',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: _obscureText,
+                                  decoration: InputDecoration(
+                                    hintText: 'Masukkan kata sandi Anda',
+                                    prefixIcon: Icon(Icons.lock,
+                                        color: Color(0xFFEB8153)),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(
+                                        _obscureText
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                        color: Color(0xFFEB8153),
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscureText = !_obscureText;
+                                        });
+                                      },
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.grey[200],
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Masukkan password';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 24),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _login,
                               child: _isLoading
-                                  ? CircularProgressIndicator(
-                                      color: Colors.white)
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
                                   : Text(
-                                      'LOGIN',
+                                      'MASUK',
                                       style: TextStyle(
+                                        fontSize: 16,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 16.0,
                                       ),
                                     ),
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(vertical: 16.0),
                                 primary: Color(0xFFEB8153),
+                                onPrimary: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 15),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
                               ),
                             ),
                           ),
                           if (_errorMessage != null)
                             Padding(
-                              padding: const EdgeInsets.only(top: 12.0),
+                              padding: const EdgeInsets.only(top: 16.0),
                               child: Text(
                                 _errorMessage!,
                                 style: TextStyle(
                                   color: Colors.red,
+                                  fontWeight: FontWeight.bold,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
@@ -235,8 +265,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

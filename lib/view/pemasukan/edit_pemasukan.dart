@@ -24,7 +24,6 @@ class _EditPemasukanState extends State<EditPemasukan> {
   List<Category> categories = [];
   Category? selectedCategory;
 
-  // Instantiate the controllers
   final SharedPreferencesService _prefsService = SharedPreferencesService();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -34,7 +33,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
     final formatCurrency = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp',
-      decimalDigits: 0, // Set to 0 to avoid decimal places
+      decimalDigits: 0,
     );
     return formatCurrency.format(amount);
   }
@@ -45,15 +44,13 @@ class _EditPemasukanState extends State<EditPemasukan> {
     fetchCategories();
     nameController.text = widget.pemasukan.name;
     descriptionController.text = widget.pemasukan.description;
-
-    // Set the selected date to the date of the pemasukan
-    selectedDate =
-        DateTime.parse(widget.pemasukan.date); // Set to pemasukan date
+    selectedDate = DateTime.parse(widget.pemasukan.date);
     jumlahController.text =
         formatCurrency(double.tryParse(widget.pemasukan.jumlah) ?? 0.0);
     selectedCategory = widget.pemasukan.category;
   }
 
+  @override
   void dispose() {
     nameController.dispose();
     descriptionController.dispose();
@@ -65,13 +62,10 @@ class _EditPemasukanState extends State<EditPemasukan> {
     try {
       ApiService apiService = ApiService();
       List<Category> allCategories = await apiService.fetchCategories();
-
-      // Filter categories to display only those with jenis_kategori 1 (pemasukan)
       categories = allCategories
           .where((category) => category.jenisKategori == 1)
           .toList();
-
-      setState(() {}); // Update UI with fetched categories
+      setState(() {});
     } catch (e) {
       print('Error fetching categories: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +75,6 @@ class _EditPemasukanState extends State<EditPemasukan> {
   }
 
   void submit() async {
-    // Validate input fields
     if (nameController.text.isEmpty ||
         descriptionController.text.isEmpty ||
         jumlahController.text.isEmpty ||
@@ -93,17 +86,13 @@ class _EditPemasukanState extends State<EditPemasukan> {
       return;
     }
 
-    // Prepare jumlahValue for parsing and storage
     String formattedAmount = jumlahController.text
-        .replaceAll('Rp', '') // Remove 'Rp. ' prefix
-        .replaceAll('Rp', '') // Remove 'Rp' prefix if it exists without dot
-        .replaceAll('.', '') // Remove dots (for thousands)
-        .replaceAll(',', '.'); // Replace comma with a dot for decimal point
+        .replaceAll('Rp', '')
+        .replaceAll('.', '')
+        .replaceAll(',', '.');
 
-    double? jumlahValue =
-        double.tryParse(formattedAmount); // Try parsing the formatted amount
+    double? jumlahValue = double.tryParse(formattedAmount);
     if (jumlahValue == null || jumlahValue <= 0) {
-      // Ensure it's a valid number and greater than zero
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Jumlah harus berupa angka yang valid dan positif.')),
@@ -113,33 +102,29 @@ class _EditPemasukanState extends State<EditPemasukan> {
 
     try {
       ApiService apiService = ApiService();
-
-      // Call the updateIncomes method with the correct parameters
       await apiService.updateIncomes(
-        widget.pemasukan.idData, // Pass the ID of the income entry
-        nameController.text, // Name
-        descriptionController.text, // Description
-        selectedDate?.toIso8601String() ?? '', // Date
-        jumlahValue.toString(), // Convert jumlahValue to String
-        selectedCategory!.id, // Use category ID directly
+        widget.pemasukan.idData,
+        nameController.text,
+        descriptionController.text,
+        selectedDate?.toIso8601String() ?? '',
+        jumlahValue.toString(),
+        selectedCategory!.id,
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Pemasukan berhasil diubah')),
       );
 
-      // Clear fields after submission
       nameController.clear();
       descriptionController.clear();
       jumlahController.clear();
       setState(() {
         selectedDate = null;
-        selectedCategory = null; // Resetting selected category
+        selectedCategory = null;
       });
 
       Future.delayed(Duration(milliseconds: 500), () {
-        Navigator.pop(
-            context, true); // Return true to indicate a successful update
+        Navigator.pop(context, true);
       });
     } catch (e) {
       print('Error: $e');
@@ -154,13 +139,13 @@ class _EditPemasukanState extends State<EditPemasukan> {
     return Scaffold(
       body: Column(
         children: [
-          // Header Section
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(90.0),
+                bottomLeft: Radius.circular(24.0),
+                bottomRight: Radius.circular(24.0),
               ),
             ),
             child: Padding(
@@ -182,34 +167,24 @@ class _EditPemasukanState extends State<EditPemasukan> {
               ),
             ),
           ),
-          // Main Content
           Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(90.0),
-                ),
-              ),
+            child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(30.0),
-                child: SingleChildScrollView(
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    color: Colors.grey[350],
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildInputFields(),
-                          SizedBox(height: 30),
-                          _buildActionButtons(),
-                        ],
-                      ),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  elevation: 5,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInputFields(),
+                        SizedBox(height: 30),
+                        _buildActionButtons(),
+                      ],
                     ),
                   ),
                 ),
@@ -268,7 +243,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
         SizedBox(height: 15),
         _buildLabel('Tanggal'),
         SizedBox(height: 10),
-        _buildDateField(), // Use the updated date field
+        _buildDateField(),
         SizedBox(height: 15),
         _buildLabel('Jumlah:'),
         SizedBox(height: 10),
@@ -300,44 +275,46 @@ class _EditPemasukanState extends State<EditPemasukan> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: Colors.grey[200],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: TextField(
         controller: controller,
-        style: TextStyle(fontSize: 14), // Ukuran teks di dalam TextField
+        style: TextStyle(fontSize: 14),
         decoration: InputDecoration(
           prefixIcon: Padding(
-            padding:
-                const EdgeInsets.only(right: 8.0), // Jarak antara ikon dan teks
+            padding: const EdgeInsets.only(right: 8.0),
             child: Container(
-              height: 48, // Sesuaikan tinggi sesuai dengan TextField
-              width: 48, // Sesuaikan lebar agar berbentuk lingkaran
+              height: 48,
+              width: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFEB8153), // Latar belakang lingkaran
+                color: Color(0xFFEB8153),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26, // Warna bayangan
-                    blurRadius: 4.0, // Blur radius
-                    spreadRadius: 1.0, // Radius penyebaran bayangan
-                    offset: Offset(0, 5), // Posisi bayangan
+                    color: Colors.black26,
+                    blurRadius: 4.0,
+                    spreadRadius: 1.0,
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  icon,
-                  color: Colors.white, // Ubah warna ikon menjadi putih
-                ),
+              child: Icon(
+                icon,
+                color: Colors.white,
               ),
             ),
           ),
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            vertical: 15, // Jarak vertikal dalam TextField
-          ),
+          contentPadding: EdgeInsets.symmetric(vertical: 15),
         ),
       ),
     );
@@ -347,49 +324,51 @@ class _EditPemasukanState extends State<EditPemasukan> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200], // Same as buildTextField
+        color: Colors.grey[200],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: TextField(
         controller: jumlahController,
         keyboardType: TextInputType.number,
         inputFormatters: [
-          ThousandSeparatorInputFormatter(), // Custom formatter
+          ThousandSeparatorInputFormatter(),
         ],
-        style: TextStyle(fontSize: 14), // Text size same as buildTextField
+        style: TextStyle(fontSize: 14),
         decoration: InputDecoration(
           prefixIcon: Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: Container(
-              height: 48, // Adjust height according to other TextFields
-              width: 48, // Adjust width to be circular
+              height: 48,
+              width: 48,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFEB8153), // Circle background color
+                color: Color(0xFFEB8153),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26, // Shadow color
-                    blurRadius: 4.0, // Blur radius
-                    spreadRadius: 1.0, // Shadow spread radius
-                    offset: Offset(0, 2), // Shadow position
+                    color: Colors.black26,
+                    blurRadius: 4.0,
+                    spreadRadius: 1.0,
+                    offset: Offset(0, 2),
                   ),
                 ],
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.money,
-                  color: Colors.white, // Change icon color to white
-                ),
+              child: Icon(
+                Icons.money,
+                color: Colors.white,
               ),
             ),
           ),
-          hintText: 'Masukkan jumlah dalam bentuk Rp', // Hint text
+          hintText: 'Masukkan jumlah dalam bentuk Rp',
           hintStyle: TextStyle(color: Colors.grey),
-
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            vertical: 15, // Vertical space same as buildTextField
-          ),
+          contentPadding: EdgeInsets.symmetric(vertical: 15),
         ),
       ),
     );
@@ -399,53 +378,57 @@ class _EditPemasukanState extends State<EditPemasukan> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200], // Warna latar belakang yang konsisten
+        color: Colors.grey[200],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: TypeAheadFormField<Category>(
         textFieldConfiguration: TextFieldConfiguration(
           controller: TextEditingController(text: selectedCategory?.name ?? ''),
           decoration: InputDecoration(
             hintText: 'Pilih kategori',
-            hintStyle: TextStyle(color: Colors.grey), // Gaya hint text
-            border: InputBorder.none, // Tidak ada border
+            hintStyle: TextStyle(color: Colors.grey),
+            border: InputBorder.none,
             prefixIcon: Padding(
               padding: const EdgeInsets.only(right: 8.0),
               child: Container(
-                height: 48, // Sesuaikan tinggi sesuai dengan TextField
-                width: 48, // Sesuaikan lebar agar berbentuk lingkaran
+                height: 48,
+                width: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFEB8153), // Latar belakang lingkaran
+                  color: Color(0xFFEB8153),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black26, // Warna bayangan
-                      blurRadius: 4.0, // Blur radius
-                      spreadRadius: 1.0, // Radius penyebaran bayangan
-                      offset: Offset(0, 5), // Posisi bayangan
+                      color: Colors.black26,
+                      blurRadius: 4.0,
+                      spreadRadius: 1.0,
+                      offset: Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.category,
-                    color: Colors.white,
-                  ),
+                child: Icon(
+                  Icons.category,
+                  color: Colors.white,
                 ),
               ),
             ),
             suffixIcon: Icon(
-              Icons.arrow_drop_down, // Ikon panah ke bawah
+              Icons.arrow_drop_down,
               color: Colors.grey,
             ),
             contentPadding: EdgeInsets.symmetric(
               vertical: 15,
-              horizontal: 12, // Jarak isi
+              horizontal: 12,
             ),
           ),
         ),
         suggestionsCallback: (pattern) async {
-          // Mengembalikan daftar kategori yang sesuai dengan input pengguna
           return categories.where((category) =>
               category.name.toLowerCase().contains(pattern.toLowerCase()));
         },
@@ -456,18 +439,18 @@ class _EditPemasukanState extends State<EditPemasukan> {
                 title: Text(
                   suggestion.name,
                   style: TextStyle(
-                    fontWeight: FontWeight.bold, // Buat teks tebal
-                    fontSize: 14, // Ukuran teks lebih kecil
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
                   ),
                 ),
               ),
-              Divider(height: 1, color: Colors.grey), // Divider antar item
+              Divider(height: 1, color: Colors.grey),
             ],
           );
         },
         onSuggestionSelected: (Category suggestion) {
           setState(() {
-            selectedCategory = suggestion; // Menetapkan kategori yang dipilih
+            selectedCategory = suggestion;
           });
         },
         noItemsFoundBuilder: (context) => Padding(
@@ -478,9 +461,9 @@ class _EditPemasukanState extends State<EditPemasukan> {
           ),
         ),
         suggestionsBoxDecoration: SuggestionsBoxDecoration(
-          color: Colors.white, // Warna latar dropdown
-          borderRadius: BorderRadius.circular(12), // Radius dropdown
-          elevation: 4, // Shadow untuk dropdown
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          elevation: 4,
         ),
       ),
     );
@@ -494,48 +477,49 @@ class _EditPemasukanState extends State<EditPemasukan> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Colors
-              .grey[200], // Menggunakan warna yang sama dengan buildTextField
+          color: Colors.grey[200],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
         child: TextField(
-          enabled: false, // Disable text editing, only allow date picker
+          enabled: false,
           decoration: InputDecoration(
             hintText: selectedDate == null
                 ? 'Pilih Tanggal'
                 : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
             hintStyle: TextStyle(color: Colors.black87),
             prefixIcon: Padding(
-              padding: const EdgeInsets.only(
-                  right: 8.0), // Jarak antara ikon dan teks
+              padding: const EdgeInsets.only(right: 8.0),
               child: Container(
-                height: 48, // Sesuaikan tinggi sesuai dengan TextField
-                width: 48, // Sesuaikan lebar agar berbentuk lingkaran
+                height: 48,
+                width: 48,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFEB8153), // Latar belakang lingkaran
+                  color: Color(0xFFEB8153),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black26, // Warna bayangan
-                      blurRadius: 4.0, // Blur radius
-                      spreadRadius: 1.0, // Radius penyebaran bayangan
-                      offset: Offset(0, 5), // Posisi bayangan
+                      color: Colors.black26,
+                      blurRadius: 4.0,
+                      spreadRadius: 1.0,
+                      offset: Offset(0, 2),
                     ),
                   ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.calendar_today,
-                    color: Colors.white,
-                    size: 22,
-                  ),
+                child: Icon(
+                  Icons.calendar_today,
+                  color: Colors.white,
+                  size: 22,
                 ),
               ),
             ),
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(
-              vertical: 15, // Jarak vertikal dalam TextField
-            ),
+            contentPadding: EdgeInsets.symmetric(vertical: 15),
           ),
         ),
       ),
@@ -561,42 +545,39 @@ class _EditPemasukanState extends State<EditPemasukan> {
       children: [
         ElevatedButton(
           onPressed: () {
-            Navigator.pop(context); // Action for Cancel button
+            Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(
-            primary: Colors.red, // Color for "Cancel"
+            primary: Colors.red,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Set radius to 8
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           child: Text(
             'Cancel',
-            style: TextStyle(color: Colors.white), // Set text color
+            style: TextStyle(color: Colors.white),
           ),
         ),
-        SizedBox(width: 16), // Add spacing between buttons
-
+        SizedBox(width: 16),
         ElevatedButton(
           onPressed: () {
-            // Consider adding error handling for the submit action
             try {
-              submit(); // Call the submit function
+              submit();
             } catch (e) {
-              // Handle the error, e.g., show a SnackBar or dialog
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Error: ${e.toString()}')),
               );
             }
           },
           style: ElevatedButton.styleFrom(
-            primary: Colors.orange, // Updated color for "Simpan"
+            primary: Colors.orange,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Set radius to 8
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
           child: Text(
             'Simpan',
-            style: TextStyle(color: Colors.white), // Set text color
+            style: TextStyle(color: Colors.white),
           ),
         ),
       ],
@@ -610,15 +591,12 @@ class ThousandSeparatorInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Remove all non-digit characters
     String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (newText.isEmpty) {
-      return TextEditingValue(
-          text: ''); // Return empty value if there's no input
+      return TextEditingValue(text: '');
     }
 
-    // Format the text with thousand separators
     String formattedText =
         NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
 

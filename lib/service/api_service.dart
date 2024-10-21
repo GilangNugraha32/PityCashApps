@@ -30,6 +30,30 @@ class ApiService {
     }
   }
 
+  Future<double> fetchSaldoKeseluruhan() async {
+    try {
+      await _setAuthToken();
+      final response = await _dio.get('$baseUrl/income/saldo');
+
+      print('Response status code: ${response.statusCode}');
+      print('Response data: ${response.data}');
+
+      if (response.statusCode == 200) {
+        if (response.data is Map && response.data.containsKey('data')) {
+          final double saldoKeseluruhan = double.parse(response.data['data'].toString());
+          return saldoKeseluruhan;
+        } else {
+          throw Exception('Data saldo keseluruhan tidak valid');
+        }
+      } else {
+        throw Exception('Gagal mengambil saldo keseluruhan: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error mengambil saldo keseluruhan: $e');
+      throw Exception('Gagal mengambil saldo keseluruhan');
+    }
+  }
+
   Future<double> fetchSaldo() async {
     try {
       await _setAuthToken();
@@ -54,6 +78,31 @@ class ApiService {
     } catch (e) {
       print('Error fetching saldo: $e');
       throw Exception('Failed to fetch saldo');
+    }
+  }
+
+  Future<double> fetchMinSaldo() async {
+    try {
+      await _setAuthToken();
+      final response = await _dio.get('$baseUrl/income/saldo');
+
+      print('Response status code: ${response.statusCode}');
+      print('Response data: ${response.data}');
+
+      if (response.statusCode == 200) {
+        if (response.data is Map && response.data.containsKey('0')) {
+          final double minSaldo = double.parse(response.data['0'].toString());
+          return minSaldo;
+        } else {
+          throw Exception('Data saldo minimum tidak valid');
+        }
+      } else {
+        throw Exception(
+            'Gagal mengambil saldo minimum: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error mengambil saldo minimum: $e');
+      throw Exception('Gagal mengambil saldo minimum');
     }
   }
 
@@ -283,6 +332,7 @@ class ApiService {
   Future<List<Map<String, dynamic>>> importCategoryFromExcel(
       String filePath) async {
     print('Mengimpor kategori dari Excel: $filePath');
+
     try {
       await _setAuthToken(); // Pastikan token otorisasi diset sebelum request
 
@@ -298,25 +348,30 @@ class ApiService {
         options: Options(
           headers: {
             'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
           },
         ),
       );
 
       print('Respons server: ${response.data}');
 
+      // Cek status code
       if (response.statusCode == 200) {
         print('Kategori berhasil diimpor');
 
+        // Validasi respons format JSON
         if (response.data is Map<String, dynamic>) {
           final status = response.data['status'];
           final message = response.data['message'];
           final importedData = response.data['data'];
 
+          // Pastikan status dan data sesuai dengan yang diharapkan
           if (status == 200 &&
               message == "Data berhasil diimpor" &&
               importedData != null &&
               importedData is List) {
             print('Data yang diimpor:');
+
             List<Map<String, dynamic>> importedCategories = [];
             for (var item in importedData) {
               print(
@@ -624,41 +679,83 @@ class ApiService {
     }
   }
 
-  Future<void> importIncomeFromExcel(String filePath) async {
+  Future<List<Map<String, dynamic>>> importIncomeFromExcel(
+      String filePath) async {
     print('Mengimpor data pemasukan dari Excel: $filePath');
+
     try {
-      await _setAuthToken(); // Pastikan token autentikasi diatur
+      await _setAuthToken(); // Pastikan token otorisasi diset sebelum request
 
       // Buat FormData untuk mengirim file
       var formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(filePath,
-            filename: 'income_import.xlsx'),
+            filename: 'template_pemasukan.xlsx'),
       });
 
       final response = await _dio.post(
         '$baseUrl/income/import',
         data: formData,
-        options: Options(
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        ),
+        options: Options(),
       );
 
+      print('Respons server: ${response.data}');
+
+      // Cek status code
       if (response.statusCode == 200) {
         print('Data pemasukan berhasil diimpor');
+
+        // Validasi respons format JSON
+        if (response.data is Map<String, dynamic>) {
+          final status = response.data['status'];
+          final message = response.data['message'];
+          final importedData = response.data['data'];
+
+          // Pastikan status dan data sesuai dengan yang diharapkan
+          if (status == 200 &&
+              message == "Data Berhasil Ditambahkan" &&
+              importedData != null &&
+              importedData is List) {
+            print('Data yang diimpor:');
+
+            List<Map<String, dynamic>> importedIncomes = [];
+            for (var item in importedData) {
+              print(
+                  '- Nama: ${item['Nama']}, Deskripsi: ${item['Deskripsi']}, Tanggal: ${item['Tanggal']}, Jumlah: ${item['Jumlah']}, Kode Kategori: ${item['Kode Kategori']}');
+              importedIncomes.add({
+                'Nama': item['Nama'],
+                'Deskripsi': item['Deskripsi'],
+                'Tanggal': item['Tanggal'],
+                'Jumlah': item['Jumlah'],
+                'Kode Kategori': item['Kode Kategori'],
+              });
+            }
+            return importedIncomes;
+          } else {
+            print('Format data tidak sesuai atau tidak ada data yang diimpor.');
+            return [];
+          }
+        } else {
+          throw Exception('Format respons tidak sesuai');
+        }
       } else {
         throw Exception(
             'Gagal mengimpor data pemasukan: ${response.statusCode}');
       }
     } catch (e) {
       if (e is DioError) {
-        print('DioError saat mengimpor data pemasukan: ${e.response?.data}');
-        throw Exception(
-            'Gagal mengimpor data pemasukan: ${e.response?.data['message'] ?? 'Kesalahan tidak diketahui'}');
+        // Tangani kesalahan dari Dio (request ke server)
+        final responseData = e.response?.data;
+        final errorMessage =
+            responseData != null && responseData is Map<String, dynamic>
+                ? responseData['message'] ?? 'Error tidak diketahui'
+                : 'Error tidak diketahui';
+
+        print('DioError saat mengimpor data pemasukan: $responseData');
+        throw Exception('Gagal mengimpor data pemasukan: $errorMessage');
       } else {
+        // Tangani kesalahan lainnya
         print('Error saat mengimpor data pemasukan: $e');
-        throw Exception('Gagal mengimpor data pemasukan');
+        throw Exception('Gagal mengimpor data pemasukan: $e');
       }
     }
   }

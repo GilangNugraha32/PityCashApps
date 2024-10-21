@@ -48,6 +48,7 @@ dependencies:
   permission_handler: ^10.0.0
   flutter_typeahead: ^3.2.1
   flutter_dropzone: ^3.0.6
+  fl_chart: ^0.62.0
 
 dev_dependencies:
   flutter_test:
