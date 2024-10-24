@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscureText = true;
 
   Future<void> _login() async {
-    final String apiUrl = "http://pitycash.mamorasoft.com/api/login";
+    final String apiUrl = "http://192.168.0.211:8000/api/login";
 
     if (!_formKey.currentState!.validate()) {
       return;

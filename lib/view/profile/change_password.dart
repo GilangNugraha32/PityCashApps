@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
@@ -69,8 +70,14 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Color(0xFFEB8153),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   void _clearFields() {
@@ -81,38 +88,53 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
 
   Widget _buildPasswordField(String label, TextEditingController controller,
       bool isVisible, VoidCallback toggleVisibility) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          obscureText: !isVisible,
-          decoration: InputDecoration(
-            suffixIcon: IconButton(
-              icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Color(0xFFEB8153)),
-              onPressed: toggleVisibility,
+    return Container(
+      margin: EdgeInsets.only(bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFEB8153),
             ),
-            hintText: 'Masukkan $label',
-            fillColor: Colors.grey[200],
-            filled: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              borderSide: BorderSide(color: Color(0xFFEB8153), width: 2.0),
-            ),
-            contentPadding:
-                EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
           ),
-        ),
-        SizedBox(height: 16),
-      ],
+          SizedBox(height: 8),
+          TextFormField(
+            controller: controller,
+            obscureText: !isVisible,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                icon: Icon(
+                  isVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Color(0xFFEB8153),
+                ),
+                onPressed: toggleVisibility,
+              ),
+              hintText: 'Masukkan $label',
+              hintStyle: TextStyle(color: Colors.grey[400]),
+              filled: true,
+              fillColor: Colors.grey[100],
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(15),
+                borderSide: BorderSide(color: Color(0xFFEB8153), width: 2),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -120,103 +142,155 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(24.0),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 7,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      Text(
-                        'Ubah Password',
-                        style: TextStyle(
-                            fontSize: 20,
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back, color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        Text(
+                          'Ubah Password',
+                          style: TextStyle(
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(width: 40),
+                      ],
+                    ),
+                    SizedBox(height: 24),
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 40),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/piticash_log.png'),
-                    backgroundColor: Colors.white,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    _usernameController.text,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  Text(
-                    _emailController.text,
-                    style: TextStyle(fontSize: 14, color: Colors.white70),
-                  ),
-                ],
+                      child: ClipOval(
+                        child: FutureBuilder<String>(
+                          future: ApiService().showProfilePicture(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white));
+                            } else if (snapshot.hasError) {
+                              print(
+                                  'Error menampilkan foto profil: ${snapshot.error}');
+                              return Image.asset('assets/piticash_log.png',
+                                  fit: BoxFit.cover);
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              return Image.memory(
+                                  base64Decode(snapshot.data!.split(',').last),
+                                  fit: BoxFit.cover);
+                            } else {
+                              return Icon(Icons.person,
+                                  size: 60, color: Colors.white);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      _usernameController.text,
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      _emailController.text,
+                      style: TextStyle(
+                          fontSize: 16, color: Colors.white.withOpacity(0.8)),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(16.0),
+              Padding(
+                padding: EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildPasswordField(
-                        'Password Saat Ini',
-                        _currentPasswordController,
-                        _isCurrentPasswordVisible, () {
-                      setState(() => _isCurrentPasswordVisible =
-                          !_isCurrentPasswordVisible);
-                    }),
-                    _buildPasswordField('Password Baru', _newPasswordController,
-                        _isNewPasswordVisible, () {
-                      setState(
-                          () => _isNewPasswordVisible = !_isNewPasswordVisible);
-                    }),
+                      'Password Saat Ini',
+                      _currentPasswordController,
+                      _isCurrentPasswordVisible,
+                      () => setState(() => _isCurrentPasswordVisible =
+                          !_isCurrentPasswordVisible),
+                    ),
                     _buildPasswordField(
-                        'Konfirmasi Password',
-                        _confirmPasswordController,
-                        _isConfirmPasswordVisible, () {
-                      setState(() => _isConfirmPasswordVisible =
-                          !_isConfirmPasswordVisible);
-                    }),
-                    SizedBox(height: 24),
+                      'Password Baru',
+                      _newPasswordController,
+                      _isNewPasswordVisible,
+                      () => setState(
+                          () => _isNewPasswordVisible = !_isNewPasswordVisible),
+                    ),
+                    _buildPasswordField(
+                      'Konfirmasi Password',
+                      _confirmPasswordController,
+                      _isConfirmPasswordVisible,
+                      () => setState(() => _isConfirmPasswordVisible =
+                          !_isConfirmPasswordVisible),
+                    ),
+                    SizedBox(height: 32),
                     ElevatedButton(
                       onPressed: _updatePassword,
                       style: ElevatedButton.styleFrom(
                         primary: Color(0xFFEB8153),
                         padding: EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(15)),
+                        elevation: 5,
                       ),
                       child: Text('Perbarui Password',
-                          style: TextStyle(fontSize: 16)),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

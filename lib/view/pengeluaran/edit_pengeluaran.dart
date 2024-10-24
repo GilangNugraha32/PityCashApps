@@ -71,12 +71,14 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
     List<String> tanggalList = [];
     bool hasValidData = false;
 
-    int parentId = widget.pengeluaranList.last.idParent;
+    int parentId = widget.pengeluaranList.isNotEmpty
+        ? widget.pengeluaranList.first.idParent
+        : 0;
 
     for (var key in formKeys) {
       var data = key.currentState?.getFormData();
       if (data != null && data.isNotEmpty) {
-        print('Data from form: $data');
+        print('Data dari form: $data');
         hasValidData = true;
 
         names.add(data['name']);
@@ -86,7 +88,14 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         dls.add(data['dll']);
         jumlahs.add(data['jumlah']);
         categoryIds.add(data['category']);
-        dataIds.add(data['id_data']);
+
+        // Tambahkan id_data ke dalam list dataIds
+        if (data['id_data'] != null) {
+          dataIds.add(data['id_data']);
+        } else {
+          dataIds
+              .add(0); // Tambahkan 0 jika id_data tidak ada (untuk data baru)
+        }
 
         String tanggal = data['tanggal'] ?? DateTime.now().toIso8601String();
         try {
@@ -94,9 +103,9 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
           String formattedDate =
               "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
           tanggalList.add(formattedDate);
-          print('Formatted Tanggal from form: $formattedDate');
+          print('Tanggal terformat dari form: $formattedDate');
         } catch (e) {
-          print('Error parsing date: $tanggal. Error: $e');
+          print('Error saat parsing tanggal: $tanggal. Error: $e');
         }
 
         if (key.currentState?.selectedImage != null &&
@@ -107,26 +116,26 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
           selectedImages.add(File(''));
         }
       } else {
-        print("Form data is empty or null for one of the forms.");
+        print("Data form kosong atau null untuk salah satu form.");
       }
     }
 
     if (!hasValidData) {
-      print("Error: No valid form data to submit.");
+      print("Error: Tidak ada data form yang valid untuk dikirim.");
       return;
     }
 
-    print('Parent ID: $parentId');
-    print('Names: $names');
-    print('Descriptions: $descriptions');
-    print('Jumlah Satuans: $jumlahSatuans');
-    print('Nominals: $nominals');
-    print('DLLs: $dls');
-    print('Jumlahs: $jumlahs');
-    print('Category IDs: $categoryIds');
-    print('Data IDs: $dataIds');
-    print('Selected Images: $selectedImages');
-    print('Tanggal List: $tanggalList');
+    print('ID Parent: $parentId');
+    print('Nama: $names');
+    print('Deskripsi: $descriptions');
+    print('Jumlah Satuan: $jumlahSatuans');
+    print('Nominal: $nominals');
+    print('DLL: $dls');
+    print('Jumlah: $jumlahs');
+    print('ID Kategori: $categoryIds');
+    print('ID Data: $dataIds');
+    print('Gambar Terpilih: $selectedImages');
+    print('Daftar Tanggal: $tanggalList');
 
     try {
       await ApiService().editPengeluaran(
@@ -147,7 +156,7 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         SnackBar(content: Text('Data berhasil Diubah')),
       );
 
-      // Refresh halaman sebelumnya
+      // Refresh halaman sebelumnya dan kembali
       Navigator.pop(context, true);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -225,7 +234,8 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(90.0),
+                bottomLeft: Radius.circular(24.0),
+                bottomRight: Radius.circular(24.0),
               ),
             ),
             child: Padding(
@@ -253,62 +263,82 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
             child: SingleChildScrollView(
               controller: _scrollController,
               child: Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 15),
-                    _buildDateField(),
-                    SizedBox(height: 20),
-                    Column(
-                      children: forms,
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.end, // Align buttons to the right
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // Navigate back to the previous page when Cancel is pressed
-                            Navigator.pop(context);
+                        SizedBox(height: 10),
+                        _buildDateField(),
+                        SizedBox(height: 5),
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: forms.length,
+                          separatorBuilder: (context, index) =>
+                              SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            return forms[index];
                           },
-                          style: ElevatedButton.styleFrom(
-                            primary: Color(
-                                0xFFDA0000), // Set color for Cancel button
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  8), // Set radius for Cancel button
-                            ),
-                          ),
-                          child: Text('Cancel'),
                         ),
-                        SizedBox(width: 8), // Add some spacing between buttons
-                        ElevatedButton(
-                          onPressed: _handleSubmit,
-                          style: ElevatedButton.styleFrom(
-                            primary: Color(
-                                0xFFE85C0D), // Set color for Kirim Semua Form button
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  8), // Set radius for Kirim Semua Form button
+                        SizedBox(height: 20),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: ElevatedButton.icon(
+                            onPressed: _addForm,
+                            icon: Icon(Icons.add),
+                            label: Text('Tambah Pengeluaran'),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.blue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                           ),
-                          child: Text('Simpan'),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                primary: Color(0xFFDA0000),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text('Cancel'),
+                            ),
+                            SizedBox(width: 8),
+                            ElevatedButton(
+                              onPressed: _handleSubmit,
+                              style: ElevatedButton.styleFrom(
+                                primary: Color(0xFFE85C0D),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text('Simpan'),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addForm,
-        backgroundColor: Color(0xFFEB8153),
-        child: Icon(Icons.add),
       ),
     );
   }
@@ -338,77 +368,73 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
   }
 
   Widget _buildDateField() {
-    return GestureDetector(
-      onTap: () {
-        _selectDate(context); // Method to open date picker
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.grey[200], // Background color for the date field
-        ),
-        child: TextField(
-          enabled: false, // Disable text editing, only allow date picker
-          decoration: InputDecoration(
-            hintText: selectedDate == null
-                ? 'Pilih Tanggal' // Placeholder text when no date is selected
-                : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}', // Display selected date
-            hintStyle: TextStyle(color: Colors.black87),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Container(
-                height: 48, // Height for the circular icon container
-                width: 48, // Width for the circular icon container
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(
-                      0xFFEB8153), // Background color of the circular icon
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26, // Shadow color
-                      blurRadius: 4.0, // Blur radius
-                      spreadRadius: 1.0, // Spread radius
-                      offset: Offset(0, 5), // Position of the shadow
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.calendar_today,
-                  color: Colors.white,
-                  size: 22,
-                ),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.grey[200],
+      ),
+      child: TextField(
+        readOnly: true,
+        enabled: false,
+        decoration: InputDecoration(
+          hintText: selectedDate == null
+              ? 'Pilih Tanggal'
+              : '${selectedDate!.day} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
+          hintStyle: TextStyle(color: Colors.black87),
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Container(
+              height: 48,
+              width: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFFEB8153),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4.0,
+                    spreadRadius: 1.0,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.calendar_today,
+                color: Colors.white,
+                size: 22,
               ),
             ),
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(
-              vertical: 15, // Vertical padding in TextField
-            ),
+          ),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(
+            vertical: 15,
           ),
         ),
+        onTap: null,
       ),
     );
   }
 
+  String _getMonthName(int month) {
+    const monthNames = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return monthNames[month - 1];
+  }
+
   Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked; // Update selectedDate state
-        // Update the date for all forms
-        for (var form in forms) {
-          if (form.key is GlobalKey<_PengeluaranFormState>) {
-            (form.key as GlobalKey<_PengeluaranFormState>)
-                .currentState
-                ?.updateDate(selectedDate);
-          }
-        }
-      });
-    }
+    // Fungsi ini tidak lagi diperlukan karena field tanggal sekarang readonly
   }
 }
 
@@ -591,23 +617,114 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }
 
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        dividerColor: Colors.transparent,
+        colorScheme: ColorScheme.light(
+          primary: Color(0xFFEB8153),
+        ),
       ),
-      color: Colors.grey[350],
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(selectedDate != null
-                ? 'Tanggal: ${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
-                : 'No Date Selected'),
-            _buildInputFields(),
-            SizedBox(height: 20),
-            _buildActionButtons(),
-          ],
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.grey[300]!,
+            width: 1,
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: ExpansionTile(
+            title: Text(
+              'Edit Pengeluaran',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            collapsedBackgroundColor: Color(0xFFEB8153).withOpacity(0.2),
+            backgroundColor: Colors.white,
+            childrenPadding: EdgeInsets.all(16),
+            initiallyExpanded: true,
+            children: [
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                color: Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(selectedDate != null
+                          ? 'Tanggal: ${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
+                          : 'No Date Selected'),
+                      _buildInputFields(),
+                      SizedBox(height: 20),
+                      if (widget.pengeluaran == null && widget.isLast)
+                        _buildActionButtons(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required IconData icon,
+    required TextEditingController controller,
+    required String hintText,
+    int? maxLines,
+    bool isDescription = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.grey[200],
+      ),
+      child: TextField(
+        controller: controller,
+        style: TextStyle(fontSize: 14),
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          prefixIcon: Padding(
+            padding: EdgeInsets.only(
+                right: 8.0,
+                top: isDescription ? 12.0 : 0,
+                left: isDescription ? 12.0 : 0),
+            child: Container(
+              height: 48,
+              width: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFFEB8153),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4.0,
+                    spreadRadius: 1.0,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          hintText: hintText,
+          hintStyle: TextStyle(color: Colors.grey),
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(
+            vertical: 15,
+            horizontal: isDescription ? 15 : 0,
+          ),
         ),
       ),
     );
@@ -632,23 +749,61 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           icon: Icons.format_align_left,
           controller: descriptionController,
           hintText: 'Masukkan Deskripsi',
+          maxLines: 5,
+          isDescription: true,
         ),
         SizedBox(height: 15),
-        _buildLabel('Nominal'),
-        SizedBox(height: 10),
-        _buildNominalTextField(),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Nominal'),
+                  SizedBox(height: 10),
+                  _buildNominalTextField(),
+                ],
+              ),
+            ),
+            SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Jumlah Satuan'),
+                  SizedBox(height: 10),
+                  _buildJumlahSatuanTextField(),
+                ],
+              ),
+            ),
+          ],
+        ),
         SizedBox(height: 15),
-        _buildLabel('Jumlah Satuan'),
-        SizedBox(height: 10),
-        _buildJumlahSatuanTextField(),
-        SizedBox(height: 15),
-        _buildLabel('Biaya Tambahan (DLL)'),
-        SizedBox(height: 10),
-        _buildDllTextField(),
-        SizedBox(height: 15),
-        _buildLabel('Jumlah'),
-        SizedBox(height: 10),
-        _buildJumlahField(),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Biaya Tambahan (DLL)'),
+                  SizedBox(height: 10),
+                  _buildDllTextField(),
+                ],
+              ),
+            ),
+            SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Jumlah'),
+                  SizedBox(height: 10),
+                  _buildJumlahField(),
+                ],
+              ),
+            ),
+          ],
+        ),
         SizedBox(height: 15),
         _buildLabel('Kategori:'),
         SizedBox(height: 10),
@@ -838,57 +993,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       style: TextStyle(
         fontWeight: FontWeight.bold,
         color: Colors.black87,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required IconData icon,
-    required TextEditingController controller,
-    required String hintText,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
-      ),
-      child: TextField(
-        controller: controller,
-        style: TextStyle(fontSize: 14),
-        decoration: InputDecoration(
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFEB8153),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    spreadRadius: 1.0,
-                    offset: Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          hintText: hintText,
-          hintStyle: TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            vertical: 15,
-          ),
-        ),
       ),
     );
   }

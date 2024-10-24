@@ -558,7 +558,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
             style: TextStyle(color: Colors.white),
           ),
         ),
-        SizedBox(width: 16),
+        SizedBox(width: 8),
         ElevatedButton(
           onPressed: () {
             try {

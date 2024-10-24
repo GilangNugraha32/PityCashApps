@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:dio/dio.dart';
@@ -12,7 +13,7 @@ import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final String baseUrl = "http://pitycash.mamorasoft.com/api";
+  final String baseUrl = "http://192.168.0.211:8000/api";
   final Dio _dio = Dio();
 
   ApiService() {
@@ -30,7 +31,7 @@ class ApiService {
     }
   }
 
-  Future<double> fetchSaldoKeseluruhan() async {
+  Future<double> fetchSaldopPemasukkanKeseluruhan() async {
     try {
       await _setAuthToken();
       final response = await _dio.get('$baseUrl/income/saldo');
@@ -40,13 +41,15 @@ class ApiService {
 
       if (response.statusCode == 200) {
         if (response.data is Map && response.data.containsKey('data')) {
-          final double saldoKeseluruhan = double.parse(response.data['data'].toString());
+          final double saldoKeseluruhan =
+              double.parse(response.data['data'].toString());
           return saldoKeseluruhan;
         } else {
           throw Exception('Data saldo keseluruhan tidak valid');
         }
       } else {
-        throw Exception('Gagal mengambil saldo keseluruhan: ${response.statusCode}');
+        throw Exception(
+            'Gagal mengambil saldo keseluruhan: ${response.statusCode}');
       }
     } catch (e) {
       print('Error mengambil saldo keseluruhan: $e');
@@ -58,7 +61,7 @@ class ApiService {
     try {
       await _setAuthToken();
       final response = await _dio.get(
-        'http://pitycash.mamorasoft.com/api/income/saldo',
+        '$baseUrl/income/saldo',
       );
 
       print('Response status code: ${response.statusCode}'); // Log status code
@@ -81,7 +84,7 @@ class ApiService {
     }
   }
 
-  Future<double> fetchMinSaldo() async {
+  Future<double> fetchPengeluaranSaldoSeluruh() async {
     try {
       await _setAuthToken();
       final response = await _dio.get('$baseUrl/income/saldo');
@@ -105,6 +108,80 @@ class ApiService {
       throw Exception('Gagal mengambil saldo minimum');
     }
   }
+
+  Future<double> fetchMinimalSaldo() async {
+    print('Mengambil saldo minimal');
+    try {
+      await _setAuthToken();
+      final response = await _dio.get('$baseUrl/setting/edit-minimal-saldo');
+
+      print('Kode status respons: ${response.statusCode}');
+      print('Data respons: ${response.data}');
+
+      if (response.statusCode == 200) {
+        if (response.data is Map &&
+            response.data.containsKey('data') &&
+            response.data['data'] is Map &&
+            response.data['data'].containsKey('saldo')) {
+          final double minimalSaldo =
+              double.parse(response.data['data']['saldo'].toString());
+          return minimalSaldo;
+        } else {
+          throw Exception('Data saldo minimal tidak valid');
+        }
+      } else {
+        throw Exception(
+            'Gagal mengambil saldo minimal: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengambil saldo minimal: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengambil saldo minimal: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat mengambil saldo minimal: $e');
+        throw Exception('Gagal mengambil saldo minimal');
+      }
+    }
+  }
+
+  Future<void> updateMinimalSaldo(double minimalSaldo) async {
+    print('Memperbarui saldo minimal: $minimalSaldo');
+    try {
+      await _setAuthToken();
+      final response = await _dio.post(
+        '$baseUrl/setting/update-minimal-saldo',
+        data: {'saldo_hidden': minimalSaldo},
+      );
+
+      print('Kode status respons: ${response.statusCode}');
+      print('Data respons: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['status'] == 200 &&
+            responseData['message'] == "Minimal saldo berhasil diperbarui") {
+          print('Saldo minimal berhasil diperbarui');
+          print('Data yang diperbarui: ${responseData['data']}');
+        } else {
+          throw Exception('Respons tidak sesuai yang diharapkan');
+        }
+      } else {
+        throw Exception(
+            'Gagal memperbarui saldo minimal: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat memperbarui saldo minimal: ${e.response?.data}');
+        throw Exception(
+            'Gagal memperbarui saldo minimal: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
+      } else {
+        print('Error saat memperbarui saldo minimal: $e');
+        throw Exception('Gagal memperbarui saldo minimal');
+      }
+    }
+  }
+
 
   // Fetch all categories with pagination
   Future<List<Category>> fetchCategories({int page = 1}) async {
@@ -134,6 +211,36 @@ class ApiService {
       throw Exception('Failed to load categories');
     }
   }
+  
+  // Fetch all categories with pagination
+  Future<List<Category>> fetchAllCategories({int page = 1}) async {
+    print('Fetching categories from page: $page');
+    try {
+      await _setAuthToken();
+      final response = await _dio.get(
+        '$baseUrl/category/all',
+        queryParameters: {'page': page},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data']['data'] as List;
+        print('Categories fetched: $data'); // Print the fetched data
+        return data
+            .map((categoryJson) => Category.fromJson(categoryJson))
+            .toList();
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError fetching categories: ${e.response?.data}');
+      } else {
+        print('Error fetching categories: $e');
+      }
+      throw Exception('Failed to load categories');
+    }
+  }
+
 
   // Fetch category detail by ID
   Future<Category> fetchCategoryDetail(int id) async {
@@ -201,24 +308,28 @@ class ApiService {
 
       final response = await _dio.get(
         '$baseUrl/user/profile-picture',
+        options: Options(responseType: ResponseType.bytes),
       );
 
       if (response.statusCode == 200) {
         print('Foto profil berhasil ditampilkan');
-        // Mengakses data sesuai struktur respons API
-        final data = response.data['data'];
-        final profilePictureUrl = data['profile_picture_url'];
-        return profilePictureUrl;
+        // Mengkonversi response bytes menjadi base64
+        final bytes = response.data as List<int>;
+        final base64Image = base64Encode(bytes);
+        return 'data:image/png;base64,$base64Image';
       } else {
-        throw Exception('Gagal menampilkan foto profil');
+        throw Exception(
+            'Gagal menampilkan foto profil: ${response.statusCode}');
       }
     } catch (e) {
       if (e is DioError) {
         print('DioError saat menampilkan foto profil: ${e.response?.data}');
+        throw Exception(
+            'Gagal menampilkan foto profil: ${e.response?.statusMessage ?? e.message}');
       } else {
         print('Error saat menampilkan foto profil: $e');
+        throw Exception('Gagal menampilkan foto profil: $e');
       }
-      throw Exception('Gagal menampilkan foto profil');
     }
   }
 
@@ -915,18 +1026,27 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = response.data['data'];
-        return Pengeluaran.fromJson(data);
+        print('Data detail pengeluaran: $data'); // Tambahkan log data
+
+        if (data != null) {
+          return Pengeluaran.fromJson(data);
+        } else {
+          throw Exception('Data detail pengeluaran kosong');
+        }
       } else {
-        throw Exception('Gagal memuat detail pengeluaran');
+        throw Exception(
+            'Gagal memuat detail pengeluaran: ${response.statusCode}');
       }
     } catch (e) {
       if (e is DioError) {
         print(
             'DioError saat mengambil detail pengeluaran: ${e.response?.data}');
+        throw Exception(
+            'Gagal memuat detail pengeluaran: ${e.response?.statusMessage}');
       } else {
         print('Error saat mengambil detail pengeluaran: $e');
+        throw Exception('Gagal memuat detail pengeluaran: $e');
       }
-      throw Exception('Gagal memuat detail pengeluaran');
     }
   }
 
@@ -1160,6 +1280,77 @@ class ApiService {
         print('Error deleting outcomes: $e');
         throw Exception(
             'Failed to delete outcomes'); // Throw exception for other errors
+      }
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> importPengeluaranFromExcel(
+      String filePath) async {
+    print('Mengimpor data pengeluaran dari Excel: $filePath');
+
+    try {
+      await _setAuthToken(); // Pastikan token otorisasi diset sebelum request
+
+      // Buat FormData untuk mengirim file
+      // Dapatkan nama file dari filePath
+      String fileName = path.basename(filePath);
+
+      // Buat FormData untuk mengirim file
+      var formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath, filename: fileName),
+      });
+      final response = await _dio.post(
+        '$baseUrl/outcome/import',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      print('Respons server: ${response.statusCode}');
+
+      // Cek status code
+      if (response.statusCode == 200) {
+        print('Data pengeluaran berhasil diimpor');
+
+        // Validasi respons format JSON
+        if (response.data is Map<String, dynamic>) {
+          final status = response.data['status'];
+          final message = response.data['message'];
+
+          // Pastikan status sesuai dengan yang diharapkan
+          if (status == 200 && message == "Data Berhasil Ditambahkan") {
+            print('Import berhasil: $message');
+            return []; // Mengembalikan list kosong karena tidak menampilkan data
+          } else {
+            print('Import gagal: $message');
+            return [];
+          }
+        } else {
+          throw Exception('Format respons tidak sesuai');
+        }
+      } else {
+        throw Exception(
+            'Gagal mengimpor data pengeluaran: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        // Tangani kesalahan dari Dio (request ke server)
+        final responseData = e.response?.data;
+        final errorMessage =
+            responseData != null && responseData is Map<String, dynamic>
+                ? responseData['message'] ?? 'Error tidak diketahui'
+                : 'Error tidak diketahui';
+
+        print('DioError saat mengimpor data pengeluaran: $errorMessage');
+        throw Exception('Gagal mengimpor data pengeluaran: $errorMessage');
+      } else {
+        // Tangani kesalahan lainnya
+        print('Error saat mengimpor data pengeluaran: $e');
+        throw Exception('Gagal mengimpor data pengeluaran: $e');
       }
     }
   }

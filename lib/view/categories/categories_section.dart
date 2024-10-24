@@ -33,12 +33,25 @@ class _CategoriesSectionState extends State<CategoriesSection> {
 
   final SharedPreferencesService _prefsService = SharedPreferencesService();
 
+  // Controller untuk pencarian
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     filteredCategories = List.from(categories);
     _fetchCategories(currentPage);
     _checkLoginStatus();
+
+    // Menambahkan listener untuk pencarian realtime
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkLoginStatus() async {
@@ -49,14 +62,22 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     });
   }
 
+  void _onSearchChanged() {
+    _filterCategories(_searchController.text);
+  }
+
   void _filterCategories(String query) {
-    if (categories.isEmpty) return; // Ensure categories are not empty
     setState(() {
       if (query.isEmpty) {
         filteredCategories = List.from(categories);
       } else {
         filteredCategories = categories.where((category) {
-          return category.name.toLowerCase().contains(query.toLowerCase());
+          final nameLower = category.name.toLowerCase();
+          final queryLower = query.toLowerCase();
+          final jenisKategori =
+              category.jenisKategori == 1 ? 'pemasukan' : 'pengeluaran';
+          return nameLower.contains(queryLower) ||
+              jenisKategori.contains(queryLower);
         }).toList();
       }
     });
@@ -94,18 +115,19 @@ class _CategoriesSectionState extends State<CategoriesSection> {
         setState(() {
           // Filter out duplicates before adding
           newCategories.forEach((category) {
-            if (!filteredCategories.any(
+            if (!categories.any(
                 (existingCategory) => existingCategory.id == category.id)) {
-              filteredCategories.add(category);
+              categories.add(category);
             }
           });
+          _filterCategories(_searchController.text); // Reapply current filter
           currentPage++; // Increment the page for the next load
         });
       }
     } catch (e) {
       // Handle errors if any
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load categories')),
+        SnackBar(content: Text('Gagal memuat kategori')),
       );
     }
 
@@ -118,7 +140,8 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   Future<void> _refreshCategoryList() async {
     setState(() {
       currentPage = 1; // Reset to the first page
-      filteredCategories.clear(); // Clear the existing list
+      categories.clear(); // Clear the existing list
+      filteredCategories.clear();
       hasMoreCategories = true; // Reset this for refreshing
       isFetching = false; // Reset fetching state
     });
@@ -164,7 +187,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Category',
+                          'Kategori',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -197,9 +220,9 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: TextField(
-                        onChanged: _filterCategories,
+                        controller: _searchController,
                         decoration: InputDecoration(
-                          hintText: 'Cari...',
+                          hintText: 'Cari nama atau jenis kategori...',
                           border: InputBorder.none,
                           icon: Icon(Icons.search, color: Colors.grey),
                         ),
@@ -235,36 +258,94 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: CircleAvatar(
-                                backgroundColor: Color(0xFF51A6F5),
-                                child: IconButton(
-                                  icon: Icon(Icons.print_outlined),
-                                  color: Colors.white,
-                                  iconSize: 28,
-                                  onPressed: () {
-                                    _showExportPDFDialog(context);
-                                  },
-                                ),
-                              ),
+                            TweenAnimationBuilder(
+                              duration: Duration(milliseconds: 300),
+                              tween: Tween<double>(begin: 1, end: 0.95),
+                              builder: (context, double scale, child) {
+                                return Transform.scale(
+                                  scale: scale,
+                                  child: Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFF51A6F5).withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0xFF51A6F5)
+                                              .withOpacity(0.3),
+                                          spreadRadius: 2,
+                                          blurRadius: 5,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        customBorder: CircleBorder(),
+                                        splashColor:
+                                            Color(0xFF51A6F5).withOpacity(0.5),
+                                        highlightColor:
+                                            Color(0xFF51A6F5).withOpacity(0.3),
+                                        onTap: () {
+                                          _showExportPDFDialog(context);
+                                        },
+                                        child: Icon(
+                                          Icons.print_outlined,
+                                          color: Color(0xFF51A6F5),
+                                          size: 28,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
-                            SizedBox(width: 8),
-                            SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: CircleAvatar(
-                                backgroundColor: Color(0xFF68CF29),
-                                child: IconButton(
-                                  icon: Icon(Icons.arrow_circle_down_sharp),
-                                  color: Colors.white,
-                                  iconSize: 28,
-                                  onPressed: () {
-                                    _showDragAndDropModal(context);
-                                  },
-                                ),
-                              ),
+                            SizedBox(width: 5),
+                            TweenAnimationBuilder(
+                              duration: Duration(milliseconds: 300),
+                              tween: Tween<double>(begin: 1, end: 0.95),
+                              builder: (context, double scale, child) {
+                                return Transform.scale(
+                                  scale: scale,
+                                  child: Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFF68CF29).withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Color(0xFF68CF29)
+                                              .withOpacity(0.3),
+                                          spreadRadius: 2,
+                                          blurRadius: 5,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        customBorder: CircleBorder(),
+                                        splashColor:
+                                            Color(0xFF68CF29).withOpacity(0.5),
+                                        highlightColor:
+                                            Color(0xFF68CF29).withOpacity(0.3),
+                                        onTap: () {
+                                          _showDragAndDropModal(context);
+                                        },
+                                        child: Icon(
+                                          Icons.file_download_outlined,
+                                          color: Color(0xFF68CF29),
+                                          size: 28,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -421,26 +502,20 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                     Container(
                       width: 120,
                       height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            spreadRadius: 1,
-                            blurRadius: 3,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextButton(
+                      child: ElevatedButton(
                         child: Text(
                           'Batal',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: Colors.white),
                         ),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.grey,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
                       ),
                     ),
                     Container(
@@ -1023,15 +1098,16 @@ class _CategoriesSectionState extends State<CategoriesSection> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () {
                       _confirmDelete(context, category.id);
                     },
-                    child: Text(
+                    icon: Icon(Icons.delete_outline, size: 18),
+                    label: Text(
                       'Hapus',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -1039,13 +1115,13 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      minimumSize: Size(100, 40), // Ukuran minimum yang sama
+                      minimumSize: Size(95, 36),
                       padding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     ),
                   ),
                   SizedBox(width: 8),
-                  ElevatedButton(
+                  ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -1057,11 +1133,12 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                 )),
                       );
                     },
-                    child: Text(
+                    icon: Icon(Icons.edit_outlined, size: 18),
+                    label: Text(
                       'Edit',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: 13,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -1069,9 +1146,9 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      minimumSize: Size(100, 40), // Ukuran minimum yang sama
+                      minimumSize: Size(95, 36),
                       padding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                     ),
                   ),
                 ],
@@ -1111,13 +1188,19 @@ class _CategoriesSectionState extends State<CategoriesSection> {
             ],
           ),
           actions: [
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Tutup dialog
               },
               child: Text(
                 'Batal',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.grey, // Warna abu-abu untuk background
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
             ),
             ElevatedButton(
@@ -1155,5 +1238,23 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       },
     );
   }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: Colors.white),
+        onPressed: onPressed,
+      ),
+    );
+  }
 }
 // Fungsi untuk menghapus kategori
+

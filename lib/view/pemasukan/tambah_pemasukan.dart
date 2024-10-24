@@ -111,6 +111,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Pemasukan berhasil ditambahkan')),
+        
       );
 
       nameController.clear();
@@ -168,13 +169,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
           Expanded(
             child: Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(90.0),
-                  topRight: Radius.circular(90.0),
-                ),
-              ),
+              decoration: BoxDecoration(),
               child: Padding(
                 padding: const EdgeInsets.all(30.0),
                 child: SingleChildScrollView(

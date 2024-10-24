@@ -94,14 +94,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: _selectedIndex == 2
                     ? Icon(Icons.real_estate_agent) // Ikon baru untuk Pemasukan
                     : Icon(Icons.real_estate_agent_outlined),
-                label: 'Income',
+                label: 'Inflow',
               ),
               BottomNavigationBarItem(
                 icon: _selectedIndex == 3
                     ? Icon(Icons
                         .shopping_cart_checkout) // Ikon baru untuk Pengeluaran
                     : Icon(Icons.shopping_cart_checkout_outlined),
-                label: 'Outcome',
+                label: 'Outflow',
               ),
               BottomNavigationBarItem(
                 icon: _selectedIndex == 4

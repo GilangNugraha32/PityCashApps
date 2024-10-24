@@ -42,34 +42,29 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
 
   void _handleSubmit() async {
     List<Map<String, dynamic>> allFormData = [];
-    List<File?> selectedImages = []; // Change to File?
+    List<File?> selectedImages = [];
 
-    // Collecting data from all forms
     for (var key in formKeys) {
       var data = key.currentState?.getFormData();
       if (data != null && data.isNotEmpty) {
         allFormData.add(data);
 
-        // Safely accessing selectedImage and its files
         if (key.currentState?.selectedImage != null &&
             key.currentState!.selectedImage!.files.isNotEmpty) {
           String? imagePath = key.currentState!.selectedImage!.files.first.path;
           if (imagePath != null) {
-            selectedImages.add(File(imagePath)); // Only add if path is not null
+            selectedImages.add(File(imagePath));
           } else {
-            selectedImages.add(null); // Handle the null case
+            selectedImages.add(null);
           }
         } else {
-          selectedImages
-              .add(null); // Allow image to be null if no image is selected
+          selectedImages.add(null);
         }
       }
     }
 
-    // Debugging: print the data that will be submitted
-    print('Submitting data: $allFormData');
+    print('Mengirim data: $allFormData');
 
-    // Ensure there's data to send
     if (allFormData.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Tidak ada data untuk dikirim')),
@@ -89,7 +84,6 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
         DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now());
 
     for (var entry in allFormData) {
-      // Safely extracting values and providing defaults
       names.add((entry['names'].first ?? '').toString());
       descriptions.add((entry['descriptions'].first ?? '').toString());
       jumlahs.add((entry['jumlah'] as List).first?.toInt() ?? 0);
@@ -99,7 +93,6 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
       categoryIds.add((entry['category'] as num?)?.toInt() ?? 0);
     }
 
-    // Call the API to save data
     try {
       await ApiService().createPengeluaran(
         names,
@@ -113,24 +106,19 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
         selectedImages
             .where((image) => image != null)
             .map((image) => image!)
-            .toList(), // Ensure no nulls
+            .toList(),
       );
 
-      // Display success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Data berhasil dikirim')),
       );
 
-      // Clear forms after successful submission
-      setState(() {
-        formKeys.clear();
-        Navigator.pop(context); // Add a new form if necessary
-      });
+      // Refresh halaman sebelumnya dan kembali
+      Navigator.pop(context, true);
     } catch (error) {
-      // Handle errors here
       print('Error: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahasn saat mengirim data')),
+        SnackBar(content: Text('Terjadi kesalahan saat mengirim data')),
       );
     }
   }
@@ -185,6 +173,7 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(90.0),
+                bottomRight: Radius.circular(90.0),
               ),
             ),
             child: Padding(
@@ -223,8 +212,7 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                       children: List.generate(formKeys.length, (index) {
                         return PengeluaranForm(
                           key: formKeys[index],
-                          onRemove: () =>
-                              _removeForm(index), // Use the new method
+                          onRemove: () => _removeForm(index),
                           onSubmit:
                               (List<Map<String, dynamic>> pengeluaranList) {
                             print(
@@ -233,11 +221,10 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                           isLast: index == formKeys.length - 1,
                           selectedDate: selectedDate,
                           categories: categories,
-                          isFirst: index == 0, // Pass categories to form
+                          isFirst: index == 0,
                           onDateChanged: (DateTime newDate) {
                             setState(() {
                               selectedDate = newDate;
-                              // Update date for all forms
                               for (var key in formKeys) {
                                 (key.currentState as _PengeluaranFormState)
                                     .updateDate(newDate);
@@ -249,33 +236,43 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                     ),
                     SizedBox(height: 20),
                     Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.end, // Align buttons to the right
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _addForm,
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text('+ Tambah Pengeluaran'),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            // Navigate back to the previous page when Cancel is pressed
                             Navigator.pop(context);
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Color(
-                                0xFFDA0000), // Set color for Cancel button
+                            primary: Color(0xFFDA0000),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  8), // Set radius for Cancel button
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           child: Text('Cancel'),
                         ),
-                        SizedBox(width: 8), // Add some spacing between buttons
+                        SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: _handleSubmit,
                           style: ElevatedButton.styleFrom(
-                            primary: Color(
-                                0xFFE85C0D), // Set color for Kirim Semua Form button
+                            primary: Color(0xFFE85C0D),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  8), // Set radius for Kirim Semua Form button
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           child: Text('Simpan'),
@@ -288,11 +285,6 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addForm,
-        backgroundColor: Color(0xFFEB8153),
-        child: Icon(Icons.add),
       ),
     );
   }
@@ -605,7 +597,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.0),
       ),
-      color: Colors.grey[350],
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -710,10 +702,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   Widget _buildNominalTextField() {
     return _buildCustomTextField(
       controller: nominalControllers.last,
-      hintText: 'Masukkan jumlah dalam bentuk Rp',
+      hintText: 'Masukkan jumlah',
       icon: Icons.money,
       inputFormatters: [ThousandSeparatorInputFormatter()],
-      prefixText: showPrefix ? 'Rp. ' : null,
     );
   }
 
@@ -726,10 +717,10 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       ),
       child: TextField(
         controller: jumlahSatuanControllers.last,
-        keyboardType: TextInputType.number, // Allow only numbers
+        keyboardType: TextInputType.number,
         style: TextStyle(fontSize: 14),
         onChanged: (value) {
-          _calculateTotal(value); // Recalculate total whenever this changes
+          _calculateTotal(value);
         },
         decoration: InputDecoration(
           prefixIcon: Padding(
@@ -752,7 +743,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Icon(
-                  Icons.format_list_numbered, // Icon for the field
+                  Icons.format_list_numbered,
                   color: Colors.white,
                 ),
               ),
@@ -773,8 +764,8 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       controller: dllControllers.last,
       hintText: 'Masukkan biaya tambahan (DLL)',
       icon: Icons.attach_money,
-      inputFormatters: [ThousandSeparatorInputFormatter()], // Format as needed
-      onChanged: _calculateTotal, // Recalculate total whenever this changes
+      inputFormatters: [ThousandSeparatorInputFormatter()],
+      onChanged: _calculateTotal,
     );
   }
 
@@ -785,7 +776,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       hintText: 'Jumlah total akan dihitung otomatis',
       readOnly: true,
       icon: Icons.receipt,
-      inputFormatters: [ThousandSeparatorInputFormatter()], // Format as needed
+      inputFormatters: [ThousandSeparatorInputFormatter()],
     );
   }
 
@@ -796,9 +787,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     required IconData icon,
     bool readOnly = false,
     List<TextInputFormatter>? inputFormatters,
-    String? prefixText,
-    TextInputType keyboardType =
-        TextInputType.number, // Restrict to number input
+    TextInputType keyboardType = TextInputType.number,
     ValueChanged<String>? onChanged,
   }) {
     return Container(
@@ -810,8 +799,8 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         controller: controller,
         readOnly: readOnly,
         keyboardType: keyboardType,
-        inputFormatters: inputFormatters ??
-            [FilteringTextInputFormatter.digitsOnly], // Only allow digits
+        inputFormatters:
+            inputFormatters ?? [FilteringTextInputFormatter.digitsOnly],
         style: TextStyle(fontSize: 14),
         onChanged: (value) {
           if (onChanged != null) onChanged(value);
@@ -847,11 +836,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           hintStyle: TextStyle(color: Colors.grey),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 15),
-          // Adjusted to show the prefix text only when the field is focused
-          prefixText: controller.text.isEmpty
-              ? null
-              : (prefixText ??
-                  'Rp. '), // Show prefix when the text is not empty
           prefixStyle: TextStyle(
             color: Colors.black87,
             fontSize: 15,
@@ -864,35 +848,28 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 
 // Function to calculate the total
   void _calculateTotal(String value) {
-    // Remove the "Rp. " prefix and commas for calculations
-    double nominal = double.tryParse(nominalControllers.last.text
-            .replaceAll('Rp. ', '')
-            .replaceAll('.', '')
-            .replaceAll(',', '.')) ??
+    double nominal = double.tryParse(
+            nominalControllers.last.text.replaceAll(RegExp(r'[^\d]'), '')) ??
         0;
     int satuan = int.tryParse(jumlahSatuanControllers.last.text) ?? 0;
-    double dll = double.tryParse(dllControllers.last.text
-            .replaceAll('Rp. ', '')
-            .replaceAll('.', '')
-            .replaceAll(',', '.')) ??
+    double dll = double.tryParse(
+            dllControllers.last.text.replaceAll(RegExp(r'[^\d]'), '')) ??
         0;
 
-    // Calculate the total
     double total = (nominal * satuan) + dll;
 
     setState(() {
-      // Format the total as "Rp. 62.222"
       jumlahControllers.last.text = _formatCurrency(total);
     });
   }
 
 // Helper function to format currency
   String _formatCurrency(double amount) {
-    // Use the number format to display in the desired format
-    return amount.toStringAsFixed(0).replaceAllMapped(
-          RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-          (Match match) => '${match[1]}.',
-        );
+    return NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    ).format(amount);
   }
 
   Widget _buildLabel(String text) {
@@ -1240,7 +1217,7 @@ class ThousandSeparatorInputFormatter extends TextInputFormatter {
 
     // Menggunakan intl package untuk format dengan pemisah ribuan
     String formattedText =
-        NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
+        'Rp' + NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
 
     return TextEditingValue(
       text: formattedText,

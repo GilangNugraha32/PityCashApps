@@ -39,6 +39,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
 
   bool isLoadingMore = false;
   int currentPage = 1;
+  bool isBalanceVisible = true;
 
   @override
   void initState() {
@@ -244,7 +245,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             ),
           );
         },
-        backgroundColor: Color(0xFFE51A6F5),
+        backgroundColor: Colors.orange,
         child: Icon(Icons.add),
       ),
     );
@@ -294,7 +295,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Outcomes',
+          'Outflow',
           style: TextStyle(
             color: Colors.white,
             fontSize: 16,
@@ -311,37 +312,133 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   }
 
   Widget _buildSaldoSection() {
-    return Column(
-      children: [
-        Center(
-          child: Text(
+    return Center(
+      child: Column(
+        children: [
+          Text(
             'Saldo Pity Cash',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withOpacity(0.9),
             ),
           ),
-        ),
-        SizedBox(height: 2),
-        Center(
-          child: isLoading
-              ? CircularProgressIndicator()
-              : Text(
-                  NumberFormat.currency(
-                    locale: 'id_ID',
-                    symbol: 'Rp',
-                    decimalDigits: 0,
-                  ).format(saldo),
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-        ),
-      ],
+          SizedBox(height: 10),
+          FutureBuilder<double>(
+            future: ApiService().fetchMinimalSaldo(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator(color: Colors.white);
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}',
+                    style: TextStyle(color: Colors.white));
+              } else {
+                double minimalSaldo = snapshot.data ?? 0;
+                bool isLowBalance = saldo <= minimalSaldo;
+                return Column(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(width: 40),
+                          Expanded(
+                            child: Text(
+                              isBalanceVisible
+                                  ? NumberFormat.currency(
+                                      locale: 'id_ID',
+                                      symbol: 'Rp',
+                                      decimalDigits: 0,
+                                    ).format(saldo)
+                                  : 'Rp' + _formatHiddenBalance(saldo),
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: isLowBalance
+                                    ? Color(0xFFF54D42)
+                                    : Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              isBalanceVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isBalanceVisible = !isBalanceVisible;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isLowBalance)
+                      Container(
+                        margin: EdgeInsets.only(top: 8),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.yellow.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.yellow,
+                              size: 16,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Saldo di bawah batas minimal',
+                              style: TextStyle(
+                                color: Colors.yellow,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              '(${NumberFormat.currency(
+                                locale: 'id_ID',
+                                symbol: 'Rp',
+                                decimalDigits: 0,
+                              ).format(minimalSaldo)})',
+                              style: TextStyle(
+                                color: Colors.yellow.withOpacity(0.8),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
+  }
+
+  String _formatHiddenBalance(double balance) {
+    String balanceStr = balance.toStringAsFixed(0);
+    List<String> parts = [];
+    for (int i = 0; i < balanceStr.length; i += 3) {
+      int end = i + 3;
+      if (end > balanceStr.length) end = balanceStr.length;
+      parts.add('•••');
+    }
+    return parts.join(',');
   }
 
   Widget _buildToggleButton() {
@@ -354,8 +451,8 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       padding: EdgeInsets.all(6),
       child: Row(
         children: [
-          _buildToggleOption('Income', !isOutcomeSelected),
-          _buildToggleOption('Outcome', isOutcomeSelected),
+          _buildToggleOption('Inflow', !isOutcomeSelected),
+          _buildToggleOption('Outflow', isOutcomeSelected),
         ],
       ),
     );
@@ -364,7 +461,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   Widget _buildToggleOption(String text, bool isSelected) {
     return Expanded(
       child: GestureDetector(
-        onTap: () => _handleSectionClick(text == 'Outcome'),
+        onTap: () => _handleSectionClick(text == 'Outflow'),
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
@@ -820,9 +917,26 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                   SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: selectedFilePath != null
-                        ? () {
-                            _importFile(context, selectedFilePath!);
-                            Navigator.of(context).pop();
+                        ? () async {
+                            try {
+                              List<Map<String, dynamic>> importedData =
+                                  await ApiService().importPengeluaranFromExcel(
+                                      selectedFilePath!);
+                              Navigator.of(context).pop();
+                              _showImportedDataDialog(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Data pengeluaran berhasil diimpor')),
+                              );
+                              _refreshExpenses();
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Gagal mengimpor data pemasukan: $e')),
+                              );
+                            }
                           }
                         : null,
                     child: Text('Upload'),
@@ -914,42 +1028,82 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     required IconData icon,
     required VoidCallback onPressed,
   }) {
-    return SizedBox(
-      width: 50,
-      height: 50,
-      child: CircleAvatar(
-        backgroundColor: color,
-        child: IconButton(
-          icon: Icon(icon),
-          color: Colors.white,
-          iconSize: 28,
-          onPressed: onPressed,
-        ),
-      ),
+    return TweenAnimationBuilder(
+      duration: Duration(milliseconds: 300),
+      tween: Tween<double>(begin: 1, end: 0.95),
+      builder: (context, double scale, child) {
+        return Transform.scale(
+          scale: scale,
+          child: Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                customBorder: CircleBorder(),
+                splashColor: color.withOpacity(0.5),
+                highlightColor: color.withOpacity(0.3),
+                onTap: onPressed,
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildExpensesList(
       Map<int, List<Pengeluaran>> groupedFilteredExpenses) {
-    return LazyLoadScrollView(
-      onEndOfPage: () {
-        if (!isLoading && !isLoadingMore) {
-          _fetchExpenses(currentPage);
-        }
+    return RefreshIndicator(
+      onRefresh: () async {
+        await _refreshExpenses();
       },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: groupedFilteredExpenses.length,
-        itemBuilder: (context, groupIndex) {
-          int parentId = groupedFilteredExpenses.keys.elementAt(groupIndex);
-          List<Pengeluaran> groupItems = groupedFilteredExpenses[parentId]!;
-          double totalJumlah =
-              groupItems.fold(0, (sum, item) => sum + item.jumlah);
-
-          return _buildExpenseGroup(groupItems, totalJumlah);
+      child: LazyLoadScrollView(
+        onEndOfPage: () {
+          if (!isLoading && !isLoadingMore) {
+            _fetchExpenses(currentPage);
+          }
         },
+        child: ListView.builder(
+          padding: const EdgeInsets.all(8),
+          itemCount: groupedFilteredExpenses.length,
+          itemBuilder: (context, groupIndex) {
+            int parentId = groupedFilteredExpenses.keys.elementAt(groupIndex);
+            List<Pengeluaran> groupItems = groupedFilteredExpenses[parentId]!;
+            double totalJumlah =
+                groupItems.fold(0, (sum, item) => sum + item.jumlah);
+
+            return _buildExpenseGroup(groupItems, totalJumlah);
+          },
+        ),
       ),
     );
+  }
+
+  Future<void> _refreshExpenses() async {
+    setState(() {
+      isLoading = true;
+      currentPage = 1;
+      groupedFilteredExpenses.clear();
+    });
+    await _fetchExpenses(currentPage);
   }
 
   Widget _buildExpenseGroup(List<Pengeluaran> groupItems, double totalJumlah) {
@@ -1113,6 +1267,84 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showImportedDataDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: Offset(0.0, 10.0),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFFF5EE),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check,
+                    color: Color(0xFFEB8153),
+                    size: 50,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  'Impor Berhasil!',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFEB8153),
+                  ),
+                ),
+                SizedBox(height: 15),
+                Text(
+                  'Data pengeluaran telah berhasil diimpor ke dalam sistem.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+                SizedBox(height: 25),
+                TextButton(
+                  child: Text(
+                    'Tutup',
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Color(0xFFEB8153),
+                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

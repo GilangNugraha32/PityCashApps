@@ -57,7 +57,6 @@ class _EditCategoriesState extends State<EditCategories> {
         children: [
           Container(
             width: double.infinity,
-            height: MediaQuery.of(context).size.height / 3.6,
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
@@ -69,6 +68,7 @@ class _EditCategoriesState extends State<EditCategories> {
               padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -99,7 +99,6 @@ class _EditCategoriesState extends State<EditCategories> {
                     ),
                   ),
                   SizedBox(height: 12),
-                  Spacer(),
                 ],
               ),
             ),

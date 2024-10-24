@@ -32,6 +32,13 @@ class _HomeSectionState extends State<HomeSection>
   late AnimationController _animationController;
   late Animation<double> _animation;
 
+  List<Pengeluaran> expenses = []; // Tambahkan baris ini
+  List<Pemasukan> incomes = []; // Tambahkan baris ini
+
+  int selectedYear = DateTime.now().year; // Tambahkan baris ini
+
+  bool isBalanceVisible = true; // Tambahkan baris ini
+
   @override
   void initState() {
     super.initState();
@@ -61,7 +68,8 @@ class _HomeSectionState extends State<HomeSection>
 
   Future<void> _getSaldoKeseluruhan() async {
     try {
-      final fetchedSaldoKeseluruhan = await _apiService.fetchSaldoKeseluruhan();
+      final fetchedSaldoKeseluruhan =
+          await _apiService.fetchSaldopPemasukkanKeseluruhan();
       setState(() {
         saldoKeseluruhan = fetchedSaldoKeseluruhan;
       });
@@ -75,7 +83,7 @@ class _HomeSectionState extends State<HomeSection>
 
   Future<void> _getMinSaldo() async {
     try {
-      final fetchedMinSaldo = await _apiService.fetchMinSaldo();
+      final fetchedMinSaldo = await _apiService.fetchPengeluaranSaldoSeluruh();
       setState(() {
         minSaldo = fetchedMinSaldo;
       });
@@ -156,7 +164,7 @@ class _HomeSectionState extends State<HomeSection>
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.only(bottom: 20.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -169,70 +177,167 @@ class _HomeSectionState extends State<HomeSection>
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 7,
+            color: Colors.orange.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 10,
             offset: Offset(0, 3),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  isLoggedIn ? 'Hi, $name!' : 'Hi, Guest!',
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isLoggedIn ? 'Hi, $name' : 'Hi, Guest',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Icon(Icons.notifications, color: Colors.white, size: 24),
+                ],
+              ),
+              SizedBox(height: 30),
+              Center(
+                child: Text(
+                  'Saldo Pity Cash',
                   style: TextStyle(
-                    color: Colors.white,
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withOpacity(0.9),
                   ),
                 ),
-                Icon(
-                  Icons.notifications,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ],
-            ),
-            SizedBox(height: 30),
-            Center(
-              child: Text(
-                'Saldo Pity Cash',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              ),
+              SizedBox(height: 10),
+              Center(
+                child: FutureBuilder<double>(
+                  future: ApiService().fetchMinimalSaldo(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(color: Colors.white);
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}',
+                          style: TextStyle(color: Colors.white));
+                    } else {
+                      double minimalSaldo = snapshot.data ?? 0;
+                      bool isLowBalance = saldo <= minimalSaldo;
+                      return Column(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(width: 40),
+                                Expanded(
+                                  child: Text(
+                                    isBalanceVisible
+                                        ? NumberFormat.currency(
+                                            locale: 'id_ID',
+                                            symbol: 'Rp',
+                                            decimalDigits: 0,
+                                          ).format(saldo)
+                                        : 'Rp' + _formatHiddenBalance(saldo),
+                                    style: TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                      color: isLowBalance
+                                          ? Color(0xFFF54D42)
+                                          : Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    isBalanceVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      isBalanceVisible = !isBalanceVisible;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isLowBalance)
+                            Container(
+                              margin: EdgeInsets.only(top: 8),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Colors.yellow.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.info_outline,
+                                    color: Colors.yellow,
+                                    size: 16,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Saldo di bawah batas minimal',
+                                    style: TextStyle(
+                                      color: Colors.yellow,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    '(${NumberFormat.currency(
+                                      locale: 'id_ID',
+                                      symbol: 'Rp',
+                                      decimalDigits: 0,
+                                    ).format(minimalSaldo)})',
+                                    style: TextStyle(
+                                      color: Colors.yellow.withOpacity(0.8),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      );
+                    }
+                  },
                 ),
               ),
-            ),
-            SizedBox(height: 2),
-            Center(
-              child: isLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text(
-                      NumberFormat.currency(
-                        locale: 'id_ID',
-                        symbol: 'Rp',
-                        decimalDigits: 0,
-                      ).format(saldo),
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-            ),
-            SizedBox(height: 12),
-            _buildIncomeExpenseToggle(),
-          ],
+              SizedBox(height: 20),
+              _buildIncomeExpenseToggle(),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _formatHiddenBalance(double balance) {
+    String balanceStr = balance.toStringAsFixed(0);
+    List<String> parts = [];
+    for (int i = 0; i < balanceStr.length; i += 3) {
+      int end = i + 3;
+      if (end > balanceStr.length) end = balanceStr.length;
+      parts.add('•••');
+    }
+    return parts.join(',');
   }
 
   Widget _buildIncomeExpenseToggle() {
@@ -266,7 +371,7 @@ class _HomeSectionState extends State<HomeSection>
                 ),
                 child: Center(
                   child: Text(
-                    'Income',
+                    'Inflow',
                     style: TextStyle(
                       color:
                           isIncomeSelected ? Colors.white : Color(0xFFB8B8B8),
@@ -292,7 +397,7 @@ class _HomeSectionState extends State<HomeSection>
                 ),
                 child: Center(
                   child: Text(
-                    'Expense',
+                    'Outflow',
                     style: TextStyle(
                       color:
                           !isIncomeSelected ? Colors.white : Color(0xFFB8B8B8),
@@ -748,7 +853,80 @@ class _HomeSectionState extends State<HomeSection>
     );
   }
 
+  Future<void> _fetchIncomes(int page) async {
+    if (isLoadingMore) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      print('Mengambil pemasukan untuk halaman: $page');
+      final fetchedIncomes = await _apiService.fetchIncomes(page: page);
+      print('Pemasukan yang diambil: ${fetchedIncomes.toString()}');
+
+      setState(() {
+        if (page == 1) {
+          incomes = fetchedIncomes;
+        } else {
+          incomes.addAll(fetchedIncomes);
+        }
+      });
+    } catch (e) {
+      print('Kesalahan saat mengambil pemasukan: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+        isLoadingMore = false;
+      });
+    }
+  }
+
+  Future<void> _fetchExpenses(int page) async {
+    if (isLoadingMore) return;
+
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    try {
+      final fetchedExpenses = await _apiService.fetchExpenses(
+        page: page,
+      );
+
+      print('Pengeluaran yang diambil: ${fetchedExpenses.toString()}');
+
+      setState(() {
+        if (page == 1) {
+          expenses = fetchedExpenses;
+        } else {
+          expenses.addAll(fetchedExpenses);
+        }
+      });
+
+      if (fetchedExpenses.isEmpty) {
+        setState(() {
+          isLoadingMore = false;
+        });
+      }
+    } catch (e) {
+      print('Kesalahan saat mengambil pengeluaran: $e');
+    } finally {
+      setState(() {
+        isLoading = false;
+        isLoadingMore = false;
+      });
+    }
+  }
+
   Widget _buildRecentTransactions() {
+    List<dynamic> recentTransactions = [];
+    if (isIncomeSelected) {
+      recentTransactions = incomes.take(5).toList();
+    } else {
+      recentTransactions = expenses.take(5).toList();
+    }
+
     return Card(
       elevation: 8.0,
       shape: RoundedRectangleBorder(
@@ -760,7 +938,9 @@ class _HomeSectionState extends State<HomeSection>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              isIncomeSelected ? 'Your recent income' : 'Your recent expense',
+              isIncomeSelected
+                  ? 'Pemasukan terbaru Anda'
+                  : 'Pengeluaran terbaru Anda',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -768,24 +948,26 @@ class _HomeSectionState extends State<HomeSection>
               ),
             ),
             SizedBox(height: 12),
-            _buildTransactionItem(
-              'Maju Jaya Coffee',
-              'October 4, 2020',
-              2000000,
-              Icons.coffee,
-            ),
-            _buildTransactionItem(
-              'Zeus Motorworks',
-              'October 4, 2020',
-              4000000,
-              Icons.settings,
-            ),
-            _buildTransactionItem(
-              'Freelance Design',
-              'October 4, 2020',
-              1000000,
-              Icons.design_services,
-            ),
+            ...recentTransactions.map((transaction) {
+              IconData icon;
+              String date;
+              double amount;
+              if (isIncomeSelected) {
+                icon = Icons.attach_money;
+                date = transaction.date;
+                amount = double.parse(transaction.jumlah);
+              } else {
+                icon = Icons.money_off;
+                date = transaction.tanggal.toString();
+                amount = transaction.jumlah;
+              }
+              return _buildTransactionItem(
+                transaction.name,
+                date,
+                amount,
+                icon,
+              );
+            }).toList(),
           ],
         ),
       ),

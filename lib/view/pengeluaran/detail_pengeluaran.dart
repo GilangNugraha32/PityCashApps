@@ -89,7 +89,7 @@ class DetailPengeluaran extends StatelessWidget {
                                 }
                               },
                               icon: Icon(Icons.delete,
-                                  color: Color(0xFF1A3A63), size: 18),
+                                  color: Colors.red, size: 18),
                               label: Text(
                                 'Hapus',
                                 style: TextStyle(
@@ -99,10 +99,10 @@ class DetailPengeluaran extends StatelessWidget {
                               ),
                               style: ElevatedButton.styleFrom(
                                 primary: Colors.white,
-                                onPrimary: Color(0xFF1A3A63),
+                                onPrimary: Colors.red,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8.0),
-                                  side: BorderSide(color: Color(0xFF1A3A63)),
+                                  side: BorderSide(color: Colors.red),
                                 ),
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 6),

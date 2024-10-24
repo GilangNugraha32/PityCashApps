@@ -75,3 +75,53 @@ class Pengeluaran {
     return 'Pengeluaran{idData: $idData, name: $name, tanggal: $tanggal}';
   }
 }
+
+class PengeluaranBulanan {
+  final String bulan;
+  final double totalJumlah;
+  final List<Pengeluaran> daftarPengeluaran;
+
+  PengeluaranBulanan(this.bulan, this.totalJumlah, this.daftarPengeluaran);
+
+  factory PengeluaranBulanan.dari(List<Pengeluaran> pengeluaranList) {
+    final Map<String, List<Pengeluaran>> pengeluaranPerBulan = {};
+    
+    for (var pengeluaran in pengeluaranList) {
+      if (pengeluaran.tanggal != null) {
+        final bulanTahun = '${pengeluaran.tanggal!.year}-${pengeluaran.tanggal!.month.toString().padLeft(2, '0')}';
+        pengeluaranPerBulan.putIfAbsent(bulanTahun, () => []).add(pengeluaran);
+      }
+    }
+
+    final String bulanTerbaru = pengeluaranPerBulan.keys.reduce((a, b) => a.compareTo(b) > 0 ? a : b);
+    final List<Pengeluaran> pengeluaranBulanIni = pengeluaranPerBulan[bulanTerbaru] ?? [];
+    final double totalJumlah = pengeluaranBulanIni.fold(0, (sum, item) => sum + item.jumlah);
+
+    return PengeluaranBulanan(bulanTerbaru, totalJumlah, pengeluaranBulanIni);
+  }
+}
+
+class PengeluaranTahunan {
+  final String tahun;
+  final double totalJumlah;
+  final List<Pengeluaran> daftarPengeluaran;
+
+  PengeluaranTahunan(this.tahun, this.totalJumlah, this.daftarPengeluaran);
+
+  factory PengeluaranTahunan.dari(List<Pengeluaran> pengeluaranList) {
+    final Map<String, List<Pengeluaran>> pengeluaranPerTahun = {};
+    
+    for (var pengeluaran in pengeluaranList) {
+      if (pengeluaran.tanggal != null) {
+        final tahun = pengeluaran.tanggal!.year.toString();
+        pengeluaranPerTahun.putIfAbsent(tahun, () => []).add(pengeluaran);
+      }
+    }
+
+    final String tahunTerbaru = pengeluaranPerTahun.keys.reduce((a, b) => a.compareTo(b) > 0 ? a : b);
+    final List<Pengeluaran> pengeluaranTahunIni = pengeluaranPerTahun[tahunTerbaru] ?? [];
+    final double totalJumlah = pengeluaranTahunIni.fold(0, (sum, item) => sum + item.jumlah);
+
+    return PengeluaranTahunan(tahunTerbaru, totalJumlah, pengeluaranTahunIni);
+  }
+}

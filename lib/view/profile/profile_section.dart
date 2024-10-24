@@ -1,4 +1,5 @@
 // For mobile (iOS, Android)
+import 'dart:convert';
 import 'dart:io' if (dart.library.html) 'dart:html';
 
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/profile/change_password.dart';
 import 'package:pity_cash/view/profile/edit_profile.dart';
 import 'package:pity_cash/service/share_preference.dart';
+import 'package:pity_cash/view/profile/settings_saldo.dart';
 
 class ProfileSection extends StatefulWidget {
   @override
@@ -83,16 +85,25 @@ class _ProfileSectionState extends State<ProfileSection> {
     );
   }
 
+  Future<void> _refreshProfile() async {
+    await _checkLoginStatus();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            _buildProfileHeader(),
-            SizedBox(height: 30),
-            _buildProfileOptions(),
-          ],
+      body: RefreshIndicator(
+        onRefresh: _refreshProfile,
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              _buildProfileHeader(),
+              SizedBox(height: 30),
+              _buildProfileOptions(),
+            ],
+          ),
         ),
       ),
     );
@@ -145,41 +156,41 @@ class _ProfileSectionState extends State<ProfileSection> {
               ],
             ),
             SizedBox(height: 30),
-            FutureBuilder<String>(
-              future: ApiService().showProfilePicture(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return CircleAvatar(
-                    radius: 60,
-                    backgroundImage: AssetImage('assets/piticash_log.png'),
-                    backgroundColor: Colors.white,
-                  );
-                } else if (snapshot.hasData && snapshot.data != null) {
-                  return Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: NetworkImage(snapshot.data!),
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white,
+                  width: 3,
+                ),
+              ),
+              child: ClipOval(
+                child: FutureBuilder<String>(
+                  future: ApiService().showProfilePicture(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      );
+                    } else if (snapshot.hasError) {
+                      print('Error menampilkan foto profil: ${snapshot.error}');
+                      return Image.asset(
+                        'assets/piticash_log.png',
                         fit: BoxFit.cover,
-                      ),
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 3,
-                      ),
-                    ),
-                  );
-                } else {
-                  return CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Colors.grey,
-                    child: Icon(Icons.person, size: 60, color: Colors.white),
-                  );
-                }
-              },
+                      );
+                    } else if (snapshot.hasData && snapshot.data != null) {
+                      return Image.memory(
+                        base64Decode(snapshot.data!.split(',').last),
+                        fit: BoxFit.cover,
+                      );
+                    } else {
+                      return Icon(Icons.person, size: 60, color: Colors.white);
+                    }
+                  },
+                ),
+              ),
             ),
             SizedBox(height: 15),
             Text(
@@ -215,27 +226,27 @@ class _ProfileSectionState extends State<ProfileSection> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => EditProfile()),
-            ),
+            ).then((_) => _refreshProfile()),
           ),
           SizedBox(height: 15),
           _buildOptionButton(
             icon: Icons.lock_outline,
-            label: 'Change Password',
+            label: 'Ubah Password',
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => ChangePasswordProfile()),
-            ),
+            ).then((_) => _refreshProfile()),
           ),
           SizedBox(
             height: 15,
           ),
           _buildOptionButton(
             icon: Icons.settings,
-            label: 'Settings',
+            label: 'Pengaturan Saldo',
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ChangePasswordProfile()),
-            ),
+              MaterialPageRoute(builder: (context) => SettingsSaldo()),
+            ).then((_) => _refreshProfile()),
           ),
           SizedBox(height: 15),
           _buildOptionButton(

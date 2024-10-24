@@ -36,6 +36,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   bool isLoadingMore = false;
   int currentPage = 1;
   bool isLoading = true;
+  bool isBalanceVisible = true;
 
   @override
   void initState() {
@@ -486,7 +487,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
             ),
           );
         },
-        backgroundColor: Color(0xFFE51A6F5),
+        backgroundColor: Colors.orange,
         child: Icon(Icons.add),
       ),
     );
@@ -536,7 +537,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Incomes',
+          'Inflow',
           style: TextStyle(
             color: Colors.white,
             fontSize: 14,
@@ -553,37 +554,133 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   }
 
   Widget _buildSaldoSection() {
-    return Column(
-      children: [
-        Center(
-          child: Text(
+    return Center(
+      child: Column(
+        children: [
+          Text(
             'Saldo Pity Cash',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              color: Colors.white.withOpacity(0.9),
             ),
           ),
-        ),
-        SizedBox(height: 2),
-        Center(
-          child: isLoading
-              ? CircularProgressIndicator()
-              : Text(
-                  NumberFormat.currency(
-                    locale: 'id_ID',
-                    symbol: 'Rp',
-                    decimalDigits: 0,
-                  ).format(saldo),
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-        ),
-      ],
+          SizedBox(height: 10),
+          FutureBuilder<double>(
+            future: ApiService().fetchMinimalSaldo(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator(color: Colors.white);
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}',
+                    style: TextStyle(color: Colors.white));
+              } else {
+                double minimalSaldo = snapshot.data ?? 0;
+                bool isLowBalance = saldo <= minimalSaldo;
+                return Column(
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(width: 40),
+                          Expanded(
+                            child: Text(
+                              isBalanceVisible
+                                  ? NumberFormat.currency(
+                                      locale: 'id_ID',
+                                      symbol: 'Rp',
+                                      decimalDigits: 0,
+                                    ).format(saldo)
+                                  : 'Rp' + _formatHiddenBalance(saldo),
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: isLowBalance
+                                    ? Color(0xFFF54D42)
+                                    : Colors.white,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              isBalanceVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isBalanceVisible = !isBalanceVisible;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isLowBalance)
+                      Container(
+                        margin: EdgeInsets.only(top: 8),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: Colors.yellow.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.yellow,
+                              size: 16,
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Saldo di bawah batas minimal',
+                              style: TextStyle(
+                                color: Colors.yellow,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              '(${NumberFormat.currency(
+                                locale: 'id_ID',
+                                symbol: 'Rp',
+                                decimalDigits: 0,
+                              ).format(minimalSaldo)})',
+                              style: TextStyle(
+                                color: Colors.yellow.withOpacity(0.8),
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
+  }
+
+  String _formatHiddenBalance(double balance) {
+    String balanceStr = balance.toStringAsFixed(0);
+    List<String> parts = [];
+    for (int i = 0; i < balanceStr.length; i += 3) {
+      int end = i + 3;
+      if (end > balanceStr.length) end = balanceStr.length;
+      parts.add('•••');
+    }
+    return parts.join(',');
   }
 
   Widget _buildToggleButton() {
@@ -596,8 +693,8 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       padding: EdgeInsets.all(6),
       child: Row(
         children: [
-          _buildToggleOption('Income', isIncomeSelected),
-          _buildToggleOption('Expense', !isIncomeSelected),
+          _buildToggleOption('Inflow', isIncomeSelected),
+          _buildToggleOption('Outflow', !isIncomeSelected),
         ],
       ),
     );
@@ -606,7 +703,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   Widget _buildToggleOption(String text, bool isSelected) {
     return Expanded(
       child: GestureDetector(
-        onTap: () => _handleSectionClick(text == 'Income'),
+        onTap: () => _handleSectionClick(text == 'Inflow'),
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
@@ -801,29 +898,64 @@ class _PemasukanSectionState extends State<PemasukanSection> {
         Expanded(
           child: GestureDetector(
             onTap: () => _selectDateRange(context),
-            child: AbsorbPointer(
-              child: TextField(
-                enabled: false,
-                decoration: InputDecoration(
-                  hintText: selectedDateRange == null
-                      ? 'Pilih Tanggal'
-                      : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
-                  hintStyle: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 13,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Color(0xFFFFF3E0),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Color(0xFFFFB74D), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
                   ),
-                  prefixIcon: _buildDateRangeIcon(),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide.none,
-                    borderRadius: BorderRadius.circular(24.0),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.date_range,
+                    color: Color(0xFFFF9800),
+                    size: 18,
                   ),
-                  contentPadding: EdgeInsets.symmetric(
-                    vertical: 15,
-                    horizontal: 20,
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          selectedDateRange == null
+                              ? 'Pilih Tanggal'
+                              : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
+                          style: TextStyle(
+                            color: Color(0xFF424242),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          selectedDateRange == null
+                              ? 'Pilih rentang tanggal sesuai kebutuhan Anda'
+                              : 'Rentang tanggal yang dipilih',
+                          style: TextStyle(
+                            color: Color(0xFF757575),
+                            fontSize: 11,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    color: Color(0xFFFF9800),
+                    size: 16,
+                  ),
+                ],
               ),
             ),
           ),
@@ -1363,18 +1495,46 @@ class _PemasukanSectionState extends State<PemasukanSection> {
 
   Widget _buildActionButton(
       IconData icon, Color color, VoidCallback onPressed) {
-    return SizedBox(
-      width: 50,
-      height: 50,
-      child: CircleAvatar(
-        backgroundColor: color,
-        child: IconButton(
-          icon: Icon(icon),
-          color: Colors.white,
-          iconSize: 28,
-          onPressed: onPressed,
-        ),
-      ),
+    return TweenAnimationBuilder(
+      duration: Duration(milliseconds: 300),
+      tween: Tween<double>(begin: 1, end: 0.95),
+      builder: (context, double scale, child) {
+        return Transform.scale(
+          scale: scale,
+          child: Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              shape: BoxShape.circle,
+              border: Border.all(
+                  color: color, width: 1), // Garis pembatas yang lebih jelas
+              boxShadow: [
+                BoxShadow(
+                  color: color.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                customBorder: CircleBorder(),
+                splashColor: color.withOpacity(0.5),
+                highlightColor: color.withOpacity(0.3),
+                onTap: onPressed,
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

@@ -25,7 +25,6 @@ class _TambahCategoriesState extends State<TambahCategories> {
         children: [
           Container(
             width: double.infinity,
-            height: MediaQuery.of(context).size.height / 3.6,
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
@@ -37,6 +36,7 @@ class _TambahCategoriesState extends State<TambahCategories> {
               padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -54,19 +54,18 @@ class _TambahCategoriesState extends State<TambahCategories> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 24),
                   Center(
                     child: Text(
                       'Tambah Kategori',
                       style: TextStyle(
-                        fontSize: 26,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
                   ),
                   SizedBox(height: 12),
-                  Spacer(),
                 ],
               ),
             ),
@@ -103,7 +102,8 @@ class _TambahCategoriesState extends State<TambahCategories> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Color(0xFFEB8153), width: 2.0),
+                              borderSide: BorderSide(
+                                  color: Color(0xFFEB8153), width: 2.0),
                             ),
                             contentPadding: EdgeInsets.symmetric(
                                 horizontal: 12.0, vertical: 8.0),
@@ -136,7 +136,8 @@ class _TambahCategoriesState extends State<TambahCategories> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(color: Color(0xFFEB8153), width: 2.0),
+                              borderSide: BorderSide(
+                                  color: Color(0xFFEB8153), width: 2.0),
                             ),
                             contentPadding: EdgeInsets.symmetric(
                                 horizontal: 12.0, vertical: 8.0),
@@ -172,7 +173,8 @@ class _TambahCategoriesState extends State<TambahCategories> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide(color: Color(0xFFEB8153), width: 2.0),
+                            borderSide: BorderSide(
+                                color: Color(0xFFEB8153), width: 2.0),
                           ),
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 12.0, vertical: 8.0),
