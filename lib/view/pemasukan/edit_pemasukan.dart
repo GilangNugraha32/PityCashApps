@@ -81,7 +81,18 @@ class _EditPemasukanState extends State<EditPemasukan> {
         selectedCategory == null ||
         selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Harap lengkapi semua field.')),
+        SnackBar(
+          content: Text(
+            'Harap lengkapi semua field.',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
       return;
     }
@@ -95,7 +106,17 @@ class _EditPemasukanState extends State<EditPemasukan> {
     if (jumlahValue == null || jumlahValue <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text('Jumlah harus berupa angka yang valid dan positif.')),
+          content: Text(
+            'Jumlah harus berupa angka yang valid dan positif.',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
       return;
     }
@@ -112,7 +133,18 @@ class _EditPemasukanState extends State<EditPemasukan> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Pemasukan berhasil diubah')),
+        SnackBar(
+          content: Text(
+            'Pemasukan berhasil diubah',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
 
       nameController.clear();
@@ -129,7 +161,18 @@ class _EditPemasukanState extends State<EditPemasukan> {
     } catch (e) {
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengubah pemasukan: ${e.toString()}')),
+        SnackBar(
+          content: Text(
+            'Gagal mengubah pemasukan: ${e.toString()}',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
     }
   }
@@ -570,7 +613,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
             }
           },
           style: ElevatedButton.styleFrom(
-            primary: Colors.orange,
+            primary: Color(0xFFE85C0D),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),

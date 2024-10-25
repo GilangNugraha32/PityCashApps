@@ -59,23 +59,17 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
   void submit() async {
     try {
       if (nameController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Nama tidak boleh kosong')),
-        );
+        _showSnackbar('Nama tidak boleh kosong', isError: true);
         return;
       }
 
       if (descriptionController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Deskripsi tidak boleh kosong')),
-        );
+        _showSnackbar('Deskripsi tidak boleh kosong', isError: true);
         return;
       }
 
       if (selectedDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tanggal tidak boleh kosong')),
-        );
+        _showSnackbar('Tanggal tidak boleh kosong', isError: true);
         return;
       }
 
@@ -86,16 +80,12 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
       double? jumlah = double.tryParse(jumlahText);
 
       if (jumlah == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Jumlah harus berupa angka')),
-        );
+        _showSnackbar('Jumlah harus berupa angka', isError: true);
         return;
       }
 
       if (selectedCategory == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Kategori tidak boleh kosong')),
-        );
+        _showSnackbar('Kategori tidak boleh kosong', isError: true);
         return;
       }
 
@@ -109,10 +99,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         jenisKategori: selectedCategory?.id ?? 0,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Pemasukan berhasil ditambahkan')),
-        
-      );
+      _showSnackbar('Pemasukan berhasil ditambahkan', isError: false);
 
       nameController.clear();
       descriptionController.clear();
@@ -127,10 +114,25 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
       });
     } catch (e) {
       print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal menambahkan pemasukan')),
-      );
+      _showSnackbar('Gagal menambahkan pemasukan', isError: true);
     }
+  }
+
+  void _showSnackbar(String message, {required bool isError}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.all(10),
+      ),
+    );
   }
 
   @override

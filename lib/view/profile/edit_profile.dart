@@ -5,6 +5,8 @@ import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'dart:io';
 
+import 'package:pity_cash/view/home/home.dart';
+
 class EditProfile extends StatefulWidget {
   @override
   _EditProfileState createState() => _EditProfileState();
@@ -81,6 +83,16 @@ class _EditProfileState extends State<EditProfile> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
+          ),
+        );
+        // Kembali ke halaman sebelumnya
+        Navigator.pop(context, true);
+
+        // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialIndex: 4),
           ),
         );
       } catch (e) {

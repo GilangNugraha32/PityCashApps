@@ -9,6 +9,7 @@ import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
+import 'package:pity_cash/view/home/home.dart';
 import 'package:pity_cash/view/pemasukan/detail_pemasukan.dart';
 import 'package:pity_cash/view/pemasukan/tambah_pemasukan.dart';
 import 'package:pity_cash/view/pengeluaran/detail_pengeluaran.dart';
@@ -237,13 +238,16 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => TambahPengeluaran(),
             ),
           );
+          if (result == true) {
+            _refreshExpenses();
+          }
         },
         backgroundColor: Colors.orange,
         child: Icon(Icons.add),
@@ -461,7 +465,15 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   Widget _buildToggleOption(String text, bool isSelected) {
     return Expanded(
       child: GestureDetector(
-        onTap: () => _handleSectionClick(text == 'Outflow'),
+        onTap: () {
+          int initialIndex = text == 'Outflow' ? 3 : 2;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(initialIndex: initialIndex),
+            ),
+          );
+        },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
@@ -563,55 +575,57 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   Widget _buildDateRangeSelector() {
     return GestureDetector(
       onTap: () => _selectDateRange(context),
-      child: AbsorbPointer(
-        child: TextField(
-          enabled: false,
-          decoration: InputDecoration(
-            hintText: selectedDateRange == null
-                ? 'Pilih Tanggal'
-                : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
-            hintStyle: TextStyle(
-              color: Colors.black54,
-              fontSize: 13,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Color(0xFFEB8153).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(14),
+          border:
+              Border.all(color: Color(0xFFEB8153).withOpacity(0.2), width: 0.5),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.date_range,
+              color: Color(0xFFEB8153),
+              size: 16,
             ),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFEB8153),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4.0,
-                      spreadRadius: 1.0,
-                      offset: Offset(0, 5),
+            SizedBox(width: 5),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    selectedDateRange == null
+                        ? 'Pilih Tanggal'
+                        : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
+                    style: TextStyle(
+                      color: Color(0xFFEB8153),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.calendar_today,
-                    color: Colors.white,
-                    size: 22,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
+                  SizedBox(height: 4),
+                  Text(
+                    selectedDateRange == null
+                        ? 'Pilih rentang tanggal sesuai kebutuhan Anda'
+                        : 'Rentang tanggal yang dipilih',
+                    style: TextStyle(
+                      color: Color(0xFFFF9D6C),
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ),
             ),
-            filled: true,
-            fillColor: Colors.grey[200],
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: BorderRadius.circular(24.0),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Color(0xFFEB8153),
+              size: 14,
             ),
-            contentPadding: EdgeInsets.symmetric(
-              vertical: 15,
-              horizontal: 20,
-            ),
-          ),
+          ],
         ),
       ),
     );
@@ -1024,8 +1038,8 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   }
 
   Widget _buildCircularButton({
-    required Color color,
     required IconData icon,
+    required Color color,
     required VoidCallback onPressed,
   }) {
     return TweenAnimationBuilder(
@@ -1040,14 +1054,8 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             decoration: BoxDecoration(
               color: color.withOpacity(0.2),
               shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
+              border: Border.all(
+                  color: color, width: 0.5), // Garis pembatas yang lebih tipis
             ),
             child: Material(
               color: Colors.transparent,
@@ -1144,12 +1152,30 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     );
   }
 
+  String _getMonthName(int month) {
+    const monthNames = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return monthNames[month - 1];
+  }
+
   Widget _buildExpenseGroupHeader(List<Pengeluaran> groupItems) {
     return Text(
       groupItems.isNotEmpty &&
               groupItems.first.parentPengeluaran != null &&
               groupItems.first.tanggal != null
-          ? DateFormat('dd MMMM yyyy').format(groupItems.first.tanggal!)
+          ? '${groupItems.first.tanggal!.day} ${_getMonthName(groupItems.first.tanggal!.month)} ${groupItems.first.tanggal!.year}'
           : 'Tidak ada tanggal',
       style: TextStyle(
         fontSize: 14,

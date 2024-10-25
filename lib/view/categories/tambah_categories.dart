@@ -206,7 +206,6 @@ class _TambahCategoriesState extends State<TambahCategories> {
                             onPressed: () async {
                               String name = nameController.text;
                               String description = descriptionController.text;
-
                               if (name.isNotEmpty &&
                                   selectedJenisKategori != null) {
                                 try {
@@ -218,26 +217,60 @@ class _TambahCategoriesState extends State<TambahCategories> {
 
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                        content: Text(
-                                            'Kategori berhasil ditambahkan')),
+                                      content: Text(
+                                        'Berhasil ditambahkan!',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      backgroundColor: Colors.green,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      margin: EdgeInsets.all(10),
+                                    ),
                                   );
 
                                   Navigator.pop(context, 'success');
                                 } catch (e) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                        content:
-                                            Text('Gagal menambahkan kategori')),
+                                      content: Text(
+                                        'Gagal menambahkan kategori',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      backgroundColor: Colors.red,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      margin: EdgeInsets.all(10),
+                                    ),
                                   );
                                 }
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                      content: Text('Please fill all fields')),
+                                    content: Text(
+                                      'Harap isi semua kolom',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    margin: EdgeInsets.all(10),
+                                  ),
                                 );
                               }
                             },
-                            child: Text('Submit'),
+                            child: Text('Simpan'),
                             style: ElevatedButton.styleFrom(
                               primary: Color(0xFFE85C0D),
                               shape: RoundedRectangleBorder(

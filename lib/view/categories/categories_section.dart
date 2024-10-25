@@ -127,7 +127,18 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     } catch (e) {
       // Handle errors if any
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat kategori')),
+        SnackBar(
+          content: Text(
+            'Gagal memuat kategori',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
     }
 
@@ -258,93 +269,19 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            TweenAnimationBuilder(
-                              duration: Duration(milliseconds: 300),
-                              tween: Tween<double>(begin: 1, end: 0.95),
-                              builder: (context, double scale, child) {
-                                return Transform.scale(
-                                  scale: scale,
-                                  child: Container(
-                                    width: 52,
-                                    height: 52,
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFF51A6F5).withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Color(0xFF51A6F5)
-                                              .withOpacity(0.3),
-                                          spreadRadius: 2,
-                                          blurRadius: 5,
-                                          offset: Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        customBorder: CircleBorder(),
-                                        splashColor:
-                                            Color(0xFF51A6F5).withOpacity(0.5),
-                                        highlightColor:
-                                            Color(0xFF51A6F5).withOpacity(0.3),
-                                        onTap: () {
-                                          _showExportPDFDialog(context);
-                                        },
-                                        child: Icon(
-                                          Icons.print_outlined,
-                                          color: Color(0xFF51A6F5),
-                                          size: 28,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
+                            _buildActionButton(
+                              Icons.print_outlined,
+                              Color(0xFF51A6F5),
+                              () {
+                                _showExportPDFDialog(context);
                               },
                             ),
                             SizedBox(width: 5),
-                            TweenAnimationBuilder(
-                              duration: Duration(milliseconds: 300),
-                              tween: Tween<double>(begin: 1, end: 0.95),
-                              builder: (context, double scale, child) {
-                                return Transform.scale(
-                                  scale: scale,
-                                  child: Container(
-                                    width: 52,
-                                    height: 52,
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFF68CF29).withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Color(0xFF68CF29)
-                                              .withOpacity(0.3),
-                                          spreadRadius: 2,
-                                          blurRadius: 5,
-                                          offset: Offset(0, 3),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        customBorder: CircleBorder(),
-                                        splashColor:
-                                            Color(0xFF68CF29).withOpacity(0.5),
-                                        highlightColor:
-                                            Color(0xFF68CF29).withOpacity(0.3),
-                                        onTap: () {
-                                          _showDragAndDropModal(context);
-                                        },
-                                        child: Icon(
-                                          Icons.file_download_outlined,
-                                          color: Color(0xFF68CF29),
-                                          size: 28,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                );
+                            _buildActionButton(
+                              Icons.file_download_outlined,
+                              Color(0xFF68CF29),
+                              () {
+                                _showDragAndDropModal(context);
                               },
                             ),
                           ],
@@ -455,6 +392,43 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     );
   }
 
+  Widget _buildActionButton(
+      IconData icon, Color color, VoidCallback onPressed) {
+    return TweenAnimationBuilder(
+      duration: Duration(milliseconds: 300),
+      tween: Tween<double>(begin: 1, end: 0.95),
+      builder: (context, double scale, child) {
+        return Transform.scale(
+          scale: scale,
+          child: Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              shape: BoxShape.circle,
+              border: Border.all(
+                  color: color, width: 0.5), // Garis pembatas yang lebih tipis
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                customBorder: CircleBorder(),
+                splashColor: color.withOpacity(0.5),
+                highlightColor: color.withOpacity(0.3),
+                onTap: onPressed,
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 28,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _showExportPDFDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -545,8 +519,19 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                   .pop(); // Menutup dialog setelah berhasil
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        'PDF berhasil diekspor ke: $newPath')),
+                                  content: Text(
+                                    'PDF berhasil diekspor ke: $newPath',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor: Colors.green,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  margin: EdgeInsets.all(10),
+                                ),
                               );
                             } else {
                               throw Exception(
@@ -557,7 +542,19 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                 .pop(); // Menutup dialog jika terjadi kesalahan
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text('Gagal mengekspor PDF: $e')),
+                                content: Text(
+                                  'Gagal mengekspor PDF: $e',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                margin: EdgeInsets.all(10),
+                              ),
                             );
                           }
                         },
@@ -653,8 +650,19 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                             Navigator.of(context).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text(
-                                      'Template berhasil diunduh: $savePath')),
+                                content: Text(
+                                  'Template berhasil diunduh: $savePath',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Colors.green,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                margin: EdgeInsets.all(10),
+                              ),
                             );
                           } else {
                             throw Exception(
@@ -664,7 +672,19 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                           Navigator.of(context).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content: Text('Gagal mengunduh template: $e')),
+                              content: Text(
+                                'Gagal mengunduh template: $e',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              margin: EdgeInsets.all(10),
+                            ),
                           );
                         }
                       },
@@ -684,7 +704,18 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                               Navigator.of(context).pop();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Data berhasil diimpor'),
+                                  content: Text(
+                                    'Data berhasil diimpor',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor: Colors.green,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  margin: EdgeInsets.all(10),
                                   duration: Duration(seconds: 2),
                                 ),
                               );
@@ -692,8 +723,19 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content:
-                                        Text('Gagal mengimpor kategori: $e')),
+                                  content: Text(
+                                    'Gagal mengimpor kategori: $e',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  margin: EdgeInsets.all(10),
+                                ),
                               );
                             }
                           }
@@ -1238,23 +1280,5 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       },
     );
   }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: Colors.white),
-        onPressed: onPressed,
-      ),
-    );
-  }
-}
-// Fungsi untuk menghapus kategori
+}// Fungsi untuk menghapus kategori
 

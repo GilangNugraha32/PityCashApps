@@ -220,26 +220,47 @@ class _ProfileSectionState extends State<ProfileSection> {
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
         children: [
-          _buildOptionButton(
-            icon: Icons.person_outline,
-            label: 'Edit Profile',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => EditProfile()),
-            ).then((_) => _refreshProfile()),
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 0.25,
+            child: Column(
+              children: [
+                _buildOptionButton(
+                  icon: Icons.person_outline,
+                  label: 'Edit Profile',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => EditProfile()),
+                  ).then((_) => _refreshProfile()),
+                  showTrailingIcon: true,
+                  showBorder: false,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                  ),
+                ),
+                Divider(height: 0.5, thickness: 0.5),
+                _buildOptionButton(
+                  icon: Icons.lock_outline,
+                  label: 'Ubah Password',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChangePasswordProfile()),
+                  ).then((_) => _refreshProfile()),
+                  showTrailingIcon: true,
+                  showBorder: false,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  ),
+                ),
+              ],
+            ),
           ),
           SizedBox(height: 15),
-          _buildOptionButton(
-            icon: Icons.lock_outline,
-            label: 'Ubah Password',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ChangePasswordProfile()),
-            ).then((_) => _refreshProfile()),
-          ),
-          SizedBox(
-            height: 15,
-          ),
           _buildOptionButton(
             icon: Icons.settings,
             label: 'Pengaturan Saldo',
@@ -265,21 +286,30 @@ class _ProfileSectionState extends State<ProfileSection> {
     required String label,
     required void Function() onTap,
     Color color = const Color(0xFFEB8153),
+    bool showTrailingIcon = true,
+    bool showBorder = true,
+    BorderRadius? borderRadius,
   }) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius:
+            borderRadius ?? (showBorder ? BorderRadius.circular(15) : null),
         color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
+        boxShadow: showBorder
+            ? [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 2,
+                  offset: Offset(0, 1),
+                ),
+              ]
+            : null,
       ),
       child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: borderRadius ?? BorderRadius.zero,
+        ),
         leading: CircleAvatar(
           backgroundColor: color.withOpacity(0.1),
           child: Icon(icon, color: color),

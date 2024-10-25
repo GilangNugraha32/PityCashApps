@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:intl/intl.dart';
+import 'package:pity_cash/view/home/home.dart';
 
 class SettingsSaldo extends StatefulWidget {
   @override
@@ -98,10 +99,38 @@ class _SettingsSaldoState extends State<SettingsSaldo>
       setState(() {
         minSaldo = newMinSaldo;
       });
-      _showSnackBar('Saldo minimal berhasil diperbarui');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Saldo minimal berhasil diperbarui'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+      // Kembali ke halaman sebelumnya
+      Navigator.pop(context, true);
+
+      // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(initialIndex: 4),
+        ),
+      );
     } catch (e) {
       print('Error updating minimal saldo: $e');
-      _showSnackBar('Gagal memperbarui saldo minimal');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memperbarui saldo minimal: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
     }
   }
 

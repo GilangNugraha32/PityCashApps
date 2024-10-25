@@ -9,6 +9,7 @@ import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
+import 'package:pity_cash/view/home/home.dart';
 import 'package:pity_cash/view/pemasukan/detail_pemasukan.dart';
 import 'package:pity_cash/view/pemasukan/edit_pemasukan.dart';
 import 'package:pity_cash/view/pemasukan/tambah_pemasukan.dart';
@@ -52,6 +53,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       currentPage = 1;
       incomes.clear();
       _fetchIncomes(currentPage);
+      _getSaldo(); // Refresh saldo terbaru
     });
   }
 
@@ -106,8 +108,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                   height: 10,
                 ),
                 Text(
-                  DateFormat('d MMMM yyyy')
-                      .format(DateTime.parse(pemasukan.date)),
+                  '${DateTime.parse(pemasukan.date).day} ${_getMonthName(DateTime.parse(pemasukan.date).month)} ${DateTime.parse(pemasukan.date).year}',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -259,7 +260,6 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   }
 
   void _navigateToEditPage(Pemasukan pemasukan) {
-    // Implementasi navigasi ke halaman edit
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -283,13 +283,19 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           ),
           content: Text('Apakah Anda yakin ingin menghapus data ini?'),
           actions: [
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
               child: Text(
                 'Batal',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
             ),
             ElevatedButton(
@@ -297,13 +303,37 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                 try {
                   await _apiService.deleteIncome(pemasukan.idData);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Berhasil dihapus!')),
+                    SnackBar(
+                      content: Text(
+                        'Berhasil dihapus!',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      margin: EdgeInsets.all(10),
+                    ),
                   );
                   _refreshIncomes();
                   Navigator.of(context).pop();
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Gagal menghapus data: $e')),
+                    SnackBar(
+                      content: Text(
+                        'Gagal menghapus data: $e',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                      backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      margin: EdgeInsets.all(10),
+                    ),
                   );
                 }
               },
@@ -444,8 +474,20 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   }
 
   void _showErrorSnackbar(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.all(10),
+      ),
+    );
   }
 
   void _handleSectionClick(bool isIncome) {
@@ -485,10 +527,14 @@ class _PemasukanSectionState extends State<PemasukanSection> {
             MaterialPageRoute(
               builder: (context) => TambahPemasukan(),
             ),
-          );
+          ).then((_) => _refreshIncomes());
         },
-        backgroundColor: Colors.orange,
-        child: Icon(Icons.add),
+        backgroundColor: Color(0xFFEB8153),
+        elevation: 4,
+        child: Icon(Icons.add, color: Colors.white),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }
@@ -703,7 +749,15 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   Widget _buildToggleOption(String text, bool isSelected) {
     return Expanded(
       child: GestureDetector(
-        onTap: () => _handleSectionClick(text == 'Inflow'),
+        onTap: () {
+          int initialIndex = text == 'Outflow' ? 3 : 2;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeScreen(initialIndex: initialIndex),
+            ),
+          );
+        },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
@@ -807,7 +861,29 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     );
   }
 
+  String _getMonthName(int month) {
+    const monthNames = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return monthNames[month - 1];
+  }
+
   Widget _buildIncomeListItem(Pemasukan pemasukan) {
+    final date = DateTime.parse(pemasukan.date);
+    final formattedDate =
+        '${date.day} ${_getMonthName(date.month)} ${date.year}';
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -823,8 +899,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                DateFormat('dd MMMM yyyy')
-                    .format(DateTime.parse(pemasukan.date)),
+                formattedDate,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.black87,
@@ -901,26 +976,19 @@ class _PemasukanSectionState extends State<PemasukanSection> {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: Color(0xFFFFF3E0),
+                color: Color(0xFFEB8153).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Color(0xFFFFB74D), width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    spreadRadius: 1,
-                    blurRadius: 5,
-                    offset: Offset(0, 2),
-                  ),
-                ],
+                border: Border.all(
+                    color: Color(0xFFEB8153).withOpacity(0.2), width: 0.5),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.date_range,
-                    color: Color(0xFFFF9800),
-                    size: 18,
+                    color: Color(0xFFEB8153),
+                    size: 16,
                   ),
-                  SizedBox(width: 10),
+                  SizedBox(width: 5),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -930,7 +998,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               ? 'Pilih Tanggal'
                               : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
                           style: TextStyle(
-                            color: Color(0xFF424242),
+                            color: Color(0xFFEB8153),
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -942,7 +1010,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               ? 'Pilih rentang tanggal sesuai kebutuhan Anda'
                               : 'Rentang tanggal yang dipilih',
                           style: TextStyle(
-                            color: Color(0xFF757575),
+                            color: Color(0xFFFF9D6C),
                             fontSize: 11,
                             fontStyle: FontStyle.italic,
                           ),
@@ -952,15 +1020,15 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                   ),
                   Icon(
                     Icons.arrow_forward_ios,
-                    color: Color(0xFFFF9800),
-                    size: 16,
+                    color: Color(0xFFEB8153),
+                    size: 14,
                   ),
                 ],
               ),
             ),
           ),
         ),
-        SizedBox(width: 8),
+        SizedBox(width: 10),
         _buildActionButton(Icons.print_outlined, Color(0xFF51A6F5), () {
           showDialog(
             context: context,
@@ -1107,8 +1175,19 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             Navigator.of(context).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content: Text(
-                                      'File berhasil diekspor ke: $newPath')),
+                                content: Text(
+                                  'File berhasil diekspor ke: $newPath',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Colors.green,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                margin: EdgeInsets.all(10),
+                              ),
                             );
                           } else {
                             throw Exception(
@@ -1118,15 +1197,37 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                           Navigator.of(context).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content: Text('Gagal mengekspor file: $e')),
+                              content: Text(
+                                'Gagal mengekspor file: $e',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              margin: EdgeInsets.all(10),
+                            ),
                           );
                         }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Pilih format terlebih dahulu',
-                                style: TextStyle(fontSize: 16)),
+                            content: Text(
+                              'Pilih format terlebih dahulu',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16),
+                            ),
                             backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            margin: EdgeInsets.all(10),
                           ),
                         );
                       }
@@ -1137,7 +1238,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
             },
           );
         }),
-        SizedBox(width: 8),
+        SizedBox(width: 5),
         _buildActionButton(Icons.arrow_circle_down_sharp, Color(0xFF68CF29),
             () {
           _showDragAndDropModal(context);
@@ -1227,8 +1328,19 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               Navigator.of(context).pop();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        'Template berhasil diunduh: $savePath')),
+                                  content: Text(
+                                    'Template berhasil diunduh: $savePath',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor: Colors.green,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  margin: EdgeInsets.all(10),
+                                ),
                               );
                             }
                           } else {
@@ -1241,8 +1353,19 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             Navigator.of(context).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content:
-                                      Text('Gagal mengunduh template: $e')),
+                                content: Text(
+                                  'Gagal mengunduh template: $e',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                margin: EdgeInsets.all(10),
+                              ),
                             );
                           }
                         }
@@ -1265,15 +1388,37 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               _showImportedDataDialog(context, importedData);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        'Data pemasukan berhasil diimpor')),
+                                  content: Text(
+                                    'Data pemasukan berhasil diimpor',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor: Colors.green,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  margin: EdgeInsets.all(10),
+                                ),
                               );
                               _refreshIncomes();
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        'Gagal mengimpor data pemasukan: $e')),
+                                  content: Text(
+                                    'Gagal mengimpor data pemasukan: $e',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  backgroundColor: Colors.red,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  margin: EdgeInsets.all(10),
+                                ),
                               );
                             }
                           }
@@ -1508,15 +1653,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
               color: color.withOpacity(0.2),
               shape: BoxShape.circle,
               border: Border.all(
-                  color: color, width: 1), // Garis pembatas yang lebih jelas
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
+                  color: color, width: 0.5), // Garis pembatas yang lebih tipis
             ),
             child: Material(
               color: Colors.transparent,

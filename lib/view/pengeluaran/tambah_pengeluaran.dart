@@ -11,6 +11,8 @@ import 'package:pity_cash/models/category_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'dart:convert';
 
+import 'package:pity_cash/view/home/home.dart';
+
 class TambahPengeluaran extends StatefulWidget {
   @override
   _TambahPengeluaranState createState() => _TambahPengeluaranState();
@@ -115,6 +117,13 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
 
       // Refresh halaman sebelumnya dan kembali
       Navigator.pop(context, true);
+      // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(initialIndex: 3),
+        ),
+      );
     } catch (error) {
       print('Error: $error');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -172,8 +181,8 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(90.0),
-                bottomRight: Radius.circular(90.0),
+                bottomLeft: Radius.circular(30.0),
+                bottomRight: Radius.circular(30.0),
               ),
             ),
             child: Padding(
@@ -603,9 +612,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(
-              'Tanggal: ${DateFormat('dd/MM/yyyy').format(selectedDate ?? DateTime.now())}',
-            ),
             SizedBox(height: 10),
             _buildInputFields(),
             SizedBox(height: 20),

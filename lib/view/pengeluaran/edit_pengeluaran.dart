@@ -10,6 +10,8 @@ import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
+import 'package:pity_cash/view/home/home.dart';
+import 'package:pity_cash/view/pengeluaran/pengeluaran_section.dart';
 
 class EditPengeluaran extends StatefulWidget {
   final List<Pengeluaran> pengeluaranList;
@@ -89,12 +91,10 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         jumlahs.add(data['jumlah']);
         categoryIds.add(data['category']);
 
-        // Tambahkan id_data ke dalam list dataIds
         if (data['id_data'] != null) {
           dataIds.add(data['id_data']);
         } else {
-          dataIds
-              .add(0); // Tambahkan 0 jika id_data tidak ada (untuk data baru)
+          dataIds.add(0);
         }
 
         String tanggal = data['tanggal'] ?? DateTime.now().toIso8601String();
@@ -153,14 +153,44 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Data berhasil Diubah')),
+        SnackBar(
+          content: Text(
+            'Berhasil diubah!',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
 
-      // Refresh halaman sebelumnya dan kembali
+      // Kembali ke halaman sebelumnya
       Navigator.pop(context, true);
+
+      // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(initialIndex: 3),
+        ),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Data Gagal Diubah')),
+        SnackBar(
+          content: Text(
+            'Gagal mengubah data: $e',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
     }
   }
@@ -173,15 +203,33 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
             index); // Also remove the corresponding form from the list
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Form berhasil dihapus!'),
-            duration: Duration(seconds: 2),
+            content: Text(
+              'Form Baru ditambahkan berhasil dihapus!',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(10),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Minimal satu form harus ada!'),
-            duration: Duration(seconds: 2),
+            content: Text(
+              'Minimal satu form harus ada!',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(10),
           ),
         );
       }
@@ -203,6 +251,22 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         categories: categories, // Pass categories to the new form
         isLast: true, // New form is always last
       ));
+
+      // Tampilkan pesan sukses
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Form baru berhasil ditambahkan!',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
+      );
     });
   }
 
@@ -218,7 +282,18 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
     } catch (e) {
       print('Error fetching categories: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat kategori')),
+        SnackBar(
+          content: Text(
+            'Gagal memuat kategori: $e',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
     }
   }
@@ -654,9 +729,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(selectedDate != null
-                          ? 'Tanggal: ${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}'
-                          : 'No Date Selected'),
                       _buildInputFields(),
                       SizedBox(height: 20),
                       if (widget.pengeluaran == null && widget.isLast)

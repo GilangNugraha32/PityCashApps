@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
+import 'package:pity_cash/view/home/home.dart';
 
 class ChangePasswordProfile extends StatefulWidget {
   @override
@@ -46,12 +47,30 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
     if (currentPassword.isEmpty ||
         newPassword.isEmpty ||
         confirmPassword.isEmpty) {
-      _showSnackBar('Mohon isi semua kolom');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Mohon isi semua kolom'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
       return;
     }
 
     if (newPassword != confirmPassword) {
-      _showSnackBar('Password baru dan konfirmasi password tidak cocok');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password baru dan konfirmasi password tidak cocok'),
+          backgroundColor: Colors.orange,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
       return;
     }
 
@@ -62,22 +81,39 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
         newPasswordConfirmation: confirmPassword,
       );
 
-      _showSnackBar('Password berhasil diperbarui');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password berhasil diperbarui'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
       _clearFields();
-    } catch (e) {
-      _showSnackBar('Gagal memperbarui password: ${e.toString()}');
-    }
-  }
+      // Kembali ke halaman sebelumnya
+      Navigator.pop(context, true);
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Color(0xFFEB8153),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+      // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(initialIndex: 4),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memperbarui password: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+      );
+    }
   }
 
   void _clearFields() {

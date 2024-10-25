@@ -182,7 +182,6 @@ class ApiService {
     }
   }
 
-
   // Fetch all categories with pagination
   Future<List<Category>> fetchCategories({int page = 1}) async {
     print('Fetching categories from page: $page');
@@ -211,7 +210,7 @@ class ApiService {
       throw Exception('Failed to load categories');
     }
   }
-  
+
   // Fetch all categories with pagination
   Future<List<Category>> fetchAllCategories({int page = 1}) async {
     print('Fetching categories from page: $page');
@@ -240,7 +239,6 @@ class ApiService {
       throw Exception('Failed to load categories');
     }
   }
-
 
   // Fetch category detail by ID
   Future<Category> fetchCategoryDetail(int id) async {
@@ -1046,6 +1044,37 @@ class ApiService {
       } else {
         print('Error saat mengambil detail pengeluaran: $e');
         throw Exception('Gagal memuat detail pengeluaran: $e');
+      }
+    }
+  }
+
+  Future<String> fetchPengeluaranImage(int id) async {
+    print('Mengambil gambar pengeluaran untuk ID: $id');
+    try {
+      await _setAuthToken();
+      final response = await _dio.get(
+        '$baseUrl/outcome/image/$id',
+        options: Options(responseType: ResponseType.bytes),
+      );
+
+      if (response.statusCode == 200) {
+        print('Gambar pengeluaran berhasil diambil');
+        // Mengkonversi response bytes menjadi base64
+        final bytes = response.data as List<int>;
+        final base64Image = base64Encode(bytes);
+        return 'data:image/png;base64,$base64Image';
+      } else {
+        throw Exception(
+            'Gagal mengambil gambar pengeluaran: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (e is DioError) {
+        print('DioError saat mengambil gambar pengeluaran: ${e.response?.data}');
+        throw Exception(
+            'Gagal mengambil gambar pengeluaran: ${e.response?.statusMessage ?? e.message}');
+      } else {
+        print('Error saat mengambil gambar pengeluaran: $e');
+        throw Exception('Gagal mengambil gambar pengeluaran: $e');
       }
     }
   }

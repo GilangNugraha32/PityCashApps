@@ -8,12 +8,16 @@ import 'package:pity_cash/view/home/home_section.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
+  final int initialIndex;
+  
+  HomeScreen({this.initialIndex = 0});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0; // Track the selected index of the navigation bar
+  late int _selectedIndex; // Track the selected index of the navigation bar
   String? _token;
   String? _userName;
   final SharedPreferencesService _prefsService = SharedPreferencesService();
@@ -29,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
     _loadUserData(); // Load user data when the screen initializes
   }
 

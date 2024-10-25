@@ -37,14 +37,45 @@ class _EditCategoriesState extends State<EditCategories> {
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Category updated successfully!')),
+          SnackBar(
+            content: Text(
+              'Berhasil diperbarui!',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(10),
+          ),
         );
         widget.onUpdate(); // Call the refresh method after successful update
 
         Navigator.pop(context);
       } catch (e) {
+        String errorMessage =
+            'Gagal memperbarui kategori Nama kategori sudah digunakan';
+        if (e.toString().contains('nama sudah digunakan')) {
+          errorMessage = 'Nama kategori sudah digunakan';
+        } else if (_deskripsi.length > 30) {
+          errorMessage = 'Deskripsi terlalu panjang (maksimal 30 karakter)';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update category: $e')),
+          SnackBar(
+            content: Text(
+              errorMessage,
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(10),
+          ),
         );
       }
     }
@@ -248,6 +279,9 @@ class _EditCategoriesState extends State<EditCategories> {
                             if (value == null || value.isEmpty) {
                               return 'Please enter a description';
                             }
+                            if (value.length > 30) {
+                              return 'Description must be 30 characters or less';
+                            }
                             return null;
                           },
                           onChanged: (value) {
@@ -275,7 +309,7 @@ class _EditCategoriesState extends State<EditCategories> {
                             SizedBox(width: 16),
                             ElevatedButton(
                               onPressed: _updateCategory,
-                              child: Text('Submit'),
+                              child: Text('Simpan'),
                               style: ElevatedButton.styleFrom(
                                 primary: Color(0xFFE85C0D),
                                 shape: RoundedRectangleBorder(
