@@ -61,6 +61,40 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
   }
 
   void _handleSubmit() async {
+    List<Map<String, dynamic>> allFormData = [];
+    List<File?> selectedImages = [];
+
+    // Validasi dan kumpulkan data dari semua form
+    for (var key in formKeys) {
+      var data = key.currentState?.getFormData();
+      if (data != null && data.isNotEmpty) {
+        allFormData.add(data);
+
+        // Cek apakah ada gambar yang dipilih
+        if (key.currentState?.selectedImage != null &&
+            key.currentState!.selectedImage!.files.isNotEmpty) {
+          String? imagePath = key.currentState!.selectedImage!.files.first.path;
+          if (imagePath != null) {
+            selectedImages.add(File(imagePath));
+          } else {
+            selectedImages.add(null);
+          }
+        } else {
+          selectedImages.add(null);
+        }
+      }
+    }
+
+    print('Mengirim data: $allFormData');
+
+    if (allFormData.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tidak ada data untuk dikirim')),
+      );
+      return;
+    }
+
+    // Siapkan data untuk API request
     List<String> names = [];
     List<String> descriptions = [];
     List<int> jumlahs = [];
@@ -69,75 +103,52 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
     List<double> dls = [];
     List<int> categoryIds = [];
     List<int> dataIds = [];
-    List<File> selectedImages = [];
     List<String> tanggalList = [];
-    bool hasValidData = false;
+    List<File> images = [];
 
+    // Dapatkan parent ID dari pengeluaran pertama
     int parentId = widget.pengeluaranList.isNotEmpty
         ? widget.pengeluaranList.first.idParent
         : 0;
 
-    for (var key in formKeys) {
-      var data = key.currentState?.getFormData();
-      if (data != null && data.isNotEmpty) {
-        print('Data dari form: $data');
-        hasValidData = true;
+    // Format data sesuai dengan response yang diharapkan
+    for (var entry in allFormData) {
+      dataIds.add(entry['id_data'] ?? 0);
+      names.add(entry['name']);
+      descriptions.add(entry['description'] ?? '');
+      jumlahs.add(entry['jumlah']);
+      jumlahSatuans.add(entry['jumlah_satuan']);
+      nominals.add(entry['nominal']);
+      dls.add(entry['dll']);
+      categoryIds.add(entry['category']);
 
-        names.add(data['name']);
-        descriptions.add(data['description'] ?? '');
-        jumlahSatuans.add(data['jumlah_satuan']);
-        nominals.add(data['nominal']);
-        dls.add(data['dll']);
-        jumlahs.add(data['jumlah']);
-        categoryIds.add(data['category']);
+      // Format tanggal sesuai dengan response "YYYY-MM-DD"
+      String tanggal = entry['tanggal'] ?? DateTime.now().toIso8601String();
+      try {
+        DateTime parsedDate = DateTime.parse(tanggal);
+        String formattedDate =
+            "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+        tanggalList.add(formattedDate);
+        print('Tanggal terformat dari form: $formattedDate');
+      } catch (e) {
+        print('Error saat parsing tanggal: $tanggal. Error: $e');
+      }
 
-        if (data['id_data'] != null) {
-          dataIds.add(data['id_data']);
-        } else {
-          dataIds.add(0);
-        }
-
-        String tanggal = data['tanggal'] ?? DateTime.now().toIso8601String();
-        try {
-          DateTime parsedDate = DateTime.parse(tanggal);
-          String formattedDate =
-              "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
-          tanggalList.add(formattedDate);
-          print('Tanggal terformat dari form: $formattedDate');
-        } catch (e) {
-          print('Error saat parsing tanggal: $tanggal. Error: $e');
-        }
-
-        if (key.currentState?.selectedImage != null &&
-            key.currentState!.selectedImage!.files.isNotEmpty) {
-          String? imagePath = key.currentState!.selectedImage!.files.first.path;
-          selectedImages.add(imagePath != null ? File(imagePath) : File(''));
-        } else {
-          selectedImages.add(File(''));
-        }
-      } else {
-        print("Data form kosong atau null untuk salah satu form.");
+      // Tambahkan gambar jika ada
+      if (entry['image'] != null && entry['image'] is File) {
+        images.add(entry['image'] as File);
       }
     }
 
-    if (!hasValidData) {
-      print("Error: Tidak ada data form yang valid untuk dikirim.");
-      return;
-    }
-
-    print('ID Parent: $parentId');
-    print('Nama: $names');
-    print('Deskripsi: $descriptions');
-    print('Jumlah Satuan: $jumlahSatuans');
-    print('Nominal: $nominals');
-    print('DLL: $dls');
-    print('Jumlah: $jumlahs');
-    print('ID Kategori: $categoryIds');
-    print('ID Data: $dataIds');
-    print('Gambar Terpilih: $selectedImages');
-    print('Daftar Tanggal: $tanggalList');
-
     try {
+      // Siapkan list gambar final
+      List<File> finalImages = [];
+      finalImages.addAll(images);
+      finalImages.addAll(selectedImages
+          .where((image) => image != null)
+          .map((image) => image!));
+
+      // Kirim request ke API
       await ApiService().editPengeluaran(
         parentId,
         tanggalList,
@@ -149,13 +160,14 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         nominals,
         dls,
         categoryIds,
-        selectedImages,
+        finalImages,
       );
 
+      // Tampilkan pesan sukses
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Berhasil diubah!',
+            'Data berhasil diperbarui!',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.green,
@@ -167,21 +179,20 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         ),
       );
 
-      // Kembali ke halaman sebelumnya
+      // Refresh halaman dan navigasi
       Navigator.pop(context, true);
-
-      // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => HomeScreen(initialIndex: 3),
         ),
       );
-    } catch (e) {
+    } catch (error) {
+      print('Error: $error');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Gagal mengubah data: $e',
+            'Terjadi kesalahan saat memperbarui data: ${error.toString()}',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.red,
@@ -333,80 +344,92 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
             ),
           ),
 
-          // Expanded for the scrollable content
+          SizedBox(height: 20), // Jarak antara orange dan putih
+
+          // White background container
           Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 10),
-                        _buildDateField(),
-                        SizedBox(height: 5),
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: forms.length,
-                          separatorBuilder: (context, index) =>
-                              SizedBox(height: 10),
-                          itemBuilder: (context, index) {
-                            return forms[index];
-                          },
-                        ),
-                        SizedBox(height: 20),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: ElevatedButton.icon(
-                            onPressed: _addForm,
-                            icon: Icon(Icons.add),
-                            label: Text('Tambah Pengeluaran'),
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.blue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24.0),
+                  topRight: Radius.circular(24.0),
+                ),
+              ),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(1.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 10),
+                          _buildDateField(),
+                          SizedBox(height: 5),
+                          ListView.separated(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: forms.length,
+                            separatorBuilder: (context, index) =>
+                                SizedBox(height: 5),
+                            itemBuilder: (context, index) {
+                              return forms[index];
+                            },
+                          ),
+                          SizedBox(height: 10),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: ElevatedButton.icon(
+                              onPressed: _addForm,
+                              icon: Icon(Icons.add),
+                              label: Text('Tambah Pengeluaran'),
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                primary: Color(0xFFDA0000),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  primary: Color(0xFFDA0000),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
+                                child: Text('Batal'),
                               ),
-                              child: Text('Cancel'),
-                            ),
-                            SizedBox(width: 8),
-                            ElevatedButton(
-                              onPressed: _handleSubmit,
-                              style: ElevatedButton.styleFrom(
-                                primary: Color(0xFFE85C0D),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                              SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: _handleSubmit,
+                                style: ElevatedButton.styleFrom(
+                                  primary: Color(0xFFE85C0D),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                 ),
+                                child: Text('Simpan'),
                               ),
-                              child: Text('Simpan'),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -643,6 +666,14 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       'tanggal': selectedDate?.toIso8601String(),
     };
 
+    // Tambahkan data gambar jika ada
+    if (selectedImage != null && selectedImage!.files.isNotEmpty) {
+      String? imagePath = selectedImage!.files.first.path;
+      if (imagePath != null) {
+        formData['image'] = File(imagePath);
+      }
+    }
+
     print('Form data gathered: $formData');
     return formData;
   }
@@ -692,6 +723,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }
 
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Theme(
       data: Theme.of(context).copyWith(
         dividerColor: Colors.transparent,
@@ -700,6 +732,8 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         ),
       ),
       child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        width: screenWidth * 2, // Double the screen width
         decoration: BoxDecoration(
           border: Border.all(
             color: Colors.grey[300]!,
@@ -712,35 +746,121 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           child: ExpansionTile(
             title: Text(
               'Edit Pengeluaran',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            collapsedBackgroundColor: Color(0xFFEB8153).withOpacity(0.2),
+            collapsedBackgroundColor: Color(0xFFEB8153).withOpacity(0.1),
             backgroundColor: Colors.white,
-            childrenPadding: EdgeInsets.all(16),
             initiallyExpanded: true,
             children: [
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _buildInputFields(),
-                      SizedBox(height: 20),
-                      if (widget.pengeluaran == null && widget.isLast)
-                        _buildActionButtons(),
-                    ],
-                  ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildInputFields(),
+                    SizedBox(height: 20),
+                    if (widget.pengeluaran == null && widget.isLast)
+                      _buildActionButtons(),
+                  ],
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInputFields() {
+    bool isLastForm = widget.isLast;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 10),
+        _buildLabel('Nama Pengeluaran'),
+        SizedBox(height: 10),
+        _buildTextField(
+          icon: Icons.attach_money,
+          controller: nameController,
+          hintText: 'Masukkan nama pengeluaran',
+        ),
+        SizedBox(height: 20),
+        _buildLabel('Deskripsi'),
+        SizedBox(height: 10),
+        _buildTextField(
+          icon: Icons.format_align_left,
+          controller: descriptionController,
+          hintText: 'Masukkan Deskripsi',
+          maxLines: 5,
+          isDescription: true,
+        ),
+        SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Nominal'),
+                  SizedBox(height: 10),
+                  _buildNominalTextField(),
+                ],
+              ),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Jumlah Satuan'),
+                  SizedBox(height: 10),
+                  _buildJumlahSatuanTextField(),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Biaya Tambahan (DLL)'),
+                  SizedBox(height: 10),
+                  _buildDllTextField(),
+                ],
+              ),
+            ),
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLabel('Jumlah'),
+                  SizedBox(height: 10),
+                  _buildJumlahField(),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 20),
+        _buildLabel('Kategori:'),
+        SizedBox(height: 10),
+        _buildCategoryDropdown(),
+        SizedBox(height: 10),
+        if (widget.isLast) _buildLabel('Pilih Gambar:'),
+        SizedBox(
+          height: 10,
+        ),
+        if (widget.isLast) _buildImagePicker(),
+      ],
     );
   }
 
@@ -799,92 +919,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildInputFields() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 10),
-        _buildLabel('Nama Pengeluaran'),
-        SizedBox(height: 10),
-        _buildTextField(
-          icon: Icons.attach_money,
-          controller: nameController,
-          hintText: 'Masukkan nama pengeluaran',
-        ),
-        SizedBox(height: 15),
-        _buildLabel('Deskripsi'),
-        SizedBox(height: 10),
-        _buildTextField(
-          icon: Icons.format_align_left,
-          controller: descriptionController,
-          hintText: 'Masukkan Deskripsi',
-          maxLines: 5,
-          isDescription: true,
-        ),
-        SizedBox(height: 15),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Nominal'),
-                  SizedBox(height: 10),
-                  _buildNominalTextField(),
-                ],
-              ),
-            ),
-            SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Jumlah Satuan'),
-                  SizedBox(height: 10),
-                  _buildJumlahSatuanTextField(),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 15),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Biaya Tambahan (DLL)'),
-                  SizedBox(height: 10),
-                  _buildDllTextField(),
-                ],
-              ),
-            ),
-            SizedBox(width: 15),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Jumlah'),
-                  SizedBox(height: 10),
-                  _buildJumlahField(),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 15),
-        _buildLabel('Kategori:'),
-        SizedBox(height: 10),
-        _buildCategoryDropdown(),
-        SizedBox(height: 15),
-        if (widget.isLast) _buildLabel('Pilih Gambar:'),
-        SizedBox(height: 10),
-        if (widget.isLast) _buildImagePicker(),
-      ],
     );
   }
 

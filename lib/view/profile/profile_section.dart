@@ -55,10 +55,16 @@ class _ProfileSectionState extends State<ProfileSection> {
           ),
           content: Text('Apakah Anda yakin ingin keluar?'),
           actions: <Widget>[
-            TextButton(
+            ElevatedButton(
               child: Text(
                 'Batal',
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -261,20 +267,36 @@ class _ProfileSectionState extends State<ProfileSection> {
             ),
           ),
           SizedBox(height: 15),
-          _buildOptionButton(
-            icon: Icons.settings,
-            label: 'Pengaturan Saldo',
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SettingsSaldo()),
-            ).then((_) => _refreshProfile()),
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 0.25,
+            child: _buildOptionButton(
+              icon: Icons.settings,
+              label: 'Pengaturan Saldo',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsSaldo()),
+              ).then((_) => _refreshProfile()),
+              showBorder: false,
+              borderRadius: BorderRadius.circular(15),
+            ),
           ),
           SizedBox(height: 15),
-          _buildOptionButton(
-            icon: Icons.logout,
-            label: 'Logout',
-            onTap: () => logout(context),
-            color: Colors.red,
+          Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 0.25,
+            child: _buildOptionButton(
+              icon: Icons.logout,
+              label: 'Logout',
+              onTap: () => logout(context),
+              color: Colors.red,
+              showBorder: false,
+              borderRadius: BorderRadius.circular(15),
+            ),
           ),
         ],
       ),

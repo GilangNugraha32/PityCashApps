@@ -8,8 +8,7 @@ import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'dart:math' show max;
+import 'dart:math' show max, min, pi;
 
 class HomeSection extends StatefulWidget {
   @override
@@ -216,111 +215,104 @@ class _HomeSectionState extends State<HomeSection>
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 5),
               Center(
                 child: FutureBuilder<double>(
                   future: ApiService().fetchMinimalSaldo(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator(color: Colors.white);
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}',
-                          style: TextStyle(color: Colors.white));
-                    } else {
-                      double minimalSaldo = snapshot.data ?? 0;
-                      bool isLowBalance = saldo <= minimalSaldo;
-                      return Column(
-                        children: [
+                    double minimalSaldo = snapshot.data ?? 0;
+                    bool isLowBalance = saldo <= minimalSaldo;
+                    return Column(
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(width: 40),
+                              Expanded(
+                                child: Text(
+                                  isBalanceVisible
+                                      ? NumberFormat.currency(
+                                          locale: 'id_ID',
+                                          symbol: 'Rp',
+                                          decimalDigits: 0,
+                                        ).format(saldo)
+                                      : 'Rp' + _formatHiddenBalance(saldo),
+                                  style: TextStyle(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.bold,
+                                    color: isLowBalance
+                                        ? Color(0xFFF54D42)
+                                        : Colors.white,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  isBalanceVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    isBalanceVisible = !isBalanceVisible;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (isLowBalance)
                           Container(
-                            width: MediaQuery.of(context).size.width * 0.8,
+                            margin: EdgeInsets.only(top: 8),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.yellow.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                SizedBox(width: 40),
-                                Expanded(
-                                  child: Text(
-                                    isBalanceVisible
-                                        ? NumberFormat.currency(
-                                            locale: 'id_ID',
-                                            symbol: 'Rp',
-                                            decimalDigits: 0,
-                                          ).format(saldo)
-                                        : 'Rp' + _formatHiddenBalance(saldo),
-                                    style: TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: isLowBalance
-                                          ? Color(0xFFF54D42)
-                                          : Colors.white,
-                                    ),
-                                    textAlign: TextAlign.center,
+                                Icon(
+                                  Icons.info_outline,
+                                  color: Colors.yellow,
+                                  size: 16,
+                                ),
+                                SizedBox(width: 4),
+                                Text(
+                                  'Saldo di bawah batas minimal',
+                                  style: TextStyle(
+                                    color: Colors.yellow,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12,
                                   ),
                                 ),
-                                IconButton(
-                                  icon: Icon(
-                                    isBalanceVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
-                                    color: Colors.white,
-                                    size: 24,
+                                SizedBox(width: 4),
+                                Text(
+                                  '(${NumberFormat.currency(
+                                    locale: 'id_ID',
+                                    symbol: 'Rp',
+                                    decimalDigits: 0,
+                                  ).format(minimalSaldo)})',
+                                  style: TextStyle(
+                                    color: Colors.yellow.withOpacity(0.8),
+                                    fontSize: 12,
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      isBalanceVisible = !isBalanceVisible;
-                                    });
-                                  },
                                 ),
                               ],
                             ),
                           ),
-                          if (isLowBalance)
-                            Container(
-                              margin: EdgeInsets.only(top: 8),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: Colors.yellow.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.info_outline,
-                                    color: Colors.yellow,
-                                    size: 16,
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'Saldo di bawah batas minimal',
-                                    style: TextStyle(
-                                      color: Colors.yellow,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    '(${NumberFormat.currency(
-                                      locale: 'id_ID',
-                                      symbol: 'Rp',
-                                      decimalDigits: 0,
-                                    ).format(minimalSaldo)})',
-                                    style: TextStyle(
-                                      color: Colors.yellow.withOpacity(0.8),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      );
-                    }
+                      ],
+                    );
                   },
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 15),
               _buildIncomeExpenseToggle(),
             ],
           ),
@@ -416,9 +408,9 @@ class _HomeSectionState extends State<HomeSection>
 
   Widget _buildThisMonthIncomeCard() {
     return Card(
-      elevation: 8.0,
+      elevation: 2.0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(24.0),
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -427,189 +419,264 @@ class _HomeSectionState extends State<HomeSection>
             end: Alignment.bottomRight,
             colors: [Colors.white, Color(0xFFF8F8F8)],
           ),
-          borderRadius: BorderRadius.circular(16.0),
+          borderRadius: BorderRadius.circular(24.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.orange.withOpacity(0.1),
+              spreadRadius: 3,
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              'Grafik Keuangan Pity Cash',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Perbandingan Pemasukan & Pengeluaran',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
             ),
-            SizedBox(height: 25),
-            Container(
-              height: 250,
-              child: AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
-                  return Stack(
-                    children: [
-                      BarChart(
-                        BarChartData(
-                          alignment: BarChartAlignment.spaceAround,
-                          maxY: max(saldoKeseluruhan, minSaldo) * 1.1,
-                          barTouchData: BarTouchData(
-                            enabled: true,
-                            touchTooltipData: BarTouchTooltipData(
-                              tooltipBgColor: Colors.blueGrey.withOpacity(0.8),
-                              tooltipRoundedRadius: 8,
-                              getTooltipItem:
-                                  (group, groupIndex, rod, rodIndex) {
-                                String amount = NumberFormat.currency(
-                                  locale: 'id_ID',
-                                  symbol: 'Rp',
-                                  decimalDigits: 0,
-                                ).format(rod.toY);
-                                return BarTooltipItem(
-                                  amount,
-                                  TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                );
-                              },
-                            ),
+            SizedBox(height: 30),
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (_animationController.value > 0.5) {
+                    _animationController.animateTo(0.4);
+                  } else {
+                    _animationController.animateTo(1.0);
+                  }
+                });
+              },
+              child: Container(
+                height: 180,
+                width: 180,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    TweenAnimationBuilder(
+                      duration: Duration(milliseconds: 1500),
+                      curve: Curves.easeOutCubic,
+                      tween: Tween<double>(begin: 0, end: 1),
+                      builder: (context, double value, child) {
+                        return CustomPaint(
+                          size: Size(180, 180),
+                          painter: DoubleRadialChartPainter(
+                            outerPercentage: (saldoKeseluruhan /
+                                    (saldoKeseluruhan + minSaldo)) *
+                                100 *
+                                value,
+                            innerPercentage:
+                                (minSaldo / (saldoKeseluruhan + minSaldo)) *
+                                    100 *
+                                    value,
+                            outerColor: Color(0xFF66BB6A),
+                            innerColor: Color(0xFFEF5350),
                           ),
-                          titlesData: FlTitlesData(
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget:
-                                    (double value, TitleMeta meta) {
-                                  IconData icon = value == 0
-                                      ? Icons.trending_up
-                                      : Icons.trending_down;
-                                  Color color = value == 0
-                                      ? Color(0xFF4CAF50)
-                                      : Color(0xFFE57373);
-                                  String text =
-                                      value == 0 ? 'Pemasukan' : 'Pengeluaran';
-                                  return Column(
-                                    children: [
-                                      Icon(icon, color: color, size: 18),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        text,
-                                        style: TextStyle(
-                                          color: color,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                },
-                                reservedSize: 40,
+                        );
+                      },
+                    ),
+                    AnimatedOpacity(
+                      duration: Duration(milliseconds: 300),
+                      opacity: _animationController.value,
+                      child: Container(
+                        padding: EdgeInsets.all(8),
+                        width: 140,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.98),
+                          borderRadius: BorderRadius.circular(6),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.15),
+                              blurRadius: 4,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Pemasukan: ${((saldoKeseluruhan / (saldoKeseluruhan + minSaldo)) * 100).toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                color: Color(0xFF66BB6A),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
                               ),
                             ),
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                getTitlesWidget: (value, meta) {
-                                  return Text(
-                                    NumberFormat.compactCurrency(
-                                      locale: 'id_ID',
-                                      symbol: '',
-                                      decimalDigits: 0,
-                                    ).format(value),
-                                    style: TextStyle(
-                                      color: Color(0xFF7589A2),
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 10,
-                                    ),
-                                  );
-                                },
-                                reservedSize: 40,
+                            SizedBox(height: 4),
+                            Text(
+                              'Pengeluaran: ${((minSaldo / (saldoKeseluruhan + minSaldo)) * 100).toStringAsFixed(1)}%',
+                              style: TextStyle(
+                                color: Color(0xFFEF5350),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
                               ),
-                            ),
-                            topTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false)),
-                            rightTitles: AxisTitles(
-                                sideTitles: SideTitles(showTitles: false)),
-                          ),
-                          gridData: FlGridData(
-                            show: true,
-                            drawVerticalLine: false,
-                            getDrawingHorizontalLine: (value) {
-                              return FlLine(
-                                color: Colors.grey.withOpacity(0.2),
-                                strokeWidth: 0.5,
-                                dashArray: [5, 5],
-                              );
-                            },
-                          ),
-                          borderData: FlBorderData(show: false),
-                          barGroups: [
-                            BarChartGroupData(
-                              x: 0,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: saldoKeseluruhan * _animation.value,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Color(0xFF81C784),
-                                      Color(0xFF4CAF50)
-                                    ],
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                  ),
-                                  width: 40,
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(8)),
-                                ),
-                              ],
-                            ),
-                            BarChartGroupData(
-                              x: 1,
-                              barRods: [
-                                BarChartRodData(
-                                  toY: minSaldo * _animation.value,
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Color(0xFFEF9A9A),
-                                      Color(0xFFE57373)
-                                    ],
-                                    begin: Alignment.bottomCenter,
-                                    end: Alignment.topCenter,
-                                  ),
-                                  width: 40,
-                                  borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(8)),
-                                ),
-                              ],
                             ),
                           ],
                         ),
                       ),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: Text(
-                            'Pemasukan & Pengeluaran',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF7589A2),
-                            ),
-                          ),
-                        ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 24),
+            TweenAnimationBuilder(
+              duration: Duration(milliseconds: 1500),
+              curve: Curves.easeOutCubic,
+              tween: Tween<double>(
+                begin: 0,
+                end: saldoKeseluruhan + minSaldo,
+              ),
+              builder: (context, double value, child) {
+                return Container(
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.grey.withOpacity(0.5), // Opacity dinaikkan
+                      width: 1, // Width dinaikkan
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        offset: Offset(0, 1),
                       ),
                     ],
-                  );
-                },
-              ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Total Keseluruhan',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        isBalanceVisible
+                            ? NumberFormat.currency(
+                                locale: 'id_ID',
+                                symbol: 'Rp',
+                                decimalDigits: 0,
+                              ).format(value)
+                            : 'Rp' + _formatHiddenBalance(value),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildLegendItemEnhanced("Pemasukan",
+                              Color(0xFF66BB6A), Icons.arrow_upward),
+                          SizedBox(width: 20),
+                          _buildLegendItemEnhanced("Pengeluaran",
+                              Color(0xFFEF5350), Icons.arrow_downward),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBadge(String text, IconData icon) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: Colors.black87),
+          SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItemEnhanced(String label, Color color, IconData icon) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 16),
+          SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLegendItem(String label, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF7589A2),
+          ),
+        ),
+      ],
     );
   }
 
@@ -621,7 +688,7 @@ class _HomeSectionState extends State<HomeSection>
             2; // Mengurangi padding, jarak antar item, dan pembatas
 
         return Card(
-          elevation: 12.0,
+          elevation: 2.0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
@@ -639,13 +706,54 @@ class _HomeSectionState extends State<HomeSection>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Ringkasan Keuangan',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Ringkasan Keuangan',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            isBalanceVisible = !isBalanceVisible;
+                          });
+                        },
+                        child: Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFEB8153).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isBalanceVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Color(0xFFEB8153),
+                                size: 18,
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                isBalanceVisible ? 'Sembunyikan' : 'Tampilkan',
+                                style: TextStyle(
+                                  color: Color(0xFFEB8153),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 20),
                   Row(
@@ -657,6 +765,7 @@ class _HomeSectionState extends State<HomeSection>
                         Colors.green,
                         Icons.trending_up,
                         itemWidth,
+                        isBalanceVisible,
                       ),
                       Container(
                         height: 80,
@@ -669,6 +778,7 @@ class _HomeSectionState extends State<HomeSection>
                         Colors.red,
                         Icons.trending_down,
                         itemWidth,
+                        isBalanceVisible,
                       ),
                     ],
                   ),
@@ -681,8 +791,8 @@ class _HomeSectionState extends State<HomeSection>
     );
   }
 
-  Widget _buildSaldoItem(
-      String title, double amount, Color color, IconData icon, double width) {
+  Widget _buildSaldoItem(String title, double amount, Color color,
+      IconData icon, double width, bool isBalanceVisible) {
     return Container(
       width: width,
       child: Column(
@@ -714,11 +824,11 @@ class _HomeSectionState extends State<HomeSection>
             duration: Duration(seconds: 1),
             builder: (context, value, child) {
               return Text(
-                NumberFormat.currency(
-                  locale: 'id_ID',
-                  symbol: 'Rp',
-                  decimalDigits: 0,
-                ).format(value),
+                isBalanceVisible
+                    ? NumberFormat.currency(
+                            locale: 'id_ID', symbol: 'Rp', decimalDigits: 0)
+                        .format(value)
+                    : 'Rp' + _formatHiddenBalance(value),
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -997,4 +1107,121 @@ class _HomeSectionState extends State<HomeSection>
       ),
     );
   }
+}
+
+class RadialChartPainter extends CustomPainter {
+  final double inflow;
+  final double outflow;
+
+  RadialChartPainter({required this.inflow, required this.outflow});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = min(size.width, size.height) / 2;
+
+    // Gambar background
+    final bgPaint = Paint()
+      ..color = Colors.grey.withOpacity(0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20;
+    canvas.drawCircle(center, radius - 10, bgPaint);
+
+    // Gambar chart
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20
+      ..strokeCap = StrokeCap.round;
+
+    // Gambar inflow (hijau)
+    paint.color = Color(0xFF66BB6A);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius - 10),
+      -pi / 2,
+      (inflow / 100) * 2 * pi,
+      false,
+      paint,
+    );
+
+    // Gambar outflow (merah)
+    paint.color = Color(0xFFEF5350);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius - 10),
+      (inflow / 100) * 2 * pi - pi / 2,
+      (outflow / 100) * 2 * pi,
+      false,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+}
+
+class DoubleRadialChartPainter extends CustomPainter {
+  final double outerPercentage;
+  final double innerPercentage;
+  final Color outerColor;
+  final Color innerColor;
+
+  DoubleRadialChartPainter({
+    required this.outerPercentage,
+    required this.innerPercentage,
+    required this.outerColor,
+    required this.innerColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final outerRadius = min(size.width, size.height) / 2;
+    final innerRadius = outerRadius * 0.7;
+
+    // Gambar background abu-abu untuk outer circle
+    final bgOuterPaint = Paint()
+      ..color = Colors.grey.withOpacity(0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20;
+    canvas.drawCircle(center, outerRadius - 10, bgOuterPaint);
+
+    // Gambar background abu-abu untuk inner circle
+    final bgInnerPaint = Paint()
+      ..color = Colors.grey.withOpacity(0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20;
+    canvas.drawCircle(center, innerRadius - 10, bgInnerPaint);
+
+    // Gambar outer circle
+    final outerPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20
+      ..strokeCap = StrokeCap.round
+      ..color = outerColor;
+
+    // Gambar inner circle
+    final innerPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 20
+      ..strokeCap = StrokeCap.round
+      ..color = innerColor;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: outerRadius - 10),
+      -pi / 2,
+      (outerPercentage / 100) * 2 * pi,
+      false,
+      outerPaint,
+    );
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: innerRadius - 10),
+      -pi / 2,
+      (innerPercentage / 100) * 2 * pi,
+      false,
+      innerPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }

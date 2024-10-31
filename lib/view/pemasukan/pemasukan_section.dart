@@ -53,7 +53,6 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       currentPage = 1;
       incomes.clear();
       _fetchIncomes(currentPage);
-      _getSaldo(); // Refresh saldo terbaru
     });
   }
 
@@ -158,18 +157,17 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                           SizedBox(height: 4),
                           Container(
                             padding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                                horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Color.fromARGB(255, 56, 175, 52)
-                                  .withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.green[50],
+                              borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              pemasukan.category?.name ?? 'Tidak ada kategori',
+                              pemasukan.category!.name,
                               style: TextStyle(
-                                color: Color.fromARGB(255, 56, 175, 52),
-                                fontWeight: FontWeight.bold,
                                 fontSize: 12,
+                                color: Colors.green[400],
+                                fontWeight: FontWeight.normal,
                               ),
                             ),
                           ),
@@ -302,6 +300,17 @@ class _PemasukanSectionState extends State<PemasukanSection> {
               onPressed: () async {
                 try {
                   await _apiService.deleteIncome(pemasukan.idData);
+
+                  // Hapus item dari list lokal
+                  setState(() {
+                    incomes
+                        .removeWhere((item) => item.idData == pemasukan.idData);
+                    filteredIncomes
+                        .removeWhere((item) => item.idData == pemasukan.idData);
+                  });
+
+                  Navigator.of(context).pop();
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -315,15 +324,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       margin: EdgeInsets.all(10),
+                      duration: Duration(seconds: 2),
                     ),
                   );
-                  _refreshIncomes();
-                  Navigator.of(context).pop();
+
+                  // Refresh saldo setelah menghapus
+                  _getSaldo();
                 } catch (e) {
+                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'Gagal menghapus data: $e',
+                        'Gagal menghapus data',
                         style: TextStyle(
                             color: Colors.white, fontWeight: FontWeight.bold),
                       ),
@@ -333,6 +345,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       margin: EdgeInsets.all(10),
+                      duration: Duration(seconds: 2),
                     ),
                   );
                 }
@@ -379,13 +392,15 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     if (isLoadingMore) return;
 
     setState(() {
-      isLoading = true;
+      if (page == 1) {
+        isLoading = true;
+      } else {
+        isLoadingMore = true;
+      }
     });
 
     try {
-      print('Fetching incomes for page: $page');
       final fetchedIncomes = await _apiService.fetchIncomes(page: page);
-      print('Fetched incomes: ${fetchedIncomes.toString()}');
 
       setState(() {
         if (page == 1) {
@@ -506,35 +521,14 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              _buildHeaderSection(),
-              SizedBox(height: 10),
-              _buildSearchForm(),
-              SizedBox(height: 20),
-              _buildIncomesList(),
-            ],
-          ),
-          if (isLoading) Center(child: CircularProgressIndicator()),
+          _buildHeaderSection(),
+          SizedBox(height: 10),
+          _buildSearchForm(),
+          SizedBox(height: 20),
+          _buildIncomesList(),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TambahPemasukan(),
-            ),
-          ).then((_) => _refreshIncomes());
-        },
-        backgroundColor: Color(0xFFEB8153),
-        elevation: 4,
-        child: Icon(Icons.add, color: Colors.white),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
       ),
     );
   }
@@ -568,7 +562,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeaderTopRow(),
-            SizedBox(height: 30),
+            SizedBox(height: 15),
             _buildSaldoSection(),
             SizedBox(height: 12),
             _buildToggleButton(),
@@ -611,13 +605,11 @@ class _PemasukanSectionState extends State<PemasukanSection> {
               color: Colors.white.withOpacity(0.9),
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 5),
           FutureBuilder<double>(
             future: ApiService().fetchMinimalSaldo(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator(color: Colors.white);
-              } else if (snapshot.hasError) {
+              if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}',
                     style: TextStyle(color: Colors.white));
               } else {
@@ -641,7 +633,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                     ).format(saldo)
                                   : 'Rp' + _formatHiddenBalance(saldo),
                               style: TextStyle(
-                                fontSize: 36,
+                                fontSize: 32,
                                 fontWeight: FontWeight.bold,
                                 color: isLowBalance
                                     ? Color(0xFFF54D42)
@@ -806,6 +798,16 @@ class _PemasukanSectionState extends State<PemasukanSection> {
               borderSide: BorderSide.none,
             ),
           ),
+          onTap: () {
+            // Scroll ke bawah saat search diklik
+            Future.delayed(Duration(milliseconds: 300), () {
+              Scrollable.ensureVisible(
+                context,
+                alignment: 0.0,
+                duration: Duration(milliseconds: 300),
+              );
+            });
+          },
           onChanged: (value) {
             _filterIncomes();
           },
@@ -829,30 +831,39 @@ class _PemasukanSectionState extends State<PemasukanSection> {
               child: _buildDateRangeAndActionButtons(),
             ),
             Expanded(
-              child: LazyLoadScrollView(
-                onEndOfPage: () {
-                  if (!isLoading && !isLoadingMore) {
-                    _fetchIncomes(currentPage);
-                  }
-                },
-                child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: filteredIncomes.length + (isLoadingMore ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == filteredIncomes.length) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+              child: Stack(
+                children: [
+                  LazyLoadScrollView(
+                    onEndOfPage: () {
+                      if (!isLoading && !isLoadingMore) {
+                        _fetchIncomes(currentPage);
+                      }
+                    },
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: filteredIncomes.length,
+                      itemBuilder: (context, index) {
+                        return _buildIncomeListItem(filteredIncomes[index]);
+                      },
+                    ),
+                  ),
+                  if (isLoading || isLoadingMore)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        color: Colors.white,
+                        padding: EdgeInsets.all(16.0),
+                        child: Center(
                           child: CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
                                 Color(0xFFEB8153)),
                           ),
                         ),
-                      );
-                    }
-                    return _buildIncomeListItem(filteredIncomes[index]);
-                  },
-                ),
+                      ),
+                    ),
+                ],
               ),
             ),
           ],
@@ -914,7 +925,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                   Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: Color(0xFFEB8153).withOpacity(0.1),
+                      color: Color(0xFFEB8153).withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(Icons.monetization_on_outlined,
@@ -935,14 +946,14 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                           padding:
                               EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: Colors.green[50],
+                            color: Colors.orange[50],
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             pemasukan.category!.name,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.green[400],
+                              color: Colors.orange[400],
                               fontWeight: FontWeight.normal,
                             ),
                           ),
@@ -951,11 +962,11 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     ),
                   ),
                   Text(
-                    '+ Rp${NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(double.tryParse(pemasukan.jumlah) ?? 0)}',
+                    ' Rp${NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(double.tryParse(pemasukan.jumlah) ?? 0)}',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEB8153),
+                      color: Colors.green,
                     ),
                   ),
                 ],

@@ -43,12 +43,11 @@ dependencies:
   intl: ^0.18.0
   file_picker: ^5.0.1
   path_provider: ^2.0.11
-  open_file: ^3.3.2
   flutter_bloc: ^8.0.0
   permission_handler: ^10.0.0
   flutter_typeahead: ^3.2.1
   flutter_dropzone: ^3.0.6
-  fl_chart: ^0.62.0
+  flutter_launcher_icons: ^0.12.0
 
 dev_dependencies:
   flutter_test:
@@ -62,7 +61,13 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   dio: ^5.0.0
   shared_preferences: ^2.0.15
-  connectivity_plus_platform_interface: ^2.0.1 # Versi terbaru pada saat penulisan. Sesuaikan dengan versi terbaru yang tersedia
+  connectivity_plus_platform_interface: ^2.0.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/pitycash_icons.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -77,8 +82,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/piticash_log.png
-    - assets/bg_splash.png
     - assets/bg_logo_piticash.png
+    - assets/icon/pitycash_icons.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

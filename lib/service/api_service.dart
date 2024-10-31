@@ -1,5 +1,6 @@
-import 'dart:convert';
+
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +14,8 @@ import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final String baseUrl = "http://192.168.0.211:8000/api";
+  // final String baseUrl = "http://192.168.0.211:8000/api";
+  final String baseUrl = "http://pitycash.mamorasoft.com/api";
   final Dio _dio = Dio();
 
   ApiService() {
@@ -956,8 +958,8 @@ class ApiService {
         throw Exception(
             'Gagal mengekspor pemasukan: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
       } else {
-        print('Error saat mengekspor pemasukan: $e');
-        throw Exception('Gagal mengekspor pemasukan ke Excel');
+        print('Error saat mengekspor Excel: $e');
+        throw Exception('Gagal mengekspor Excel pemasukan');
       }
     }
   }
@@ -1069,7 +1071,8 @@ class ApiService {
       }
     } catch (e) {
       if (e is DioError) {
-        print('DioError saat mengambil gambar pengeluaran: ${e.response?.data}');
+        print(
+            'DioError saat mengambil gambar pengeluaran: ${e.response?.data}');
         throw Exception(
             'Gagal mengambil gambar pengeluaran: ${e.response?.statusMessage ?? e.message}');
       } else {
@@ -1082,7 +1085,7 @@ class ApiService {
   Future<void> createPengeluaran(
     List<String> names,
     List<String> descriptions,
-    List<String> parentDates, // Accept formatted dates
+    List<String> parentDates,
     List<int> jumlahs,
     List<int> jumlahSatuans,
     List<double> nominals,
@@ -1091,67 +1094,85 @@ class ApiService {
     List<File> files,
   ) async {
     try {
-      List<Map<String, dynamic>> pengeluaranList = [];
+      // Prepare form data
+      var formData = FormData();
 
-      // Prepare the list of pengeluaran items
-      for (int i = 0; i < names.length; i++) {
-        pengeluaranList.add({
-          'name': names[i],
-          'description': descriptions[i],
-          'jumlah_satuan': jumlahSatuans[i],
-          'nominal': nominals[i],
-          'dll': dls[i],
-          'jumlah': jumlahs[i],
-          'id': categoryIds[i], // Ensure this matches your API expectations
-        });
+      // Add basic fields as arrays
+      formData.fields.addAll([
+        for (int i = 0; i < names.length; i++) MapEntry('name[]', names[i]),
+        for (int i = 0; i < descriptions.length; i++)
+          MapEntry('description[]', descriptions[i]),
+        for (int i = 0; i < parentDates.length; i++)
+          MapEntry('tanggal[]', parentDates[i]),
+        for (int i = 0; i < jumlahs.length; i++)
+          MapEntry('jumlah[]', jumlahs[i].toString()),
+        for (int i = 0; i < jumlahSatuans.length; i++)
+          MapEntry('jumlah_satuan[]', jumlahSatuans[i].toString()),
+        for (int i = 0; i < nominals.length; i++)
+          MapEntry('nominal[]', nominals[i].toString()),
+        for (int i = 0; i < dls.length; i++)
+          MapEntry('dll[]', dls[i].toString()),
+        for (int i = 0; i < categoryIds.length; i++)
+          MapEntry('category_id[]', categoryIds[i].toString()),
+      ]);
+
+      // Add files if they exist
+      if (files.isNotEmpty) {
+        for (int i = 0; i < files.length; i++) {
+          if (files[i].path.isNotEmpty) {
+            String fileName = files[i].path.split('/').last;
+            formData.files.add(
+              MapEntry(
+                'image[]',
+                await MultipartFile.fromFile(
+                  files[i].path,
+                  filename: fileName,
+                ),
+              ),
+            );
+          }
+        }
       }
 
-      // Check that parent dates are not empty
-      if (parentDates.isEmpty) {
-        throw Exception("At least one date must be provided.");
-      }
+      print('Mengirim request dengan form data: ${formData.fields}');
+      print('Files yang akan dikirim: ${formData.files.length}');
 
-      // Construct the request body
-      Map<String, dynamic> requestBody = {
-        'tanggal': parentDates, // Use the formatted parent dates directly
-        'name': names,
-        'description': descriptions,
-        'jumlah_satuan': jumlahSatuans,
-        'nominal': nominals,
-        'dll': dls,
-        'jumlah': jumlahs,
-        'id': categoryIds,
-        // 'image': images, // Include if you have images to upload
-      };
+      await _setAuthToken();
+      final response = await _dio.post(
+        '$baseUrl/outcome/store',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
 
-      // Debugging: Log the request body
-      print('Request Body: $requestBody');
-
-      // Send the request
-      await _setAuthToken(); // Assuming this method sets the auth token correctly
-      final response =
-          await _dio.post('$baseUrl/outcome/store', data: requestBody);
-
-      // Check the response
       if (response.statusCode == 201) {
         print('Pengeluaran berhasil ditambahkan: ${response.data}');
+        // Mengambil path gambar dari response
+        if (response.data['data'] != null &&
+            response.data['data']['image'] != null) {
+          String imagePath = response.data['data']['image'];
+          print('Path gambar tersimpan: $imagePath');
+        }
       } else {
-        throw Exception('Failed to create pengeluaran: ${response.data}');
+        throw Exception('Gagal membuat pengeluaran: ${response.data}');
       }
     } catch (e) {
-      print('Error in ApiService: $e');
+      print('Error dalam ApiService: $e');
       if (e is DioError) {
         print('Response data: ${e.response?.data}');
         print('Response status code: ${e.response?.statusCode}');
         print('Response headers: ${e.response?.headers}');
       }
-      throw Exception('Error in ApiService: $e');
+      throw Exception('Error dalam ApiService: $e');
     }
   }
 
   Future<void> editPengeluaran(
     int parentId,
-    List<String> tanggalList, // List to hold dates for each entry
+    List<String> tanggalList,
     List<int> dataIds,
     List<String> names,
     List<String> descriptions,
@@ -1163,102 +1184,95 @@ class ApiService {
     List<File> files,
   ) async {
     try {
-      List<Map<String, dynamic>> pengeluaranList = [];
+      var formData = FormData();
 
+      // Add parent ID
+      formData.fields.add(MapEntry('id_parent', parentId.toString()));
+
+      // Add tanggal as single field
+      formData.fields.add(MapEntry('tanggal', tanggalList.first));
+
+      // Add basic fields as arrays
       for (int i = 0; i < names.length; i++) {
-        // Check for non-null values before adding to the list
-        if (dataIds[i] != null &&
-            names[i].isNotEmpty &&
-            jumlahSatuans[i] != null &&
-            nominals[i] != null &&
-            jumlahs[i] != null &&
-            categoryIds[i] != null) {
-          pengeluaranList.add({
-            'id_data': dataIds[i],
-            'name': names[i],
-            'description': descriptions[i], // Provide default if null
-            'jumlah_satuan': jumlahSatuans[i].toString(), // Convert to String
-            'nominal': nominals[i].toString(), // Convert to String
-            'dll': dls[i].toString(), // Convert to String
-            'jumlah': jumlahs[i].toString(), // Convert to String
-            'id': categoryIds[i].toString(), // Convert to String
-            'tanggal':
-                tanggalList[i], // Use tanggal from the list for each entry
-            // Add image data handling if applicable
-            'image': files.isNotEmpty && files[i].path.isNotEmpty
-                ? await _uploadFile(files[i]) // Ensure you upload the file
-                : null,
-          });
-        } else {
-          print(
-              "Error: Missing required fields for pengeluaran item at index $i");
+        formData.fields.addAll([
+          MapEntry('id_data[]', dataIds[i].toString()),
+          MapEntry('name[]', names[i]),
+          MapEntry('description[]', descriptions[i]),
+          MapEntry('jumlah[]', jumlahs[i].toString()),
+          MapEntry('jumlah_satuan[]', jumlahSatuans[i].toString()),
+          MapEntry('nominal[]', nominals[i].toString()),
+          MapEntry('dll[]', dls[i].toString()),
+          MapEntry('category_id[]', categoryIds[i].toString()),
+        ]);
+      }
+
+      // Add files if they exist
+      if (files.isNotEmpty) {
+        for (int i = 0; i < files.length; i++) {
+          if (files[i].path.isNotEmpty) {
+            String fileName = files[i].path.split('/').last;
+            formData.files.add(
+              MapEntry(
+                'image[]',
+                await MultipartFile.fromFile(
+                  files[i].path,
+                  filename: fileName,
+                ),
+              ),
+            );
+          }
         }
       }
 
-      if (pengeluaranList.isEmpty) {
-        print("Error: No valid pengeluaran items to update.");
-        return; // Exit early if no valid items
-      }
-
-      // Create the request body according to the API requirements
-      Map<String, dynamic> requestBody = {
-        'tanggal': tanggalList.isNotEmpty
-            ? tanggalList.first
-            : DateTime.now()
-                .toIso8601String()
-                .split('T')
-                .first, // Default if list is empty
-        'name': names,
-        'description': descriptions,
-        'jumlah_satuan': jumlahSatuans,
-        'nominal': nominals,
-        'jumlah': jumlahs,
-        'dll': dls,
-        'id': categoryIds,
-        'image': files
-            .map((file) => file.path)
-            .toList(), // Ensure images are properly formatted
-        'pengeluaran': pengeluaranList, // Include the list of pengeluaran items
-      };
-
-      print('Request Body: $requestBody');
+      print('Mengirim request dengan form data: ${formData.fields}');
+      print('Files yang akan dikirim: ${formData.files.length}');
 
       await _setAuthToken();
-      final response = await _dio.put(
+      final response = await _dio.post(
         '$baseUrl/outcome/update/$parentId',
-        data: requestBody,
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+          },
+        ),
       );
 
       if (response.statusCode == 200) {
         print('Data updated successfully: ${response.data}');
-        // Handle the successful response as needed
         if (response.data['status'] == 'success') {
-          print(response.data['message']);
+          print('Data berhasil diperbarui.');
+          var responseData = response.data['data'];
+          print('Parent ID: ${responseData['id']}');
+          print('Tanggal: ${responseData['tanggal']}');
+
+          if (responseData['pengeluaran'] != null) {
+            for (var item in responseData['pengeluaran']) {
+              print('ID Data: ${item['id_data']}');
+              print('Name: ${item['name']}');
+              print('Description: ${item['description']}');
+              print('Image: ${item['image']}');
+            }
+          }
+        } else {
+          throw Exception('Failed to update data: ${response.data['message']}');
         }
       } else {
-        print('Failed to update data: ${response.statusCode} ${response.data}');
+        throw Exception('Failed to update data: ${response.data}');
       }
     } catch (e) {
-      // Log error with more detail
-      print('Error in ApiService: $e');
-      // Check for specific exceptions if needed
+      print('Error dalam ApiService: $e');
       if (e is DioError) {
-        // Handle DioError specifically
-        print('DioError: ${e.response?.data} ${e.response?.statusCode}');
+        print('Response data: ${e.response?.data}');
+        print('Response status code: ${e.response?.statusCode}');
+        print('Response headers: ${e.response?.headers}');
       }
+      throw Exception('Error dalam ApiService: $e');
     }
   }
 
 // Example method to upload files if necessary
-  Future<String?> _uploadFile(File file) async {
-    try {
-      // Implement your file upload logic here and return the image URL or null
-      return null; // Replace with actual implementation
-    } catch (e) {
-      print('Error uploading file: $e');
-      return null; // Handle the upload failure
-    }
-  }
 
   Future<void> deleteDataPengeluaran(int id) async {
     print('Deleting outcome ID: $id');

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPreferencesService {
   static const String _tokenKey = 'token';
   static const String _userKey = 'user';
+  static const String _rolesKey = 'roles';
   static SharedPreferences? _instance;
 
   static Future<SharedPreferencesService> getInstance() async {
@@ -24,11 +25,26 @@ class SharedPreferencesService {
         _userKey, json.encode(user)); // Save user as JSON string
   }
 
+  Future<void> saveRoles(Map<String, dynamic> roles) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        _rolesKey, json.encode(roles)); // Save user as JSON string
+  }
+
   Future<Map<String, dynamic>?> getUser() async {
     final prefs = await SharedPreferences.getInstance();
     final userString = prefs.getString(_userKey);
     if (userString != null) {
       return Map<String, dynamic>.from(json.decode(userString));
+    }
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> getRoles() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rolesString = prefs.getString(_rolesKey);
+    if (rolesString != null) {
+      return Map<String, dynamic>.from(json.decode(rolesString));
     }
     return null;
   }
@@ -73,6 +89,11 @@ class SharedPreferencesService {
     await prefs.remove(_userKey);
   }
 
+  Future<void> removeRoles() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_rolesKey);
+  }
+
   // New method to print user data
   Future<void> printUserData() async {
     final user = await getUser();
@@ -94,6 +115,7 @@ class SharedPreferencesService {
   Future<void> removeUserData() async {
     await _instance?.remove('userName'); // Clear the user name
     await _instance?.remove('userEmail'); // Clear the user email
+    await _instance?.remove(_rolesKey); // Clear the roles
     // Add more removals if there are other user data keys
   }
 }

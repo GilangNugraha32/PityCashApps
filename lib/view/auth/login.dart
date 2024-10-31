@@ -19,9 +19,9 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _obscureText = true;
-
   Future<void> _login() async {
-    final String apiUrl = "http://192.168.0.211:8000/api/login";
+    // final String apiUrl = "http://192.168.0.211:8000/api/login";
+    final String apiUrl = "http://pitycash.mamorasoft.com/api/login";
 
     if (!_formKey.currentState!.validate()) {
       return;
@@ -53,10 +53,33 @@ class _LoginScreenState extends State<LoginScreen> {
         final token = jsonResponse['token'];
         final user = jsonResponse['user'];
 
+        // Ambil roles dari user data
+        final userRoles = user['roles'];
+        Map<String, dynamic> roles = {};
+
+        if (userRoles != null && userRoles is List && userRoles.isNotEmpty) {
+          roles = {
+            'roles': userRoles
+                .map((role) => {
+                      'id': role['id'],
+                      'name': role['name'],
+                      'guard_name': role['guard_name'],
+                      'created_at': role['created_at'],
+                      'updated_at': role['updated_at'],
+                    })
+                .toList()
+          };
+          log("Roles found in user data: $roles");
+        } else {
+          log("Error: Exception: Roles data is null or empty");
+        }
+
         if (token != null) {
           log("Token saved: $token");
           await _prefsService.saveToken(token);
           await _prefsService.saveUser(user);
+          await _prefsService.saveRoles(roles);
+          log("Roles saved successfully: $roles");
 
           Navigator.pushReplacementNamed(context, '/home');
         }

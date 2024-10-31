@@ -91,8 +91,8 @@ class _EditCategoriesState extends State<EditCategories> {
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(16.0),
-                bottomLeft: Radius.circular(16.0),
+                bottomRight: Radius.circular(24.0),
+                bottomLeft: Radius.circular(24.0),
               ),
             ),
             child: Padding(
@@ -296,7 +296,7 @@ class _EditCategoriesState extends State<EditCategories> {
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              child: Text('Cancel'),
+                              child: Text('Batal'),
                               style: ElevatedButton.styleFrom(
                                 primary: Color(0xFFDA0000),
                                 shape: RoundedRectangleBorder(

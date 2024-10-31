@@ -48,6 +48,17 @@ class _EditPemasukanState extends State<EditPemasukan> {
     jumlahController.text =
         formatCurrency(double.tryParse(widget.pemasukan.jumlah) ?? 0.0);
     selectedCategory = widget.pemasukan.category;
+
+    // Add listener to jumlahController
+    jumlahController.addListener(() {
+      String text = jumlahController.text;
+      if (!text.startsWith('Rp') && text.isNotEmpty) {
+        jumlahController.value = jumlahController.value.copyWith(
+          text: 'Rp$text',
+          selection: TextSelection.collapsed(offset: text.length + 2),
+        );
+      }
+    });
   }
 
   @override
@@ -381,8 +392,17 @@ class _EditPemasukanState extends State<EditPemasukan> {
         controller: jumlahController,
         keyboardType: TextInputType.number,
         inputFormatters: [
-          ThousandSeparatorInputFormatter(),
+          FilteringTextInputFormatter.digitsOnly,
+          CurrencyInputFormatter(),
         ],
+        onChanged: (value) {
+          // Jika field kosong atau hanya berisi Rp0, reset controller dan set cursor ke posisi setelah Rp
+          if (value.isEmpty || value == 'Rp0') {
+            jumlahController.value = TextEditingValue(
+                text: 'Rp0',
+                selection: TextSelection.fromPosition(TextPosition(offset: 2)));
+          }
+        },
         style: TextStyle(fontSize: 14),
         decoration: InputDecoration(
           prefixIcon: Padding(
@@ -408,7 +428,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
               ),
             ),
           ),
-          hintText: 'Masukkan jumlah dalam bentuk Rp',
+          hintText: 'Masukkan jumlah',
           hintStyle: TextStyle(color: Colors.grey),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(vertical: 15),
@@ -597,7 +617,7 @@ class _EditPemasukanState extends State<EditPemasukan> {
             ),
           ),
           child: Text(
-            'Cancel',
+            'Batal',
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -628,24 +648,36 @@ class _EditPemasukanState extends State<EditPemasukan> {
   }
 }
 
-class ThousandSeparatorInputFormatter extends TextInputFormatter {
+class CurrencyInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+    if (newValue.text.isEmpty) {
+      return TextEditingValue(
+          text: 'Rp0',
+          selection: TextSelection.fromPosition(TextPosition(offset: 2)));
+    }
+
     String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (newText.isEmpty) {
-      return TextEditingValue(text: '');
+      return TextEditingValue(
+          text: 'Rp0',
+          selection: TextSelection.fromPosition(TextPosition(offset: 2)));
     }
 
-    String formattedText =
-        NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
+    int value = int.parse(newText);
+    String formatted = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp',
+      decimalDigits: 0,
+    ).format(value);
 
     return TextEditingValue(
-      text: formattedText,
-      selection: TextSelection.collapsed(offset: formattedText.length),
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

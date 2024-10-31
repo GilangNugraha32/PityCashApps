@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:pity_cash/service/api_service.dart';
+import 'package:pity_cash/view/home/home.dart';
 
 class TambahCategories extends StatefulWidget {
+  final VoidCallback? onUpdate;
+
+  const TambahCategories({
+    Key? key,
+    this.onUpdate,
+  }) : super(key: key);
+
   @override
   _TambahCategoriesState createState() => _TambahCategoriesState();
 }
@@ -28,8 +36,8 @@ class _TambahCategoriesState extends State<TambahCategories> {
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(16.0),
-                bottomLeft: Radius.circular(16.0),
+                bottomRight: Radius.circular(24.0),
+                bottomLeft: Radius.circular(24.0),
               ),
             ),
             child: Padding(
@@ -59,7 +67,7 @@ class _TambahCategoriesState extends State<TambahCategories> {
                     child: Text(
                       'Tambah Kategori',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -193,7 +201,7 @@ class _TambahCategoriesState extends State<TambahCategories> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: Text('Cancel'),
+                            child: Text('Batal'),
                             style: ElevatedButton.styleFrom(
                               primary: Color(0xFFDA0000),
                               shape: RoundedRectangleBorder(
@@ -232,12 +240,36 @@ class _TambahCategoriesState extends State<TambahCategories> {
                                     ),
                                   );
 
-                                  Navigator.pop(context, 'success');
+                                  // Panggil callback untuk refresh
+                                  widget.onUpdate?.call();
+
+                                  // Kembali ke halaman sebelumnya
+                                  Navigator.pop(context);
+
+                                  // Refresh halaman yang dituju dengan mengganti route
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          HomeScreen(initialIndex: 1),
+                                    ),
+                                  );
                                 } catch (e) {
+                                  String errorMessage =
+                                      'Gagal menambahkan kategori';
+                                  if (e
+                                      .toString()
+                                      .contains('nama sudah digunakan')) {
+                                    errorMessage =
+                                        'Nama kategori sudah digunakan';
+                                  } else if (description.length > 30) {
+                                    errorMessage =
+                                        'Deskripsi terlalu panjang (maksimal 30 karakter)';
+                                  }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(
-                                        'Gagal menambahkan kategori',
+                                        errorMessage,
                                         style: TextStyle(
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold),

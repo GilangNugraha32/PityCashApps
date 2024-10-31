@@ -83,15 +83,10 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     });
 
     try {
-      print(
-          'Mengambil pengeluaran untuk halaman: $page dengan rentang tanggal: $selectedDateRange');
-
       final fetchedExpenses = await _apiService.fetchExpenses(
         page: page,
         dateRange: selectedDateRange,
       );
-
-      print('Pengeluaran yang diambil: ${fetchedExpenses.toString()}');
 
       setState(() {
         if (page == 1) {
@@ -102,14 +97,12 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
 
         _filterExpenses();
         currentPage++;
-      });
 
-      // Periksa apakah masih ada data yang bisa dimuat
-      if (fetchedExpenses.isEmpty) {
-        setState(() {
+        // Hentikan loading jika tidak ada data baru
+        if (fetchedExpenses.isEmpty) {
           isLoadingMore = false;
-        });
-      }
+        }
+      });
     } catch (e) {
       print('Error saat mengambil pengeluaran: $e');
     } finally {
@@ -148,8 +141,9 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     if (picked != null && picked != selectedDateRange) {
       setState(() {
         selectedDateRange = picked;
+        isLoading = true;
       });
-      _filterExpenses();
+      await _fetchExpenses(1);
     }
   }
 
@@ -170,19 +164,15 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         }).toList();
       }
 
-      if (query.isEmpty) {
-        filteredExpenses = List.from(dateRangeFilteredExpenses);
-      } else {
-        filteredExpenses = dateRangeFilteredExpenses.where((pengeluaran) {
-          bool matchesName = pengeluaran.name.toLowerCase().contains(query);
-          bool matchesDate = DateFormat('dd MMMM yyyy')
-              .format(pengeluaran.tanggal!)
-              .toLowerCase()
-              .contains(query);
-
-          return matchesName || matchesDate;
-        }).toList();
-      }
+      filteredExpenses = query.isEmpty
+          ? List.from(dateRangeFilteredExpenses)
+          : dateRangeFilteredExpenses.where((pengeluaran) {
+              return pengeluaran.name.toLowerCase().contains(query) ||
+                  DateFormat('dd MMMM yyyy')
+                      .format(pengeluaran.tanggal!)
+                      .toLowerCase()
+                      .contains(query);
+            }).toList();
 
       groupedFilteredExpenses = {};
       for (var pengeluaran in filteredExpenses) {
@@ -207,8 +197,6 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         currentPage = 1;
         expenses.clear();
         _fetchExpenses(currentPage);
-      } else {
-        // Implement income fetching if needed
       }
     });
   }
@@ -223,34 +211,15 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       groupedExpenses[expense.idParent]!.add(expense);
     }
     return Scaffold(
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              _buildOrangeBackgroundSection(),
-              SizedBox(height: 10),
-              _buildSearchForm(),
-              SizedBox(height: 20),
-              _buildCategoriesList(groupedFilteredExpenses),
-            ],
-          ),
-          if (isLoading) Center(child: CircularProgressIndicator()),
+          _buildOrangeBackgroundSection(),
+          SizedBox(height: 10),
+          _buildSearchForm(),
+          SizedBox(height: 20),
+          _buildCategoriesList(groupedFilteredExpenses),
+          if (isLoading) Center(child: CircularProgressIndicator())
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TambahPengeluaran(),
-            ),
-          );
-          if (result == true) {
-            _refreshExpenses();
-          }
-        },
-        backgroundColor: Colors.orange,
-        child: Icon(Icons.add),
       ),
     );
   }
@@ -284,7 +253,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeaderRow(),
-            SizedBox(height: 30),
+            SizedBox(height: 15),
             _buildSaldoSection(),
             SizedBox(height: 12),
             _buildToggleButton(),
@@ -327,106 +296,97 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
               color: Colors.white.withOpacity(0.9),
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 5),
           FutureBuilder<double>(
             future: ApiService().fetchMinimalSaldo(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator(color: Colors.white);
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}',
-                    style: TextStyle(color: Colors.white));
-              } else {
-                double minimalSaldo = snapshot.data ?? 0;
-                bool isLowBalance = saldo <= minimalSaldo;
-                return Column(
-                  children: [
+              double minimalSaldo = snapshot.data ?? 0;
+              bool isLowBalance = saldo <= minimalSaldo;
+
+              return Column(
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(width: 40),
+                        Expanded(
+                          child: Text(
+                            isBalanceVisible
+                                ? NumberFormat.currency(
+                                    locale: 'id_ID',
+                                    symbol: 'Rp',
+                                    decimalDigits: 0,
+                                  ).format(saldo)
+                                : 'Rp' + _formatHiddenBalance(saldo),
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: isLowBalance
+                                  ? Color(0xFFF54D42)
+                                  : Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            isBalanceVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isBalanceVisible = !isBalanceVisible;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isLowBalance)
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.8,
+                      margin: EdgeInsets.only(top: 8),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.yellow.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          SizedBox(width: 40),
-                          Expanded(
-                            child: Text(
-                              isBalanceVisible
-                                  ? NumberFormat.currency(
-                                      locale: 'id_ID',
-                                      symbol: 'Rp',
-                                      decimalDigits: 0,
-                                    ).format(saldo)
-                                  : 'Rp' + _formatHiddenBalance(saldo),
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: isLowBalance
-                                    ? Color(0xFFF54D42)
-                                    : Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
+                          Icon(Icons.info_outline,
+                              color: Colors.yellow, size: 16),
+                          SizedBox(width: 4),
+                          Text(
+                            'Saldo di bawah batas minimal',
+                            style: TextStyle(
+                              color: Colors.yellow,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12,
                             ),
                           ),
-                          IconButton(
-                            icon: Icon(
-                              isBalanceVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.white,
-                              size: 24,
+                          SizedBox(width: 4),
+                          Text(
+                            '(${NumberFormat.currency(
+                              locale: 'id_ID',
+                              symbol: 'Rp',
+                              decimalDigits: 0,
+                            ).format(minimalSaldo)})',
+                            style: TextStyle(
+                              color: Colors.yellow.withOpacity(0.8),
+                              fontSize: 12,
                             ),
-                            onPressed: () {
-                              setState(() {
-                                isBalanceVisible = !isBalanceVisible;
-                              });
-                            },
                           ),
                         ],
                       ),
                     ),
-                    if (isLowBalance)
-                      Container(
-                        margin: EdgeInsets.only(top: 8),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: Colors.yellow.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.yellow,
-                              size: 16,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Saldo di bawah batas minimal',
-                              style: TextStyle(
-                                color: Colors.yellow,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12,
-                              ),
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              '(${NumberFormat.currency(
-                                locale: 'id_ID',
-                                symbol: 'Rp',
-                                decimalDigits: 0,
-                              ).format(minimalSaldo)})',
-                              style: TextStyle(
-                                color: Colors.yellow.withOpacity(0.8),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                );
-              }
+                ],
+              );
             },
           ),
         ],
@@ -1089,17 +1049,35 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             _fetchExpenses(currentPage);
           }
         },
-        child: ListView.builder(
-          padding: const EdgeInsets.all(8),
-          itemCount: groupedFilteredExpenses.length,
-          itemBuilder: (context, groupIndex) {
-            int parentId = groupedFilteredExpenses.keys.elementAt(groupIndex);
-            List<Pengeluaran> groupItems = groupedFilteredExpenses[parentId]!;
-            double totalJumlah =
-                groupItems.fold(0, (sum, item) => sum + item.jumlah);
+        child: Stack(
+          children: [
+            ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount:
+                  groupedFilteredExpenses.length + (isLoadingMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == groupedFilteredExpenses.length) {
+                  return Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFFEB8153)),
+                      ),
+                    ),
+                  );
+                }
 
-            return _buildExpenseGroup(groupItems, totalJumlah);
-          },
+                int parentId = groupedFilteredExpenses.keys.elementAt(index);
+                List<Pengeluaran> groupItems =
+                    groupedFilteredExpenses[parentId]!;
+                double totalJumlah =
+                    groupItems.fold(0, (sum, item) => sum + item.jumlah);
+
+                return _buildExpenseGroup(groupItems, totalJumlah);
+              },
+            ),
+          ],
         ),
       ),
     );

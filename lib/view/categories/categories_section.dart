@@ -35,6 +35,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
 
   // Controller untuk pencarian
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -370,25 +372,6 @@ class _CategoriesSectionState extends State<CategoriesSection> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => TambahCategories(),
-            ),
-          );
-          if (result == 'success') {
-            _refreshCategoryList();
-          }
-        },
-        backgroundColor: Colors.orange,
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -1254,15 +1237,34 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                   _refreshCategoryList();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Kategori berhasil dihapus'),
+                      content: Text(
+                        'Kategori berhasil dihapus',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                       backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      margin: EdgeInsets.all(10),
                     ),
                   );
                 } catch (e) {
+                  Navigator.of(context).pop(); // Tutup dialog konfirmasi
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Gagal menghapus kategori: $e'),
+                      content: Text(
+                        'Gagal menghapus kategori: $e',
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                       backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      margin: EdgeInsets.all(10),
                     ),
                   );
                 }

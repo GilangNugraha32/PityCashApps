@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
+import 'package:pity_cash/view/home/home.dart';
 
 class TambahPemasukan extends StatefulWidget {
   @override
@@ -111,6 +112,13 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
       Future.delayed(Duration(milliseconds: 500), () {
         Navigator.pop(context, true);
+        // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialIndex: 3),
+          ),
+        );
       });
     } catch (e) {
       print('Error: $e');
@@ -559,7 +567,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
               borderRadius: BorderRadius.circular(8), // Set radius to 8
             ),
           ),
-          child: Text('Cancel'),
+          child: Text('Batal'),
         ),
         SizedBox(width: 16), // Add spacing between buttons
 

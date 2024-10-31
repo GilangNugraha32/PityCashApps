@@ -81,18 +81,28 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
     List<double> nominals = [];
     List<double> dls = [];
     List<int> categoryIds = [];
+    List<File> images = [];
 
     String parentDate =
         DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now());
 
     for (var entry in allFormData) {
-      names.add((entry['names'].first ?? '').toString());
-      descriptions.add((entry['descriptions'].first ?? '').toString());
-      jumlahs.add((entry['jumlah'] as List).first?.toInt() ?? 0);
-      jumlahSatuans.add((entry['jumlahSatuan'] as List).first?.toInt() ?? 0);
-      nominals.add((entry['nominals'] as List).first?.toDouble() ?? 0.0);
-      dls.add((entry['dll'] as List).first?.toDouble() ?? 0.0);
-      categoryIds.add((entry['category'] as num?)?.toInt() ?? 0);
+      Map<String, dynamic> parentPengeluaran = entry['parentPengeluaran'];
+      List<Map<String, dynamic>> pengeluaranItems = entry['pengeluaran'];
+
+      for (var item in pengeluaranItems) {
+        names.add(item['name']);
+        descriptions.add(item['description']);
+        jumlahs.add(int.parse(item['jumlah']));
+        jumlahSatuans.add(int.parse(item['jumlah_satuan']));
+        nominals.add(double.parse(item['nominal']));
+        dls.add(double.parse(item['dll']));
+        categoryIds.add(int.parse(item['id']));
+
+        if (item['image'] != null) {
+          images.add(item['image'] as File);
+        }
+      }
     }
 
     try {
@@ -105,14 +115,26 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
         nominals,
         dls,
         categoryIds,
-        selectedImages
-            .where((image) => image != null)
-            .map((image) => image!)
-            .toList(),
+        images.isNotEmpty
+            ? images
+            : selectedImages
+                .where((image) => image != null)
+                .map((image) => image!)
+                .toList(),
       );
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Data berhasil dikirim')),
+        SnackBar(
+          content: Text(
+            'Berhasil ditambahkan!',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
 
       // Refresh halaman sebelumnya dan kembali
@@ -127,7 +149,18 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
     } catch (error) {
       print('Error: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan saat mengirim data')),
+        SnackBar(
+          content: Text(
+            'Gagal menambahkan data',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
     }
   }
@@ -273,7 +306,7 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: Text('Cancel'),
+                          child: Text('Batal'),
                         ),
                         SizedBox(width: 8),
                         ElevatedButton(
@@ -510,11 +543,10 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       return int.tryParse(text) ?? 0; // Convert to int
     }).toList();
 
-    List<String> dates = selectedDates
-        .map((date) => DateFormat('yyyy-MM-dd').format(date))
-        .toList(); // Format dates as strings
+    String date =
+        DateFormat('yyyy-MM-dd').format(selectedDate ?? DateTime.now());
 
-    int? category = selectedCategory?.id; // Ensure this is correct
+    int? category = selectedCategory?.id;
 
     // Check for errors before submitting
     if (names.isEmpty ||
@@ -523,21 +555,43 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         jumlahSatuan.isEmpty ||
         dll.isEmpty ||
         jumlah.isEmpty ||
-        dates.isEmpty ||
         category == null) {
-      // Handle error: show a message to the user
       throw Exception("All fields must be filled out before submission.");
     }
 
+    // Create parent pengeluaran data
+    Map<String, dynamic> parentPengeluaran = {
+      'tanggal': date,
+      'updated_at': DateTime.now().toIso8601String(),
+      'created_at': DateTime.now().toIso8601String(),
+    };
+
+    // Create list of pengeluaran items
+    List<Map<String, dynamic>> pengeluaranItems = [];
+    for (int i = 0; i < names.length; i++) {
+      Map<String, dynamic> item = {
+        'name': names[i],
+        'description': descriptions[i],
+        'jumlah_satuan': jumlahSatuan[i].toString(),
+        'nominal': nominals[i].toString(),
+        'dll': dll[i].toString(),
+        'jumlah': jumlah[i].toString(),
+        'id': category.toString(),
+        'updated_at': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      if (selectedImage != null && selectedImage!.files.isNotEmpty) {
+        item['image'] = File(selectedImage!.files.first.path!);
+      }
+
+      pengeluaranItems.add(item);
+    }
+
+    // Return complete form data structure
     return {
-      'names': names,
-      'descriptions': descriptions,
-      'nominals': nominals,
-      'jumlahSatuan': jumlahSatuan,
-      'dll': dll,
-      'jumlah': jumlah,
-      'dates': dates,
-      'category': category,
+      'parentPengeluaran': parentPengeluaran,
+      'pengeluaran': pengeluaranItems,
     };
   }
 
