@@ -1250,7 +1250,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           );
         }),
         SizedBox(width: 5),
-        _buildActionButton(Icons.arrow_circle_down_sharp, Color(0xFF68CF29),
+        _buildActionButton(Icons.file_upload_outlined, Color(0xFF68CF29),
             () {
           _showDragAndDropModal(context);
         }),

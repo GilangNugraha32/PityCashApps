@@ -344,96 +344,109 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
             ),
           ),
 
-          SizedBox(height: 20), // Jarak antara orange dan putih
+          SizedBox(height: 20), // Mengurangi jarak
 
           // White background container
           Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24.0),
-                  topRight: Radius.circular(24.0),
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity,
+                  color: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  // Mengurangi padding vertical
+                  child: _buildDateField(), // Tanggal tetap di atas
                 ),
-              ),
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                Expanded(
                   child: Container(
+                    width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(24.0),
+                        topRight: Radius.circular(24.0),
+                      ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(1.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 10),
-                          _buildDateField(),
-                          SizedBox(height: 5),
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: forms.length,
-                            separatorBuilder: (context, index) =>
-                                SizedBox(height: 5),
-                            itemBuilder: (context, index) {
-                              return forms[index];
-                            },
+                    child: SingleChildScrollView(
+                      controller: _scrollController,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                            16.0, 4.0, 16.0, 16.0), // Mengurangi padding atas
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          SizedBox(height: 10),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: ElevatedButton.icon(
-                              onPressed: _addForm,
-                              icon: Icon(Icons.add),
-                              label: Text('Tambah Pengeluaran'),
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.all(1.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: forms.length,
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(height: 5),
+                                  itemBuilder: (context, index) {
+                                    return forms[index];
+                                  },
                                 ),
-                              ),
+                                SizedBox(height: 10),
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: ElevatedButton.icon(
+                                    onPressed: _addForm,
+                                    icon: Icon(Icons.add),
+                                    label: Text('Tambah Pengeluaran'),
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Colors.blue,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Color(0xFFDA0000),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: Text('Batal'),
+                                    ),
+                                    SizedBox(width: 8),
+                                    ElevatedButton(
+                                      onPressed: _handleSubmit,
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Color(0xFFE85C0D),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                      child: Text('Simpan'),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  primary: Color(0xFFDA0000),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text('Batal'),
-                              ),
-                              SizedBox(width: 8),
-                              ElevatedButton(
-                                onPressed: _handleSubmit,
-                                style: ElevatedButton.styleFrom(
-                                  primary: Color(0xFFE85C0D),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text('Simpan'),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
@@ -466,49 +479,52 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
   }
 
   Widget _buildDateField() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
-      ),
-      child: TextField(
-        readOnly: true,
-        enabled: false,
-        decoration: InputDecoration(
-          hintText: selectedDate == null
-              ? 'Pilih Tanggal'
-              : '${selectedDate!.day} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
-          hintStyle: TextStyle(color: Colors.black87),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFEB8153),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    spreadRadius: 1.0,
-                    offset: Offset(0, 5),
-                  ),
-                ],
-              ),
+    return GestureDetector(
+      onTap: null,
+      child: Container(
+        height: 60,
+        margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey[300]!),
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.white,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: Duration(milliseconds: 200),
+              padding: EdgeInsets.all(12),
               child: Icon(
-                Icons.calendar_today,
-                color: Colors.white,
-                size: 22,
+                Icons.calendar_month_outlined,
+                color: Color(0xFFEB8153),
+                size: 24,
               ),
             ),
-          ),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            vertical: 15,
-          ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border(
+                  left: BorderSide(
+                    color: Colors.grey[300]!,
+                    width: 1.5,
+                  ),
+                ),
+              ),
+              child: Text(
+                selectedDate == null
+                    ? 'Pilih Tanggal'
+                    : '${selectedDate!.day} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
         ),
-        onTap: null,
       ),
     );
   }
@@ -732,7 +748,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         ),
       ),
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        margin: EdgeInsets.symmetric(horizontal: 8),
         width: screenWidth * 2, // Double the screen width
         decoration: BoxDecoration(
           border: Border.all(
@@ -775,91 +791,106 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }
 
   Widget _buildInputFields() {
-    bool isLastForm = widget.isLast;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 10),
+        // Nama Pengeluaran Section
         _buildLabel('Nama Pengeluaran'),
-        SizedBox(height: 10),
+        SizedBox(height: 8),
         _buildTextField(
-          icon: Icons.attach_money,
+          icon: Icons.sticky_note_2_outlined,
           controller: nameController,
           hintText: 'Masukkan nama pengeluaran',
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 16),
+
+        // Deskripsi Section
         _buildLabel('Deskripsi'),
-        SizedBox(height: 10),
-        _buildTextField(
-          icon: Icons.format_align_left,
-          controller: descriptionController,
-          hintText: 'Masukkan Deskripsi',
-          maxLines: 5,
-          isDescription: true,
-        ),
-        SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Nominal'),
-                  SizedBox(height: 10),
-                  _buildNominalTextField(),
-                ],
+        SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.grey.shade300,
+              width: 1,
+            ),
+          ),
+          child: TextField(
+            controller: descriptionController,
+            maxLines: 3,
+            style: TextStyle(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: 'Masukkan deskripsi pengeluaran',
+              hintStyle: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+              prefixIcon: Icon(
+                Icons.notes,
+                color: Color(0xFFEB8153),
+                size: 20,
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
               ),
             ),
-            SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Jumlah Satuan'),
-                  SizedBox(height: 10),
-                  _buildJumlahSatuanTextField(),
-                ],
-              ),
+          ),
+        ),
+        SizedBox(height: 16),
+
+        // Nominal & Jumlah Satuan Section
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildLabel('Nominal'),
+                SizedBox(height: 8),
+                _buildNominalTextField(),
+              ],
+            ),
+            SizedBox(height: 16),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildLabel('Jumlah Satuan'),
+                SizedBox(height: 8),
+                _buildJumlahSatuanTextField(),
+              ],
             ),
           ],
         ),
-        SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Biaya Tambahan (DLL)'),
-                  SizedBox(height: 10),
-                  _buildDllTextField(),
-                ],
-              ),
-            ),
-            SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildLabel('Jumlah'),
-                  SizedBox(height: 10),
-                  _buildJumlahField(),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 20),
-        _buildLabel('Kategori:'),
-        SizedBox(height: 10),
+        SizedBox(height: 16),
+
+        // Biaya Tambahan Section
+        _buildLabel('Biaya Tambahan (DLL)'),
+        SizedBox(height: 8),
+        _buildDllTextField(),
+        SizedBox(height: 16),
+
+        // Total Jumlah Section
+        _buildLabel('Jumlah'),
+        SizedBox(height: 8),
+        _buildJumlahField(),
+        SizedBox(height: 16),
+
+        // Kategori Section
+        _buildLabel('Kategori'),
+        SizedBox(height: 8),
         _buildCategoryDropdown(),
-        SizedBox(height: 10),
-        if (widget.isLast) _buildLabel('Pilih Gambar:'),
-        SizedBox(
-          height: 10,
-        ),
-        if (widget.isLast) _buildImagePicker(),
+        SizedBox(height: 16),
+
+        // Image Picker Section (Only for last form)
+        if (widget.isLast) ...[
+          _buildLabel('Pilih Gambar'),
+          SizedBox(height: 8),
+          _buildImagePicker(),
+        ],
       ],
     );
   }
@@ -868,54 +899,35 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     required IconData icon,
     required TextEditingController controller,
     required String hintText,
-    int? maxLines,
-    bool isDescription = false,
   }) {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
       ),
       child: TextField(
         controller: controller,
         style: TextStyle(fontSize: 14),
-        maxLines: maxLines,
         decoration: InputDecoration(
-          prefixIcon: Padding(
-            padding: EdgeInsets.only(
-                right: 8.0,
-                top: isDescription ? 12.0 : 0,
-                left: isDescription ? 12.0 : 0),
-            child: Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFEB8153),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    spreadRadius: 1.0,
-                    offset: Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
           hintText: hintText,
-          hintStyle: TextStyle(color: Colors.grey),
+          hintStyle: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 14,
+          ),
+          suffixIcon: Icon(
+            icon,
+            color: Color(0xFFEB8153),
+            size: 20,
+          ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
-            vertical: 15,
-            horizontal: isDescription ? 15 : 0,
+            horizontal: 16,
+            vertical: 14,
           ),
         ),
       ),
@@ -924,59 +936,127 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 
   Widget _buildJumlahSatuanTextField() {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
       ),
-      child: TextField(
-        controller: jumlahSatuanController,
-        keyboardType: TextInputType.number,
-        style: TextStyle(fontSize: 14),
-        onChanged: (value) {
-          _calculateTotal();
-        },
-        decoration: InputDecoration(
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFEB8153),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    spreadRadius: 1.0,
-                    offset: Offset(0, 2),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: jumlahSatuanController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(fontSize: 14),
+              onChanged: (value) {
+                _calculateTotal();
+              },
+              decoration: InputDecoration(
+                prefixIcon: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Icon(
+                    Icons.format_list_numbered,
+                    color: Color(0xFFEB8153),
+                    size: 20,
                   ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.format_list_numbered,
-                  color: Colors.white,
+                ),
+                hintText: 'Masukkan jumlah satuan',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
                 ),
               ),
             ),
           ),
-          hintText: 'Masukkan jumlah satuan',
-          hintStyle: TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 15),
-        ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              InkWell(
+                onTap: () {
+                  String currentText = jumlahSatuanController.text;
+                  int currentValue = int.tryParse(currentText) ?? 0;
+                  int newValue = currentValue + 1;
+                  jumlahSatuanController.text = newValue.toString();
+                  _calculateTotal();
+                },
+                child: Icon(Icons.arrow_drop_up, color: Color(0xFFEB8153)),
+              ),
+              InkWell(
+                onTap: () {
+                  String currentText = jumlahSatuanController.text;
+                  int currentValue = int.tryParse(currentText) ?? 0;
+                  if (currentValue > 0) {
+                    int newValue = currentValue - 1;
+                    jumlahSatuanController.text = newValue.toString();
+                    _calculateTotal();
+                  }
+                },
+                child: Icon(Icons.arrow_drop_down, color: Color(0xFFEB8153)),
+              ),
+            ],
+          ),
+          SizedBox(width: 8),
+        ],
       ),
     );
   }
 
   Widget _buildJumlahField() {
-    return _buildCustomTextField(
-      controller: jumlahController,
-      hintText: 'Jumlah total akan dihitung otomatis',
-      readOnly: true,
-      icon: Icons.receipt,
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: jumlahController,
+              readOnly: true,
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                prefixIcon: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Icon(
+                    Icons.receipt,
+                    color: Color(0xFFEB8153),
+                    size: 20,
+                  ),
+                ),
+                suffixText: 'IDR',
+                suffixStyle: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500),
+                hintText: 'Jumlah total akan dihitung otomatis',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1002,38 +1082,188 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }
 
   Widget _buildDllTextField() {
-    return _buildCustomTextField(
-      controller: dllController,
-      hintText: 'Masukkan biaya tambahan (DLL)',
-      icon: Icons.attach_money,
-      onChanged: (value) {
-        String numericValue = value.replaceAll(RegExp(r'[^0-9]'), '');
-        double amount = double.tryParse(numericValue) ?? 0;
-        dllController.value = TextEditingValue(
-          text: _formatCurrency(amount),
-          selection:
-              TextSelection.collapsed(offset: _formatCurrency(amount).length),
-        );
-        _calculateTotal();
-      },
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: dllController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(fontSize: 14),
+              onChanged: (value) {
+                String numericValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+                double amount = double.tryParse(numericValue) ?? 0;
+                dllController.value = TextEditingValue(
+                  text: _formatCurrency(amount),
+                  selection: TextSelection.collapsed(
+                      offset: _formatCurrency(amount).length),
+                );
+                _calculateTotal();
+              },
+              decoration: InputDecoration(
+                prefixIcon: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Icon(
+                    Icons.attach_money,
+                    color: Color(0xFFEB8153),
+                    size: 20,
+                  ),
+                ),
+                suffixText: 'IDR',
+                suffixStyle: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500),
+                hintText: 'Masukkan biaya tambahan (DLL)',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              InkWell(
+                onTap: () {
+                  String currentText =
+                      dllController.text.replaceAll(RegExp(r'[^0-9]'), '');
+                  int currentValue = int.tryParse(currentText) ?? 0;
+                  int newValue = currentValue + 1;
+                  String formattedValue = _formatCurrency(newValue.toDouble());
+                  dllController.text = formattedValue;
+                  _calculateTotal();
+                },
+                child: Icon(Icons.arrow_drop_up, color: Color(0xFFEB8153)),
+              ),
+              InkWell(
+                onTap: () {
+                  String currentText =
+                      dllController.text.replaceAll(RegExp(r'[^0-9]'), '');
+                  int currentValue = int.tryParse(currentText) ?? 0;
+                  if (currentValue > 0) {
+                    int newValue = currentValue - 1;
+                    String formattedValue =
+                        _formatCurrency(newValue.toDouble());
+                    dllController.text = formattedValue;
+                    _calculateTotal();
+                  }
+                },
+                child: Icon(Icons.arrow_drop_down, color: Color(0xFFEB8153)),
+              ),
+            ],
+          ),
+          SizedBox(width: 8),
+        ],
+      ),
     );
   }
 
   Widget _buildNominalTextField() {
-    return _buildCustomTextField(
-      controller: nominalController,
-      hintText: 'Masukkan jumlah',
-      icon: Icons.money,
-      onChanged: (value) {
-        String numericValue = value.replaceAll(RegExp(r'[^0-9]'), '');
-        double amount = double.tryParse(numericValue) ?? 0;
-        nominalController.value = TextEditingValue(
-          text: _formatCurrency(amount),
-          selection:
-              TextSelection.collapsed(offset: _formatCurrency(amount).length),
-        );
-        _calculateTotal();
-      },
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: nominalController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(fontSize: 14),
+              onChanged: (value) {
+                String numericValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+                double amount = double.tryParse(numericValue) ?? 0;
+                nominalController.value = TextEditingValue(
+                  text: _formatCurrency(amount),
+                  selection: TextSelection.collapsed(
+                      offset: _formatCurrency(amount).length),
+                );
+                _calculateTotal();
+              },
+              decoration: InputDecoration(
+                prefixIcon: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Icon(
+                    Icons.money,
+                    color: Color(0xFFEB8153),
+                    size: 20,
+                  ),
+                ),
+                suffixText: 'IDR',
+                suffixStyle: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500),
+                hintText: 'Masukkan jumlah',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+            ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              InkWell(
+                onTap: () {
+                  String currentText =
+                      nominalController.text.replaceAll(RegExp(r'[^0-9]'), '');
+                  int currentValue = int.tryParse(currentText) ?? 0;
+                  int newValue = currentValue + 1;
+                  String formattedValue = _formatCurrency(newValue.toDouble());
+                  nominalController.text = formattedValue;
+                  _calculateTotal();
+                },
+                child: Icon(Icons.arrow_drop_up, color: Color(0xFFEB8153)),
+              ),
+              InkWell(
+                onTap: () {
+                  String currentText =
+                      nominalController.text.replaceAll(RegExp(r'[^0-9]'), '');
+                  int currentValue = int.tryParse(currentText) ?? 0;
+                  if (currentValue > 0) {
+                    int newValue = currentValue - 1;
+                    String formattedValue =
+                        _formatCurrency(newValue.toDouble());
+                    nominalController.text = formattedValue;
+                    _calculateTotal();
+                  }
+                },
+                child: Icon(Icons.arrow_drop_down, color: Color(0xFFEB8153)),
+              ),
+            ],
+          ),
+          SizedBox(width: 8),
+        ],
+      ),
     );
   }
 
@@ -1104,69 +1334,76 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }
 
   Widget _buildImagePicker() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: _pickImage,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.grey[200],
-            ),
-            height: 60,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    height: 40,
-                    width: 40,
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: _pickImage,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFEB8153),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 4.0,
-                          spreadRadius: 1.0,
-                          offset: Offset(0, 5),
-                        ),
-                      ],
+                      color: Color(0xFFEB8153).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      Icons.image,
-                      color: Colors.white,
-                      size: 24,
+                      Icons.image_outlined,
+                      color: Color(0xFFEB8153),
+                      size: 20,
                     ),
                   ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    selectedImage != null
-                        ? 'Pilih gambar: ${selectedImage!.files.first.name}'
-                        : 'Pilih gambar dari Galeri',
-                    style: TextStyle(fontSize: 14),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      selectedImage != null
+                          ? selectedImage!.files.first.name
+                          : 'Cari atau pilih gambar',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
+                ],
+              ),
+            ),
+          ),
+          if (selectedImage != null && selectedImage!.files.isNotEmpty)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.file(
+                  File(selectedImage!.files.first.path!),
+                  height: 200,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-        SizedBox(height: 10),
-        if (selectedImage != null && selectedImage!.files.isNotEmpty)
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.file(
-              File(selectedImage!.files.first.path!),
-              height: 200,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1187,42 +1424,55 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 
   Widget _buildCategoryDropdown() {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 3,
+            offset: Offset(0, 2),
+          ),
+        ],
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
       ),
       child: TypeAheadFormField<Category>(
         textFieldConfiguration: TextFieldConfiguration(
           controller: TextEditingController(text: selectedCategory?.name ?? ''),
+          style: TextStyle(fontSize: 14),
           decoration: InputDecoration(
-            hintText: 'Pilih kategori',
-            hintStyle: TextStyle(color: Colors.grey),
-            border: InputBorder.none,
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFEB8153),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4.0,
-                      spreadRadius: 1.0,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.category, color: Colors.white),
-                ),
+            prefixIcon: Container(
+              margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Color(0xFFEB8153).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.insert_chart_outlined_outlined,
+                color: Color(0xFFEB8153),
+                size: 20,
               ),
             ),
-            suffixIcon: Icon(Icons.arrow_drop_down, color: Colors.grey),
-            contentPadding: EdgeInsets.symmetric(vertical: 15, horizontal: 12),
+            suffixIcon: Icon(
+              Icons.arrow_drop_down,
+              color: Color(0xFFEB8153),
+            ),
+            hintText: 'Cari atau pilih kategori',
+            hintStyle: TextStyle(
+              color: Colors.grey[400],
+              fontSize: 14,
+            ),
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
         ),
         suggestionsCallback: (pattern) async {
@@ -1230,8 +1480,36 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               category.name.toLowerCase().contains(pattern.toLowerCase()));
         },
         itemBuilder: (context, Category suggestion) {
-          return ListTile(
-            title: Text(suggestion.name),
+          return Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: Colors.grey.shade200),
+              ),
+            ),
+            child: ListTile(
+              title: Text(
+                suggestion.name,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: selectedCategory == suggestion
+                      ? FontWeight.normal
+                      : FontWeight.normal,
+                ),
+              ),
+              leading: Radio<Category>(
+                value: suggestion,
+                groupValue: selectedCategory,
+                onChanged: (Category? value) {
+                  setState(() {
+                    selectedCategory = value;
+                  });
+                },
+                activeColor: Color(0xFFEB8153),
+              ),
+              tileColor: selectedCategory == suggestion
+                  ? Color(0xFFEB8153).withOpacity(0.1)
+                  : null,
+            ),
           );
         },
         onSuggestionSelected: (Category suggestion) {
@@ -1239,11 +1517,25 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             selectedCategory = suggestion;
           });
         },
-        noItemsFoundBuilder: (context) => Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            'Tidak ada kategori ditemukan.',
-            style: TextStyle(color: Colors.red),
+        noItemsFoundBuilder: (context) => Container(
+          padding: EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.orange,
+                size: 20,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Tidak ada kategori ditemukan',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 14,
+                ),
+              ),
+            ],
           ),
         ),
       ),

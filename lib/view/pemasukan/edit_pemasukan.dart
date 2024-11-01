@@ -278,43 +278,407 @@ class _EditPemasukanState extends State<EditPemasukan> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 10),
+        SizedBox(height: 20),
+        // Nama Pemasukan
         _buildLabel('Nama Pemasukan'),
-        SizedBox(height: 10),
-        _buildTextField(
-          icon: Icons.mode_edit_outlined,
-          controller: nameController,
-          hintText: 'Masukkan nama pemasukan',
+        SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.grey.shade300,
+              width: 1,
+            ),
+          ),
+          child: TextField(
+            controller: nameController,
+            style: TextStyle(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: 'Masukkan nama pemasukan',
+              hintStyle: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+              suffixIcon: Icon(
+                Icons.description_outlined,
+                color: Color(0xFFEB8153),
+                size: 20,
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+          ),
         ),
-        SizedBox(height: 15),
+        SizedBox(height: 20),
+
+        // Deskripsi
         _buildLabel('Deskripsi'),
-        SizedBox(height: 10),
-        _buildTextField(
-          icon: Icons.format_align_left,
-          controller: descriptionController,
-          hintText: 'Masukkan Deskripsi',
+        SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.grey.shade300,
+              width: 1,
+            ),
+          ),
+          child: TextField(
+            controller: descriptionController,
+            maxLines: 3,
+            style: TextStyle(fontSize: 14),
+            decoration: InputDecoration(
+              hintText: 'Masukkan deskripsi pemasukan',
+              hintStyle: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+              ),
+              prefixIcon: Icon(
+                Icons.notes,
+                color: Color(0xFFEB8153),
+                size: 20,
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+            ),
+          ),
         ),
-        SizedBox(height: 15),
+        SizedBox(height: 20),
+
+        // Kategori
+        _buildLabel('Kategori'),
+        SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: Offset(0, 2),
+              ),
+            ],
+            border: Border.all(
+              color: Colors.grey.shade300,
+              width: 1,
+            ),
+          ),
+          child: TypeAheadFormField<Category>(
+            textFieldConfiguration: TextFieldConfiguration(
+              controller:
+                  TextEditingController(text: selectedCategory?.name ?? ''),
+              style: TextStyle(fontSize: 14),
+              decoration: InputDecoration(
+                prefixIcon: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFEB8153).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.insert_chart_outlined_outlined,
+                    color: Color(0xFFEB8153),
+                    size: 20,
+                  ),
+                ),
+                suffixIcon: Icon(
+                  Icons.arrow_drop_down,
+                  color: Color(0xFFEB8153),
+                ),
+                hintText: 'Cari atau pilih kategori',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 14,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+            ),
+            suggestionsCallback: (pattern) async {
+              return categories.where((category) =>
+                  category.name.toLowerCase().contains(pattern.toLowerCase()));
+            },
+            itemBuilder: (context, Category suggestion) {
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Colors.grey.shade200),
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(
+                    suggestion.name,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: selectedCategory == suggestion
+                          ? FontWeight.normal
+                          : FontWeight.normal,
+                    ),
+                  ),
+                  leading: Radio<Category>(
+                    value: suggestion,
+                    groupValue: selectedCategory,
+                    onChanged: (Category? value) {
+                      setState(() {
+                        selectedCategory = value;
+                      });
+                    },
+                    activeColor: Color(0xFFEB8153),
+                  ),
+                  tileColor: selectedCategory == suggestion
+                      ? Color(0xFFEB8153).withOpacity(0.1)
+                      : null,
+                ),
+              );
+            },
+            onSuggestionSelected: (Category suggestion) {
+              setState(() {
+                selectedCategory = suggestion;
+              });
+            },
+            noItemsFoundBuilder: (context) => Container(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.orange,
+                    size: 20,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Tidak ada kategori ditemukan',
+                    style: TextStyle(
+                      color: Colors.orange,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
+
+        // Tanggal
         _buildLabel('Tanggal'),
-        SizedBox(height: 10),
-        _buildDateField(),
-        SizedBox(height: 15),
-        _buildLabel('Jumlah:'),
-        SizedBox(height: 10),
-        _buildJumlahTextField(),
-        SizedBox(height: 15),
-        _buildLabel('Kategori:'),
-        SizedBox(height: 10),
-        _buildCategoryDropdown(),
+        SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.grey.shade300,
+              width: 1,
+            ),
+          ),
+          child: InkWell(
+            onTap: () => _selectDate(context),
+            child: TextField(
+              enabled: false,
+              decoration: InputDecoration(
+                suffixIcon: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Icon(
+                    Icons.calendar_today,
+                    color: Color(0xFFEB8153),
+                    size: 20,
+                  ),
+                ),
+                hintText: selectedDate == null
+                    ? 'Pilih Tanggal'
+                    : '${selectedDate!.day.toString().padLeft(2, '0')} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
+                hintStyle: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
+
+        // Jumlah
+        _buildLabel('Jumlah'),
+        SizedBox(height: 8),
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.white,
+            border: Border.all(
+              color: Colors.grey.shade300,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: jumlahController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    CurrencyInputFormatter(),
+                  ],
+                  style: TextStyle(fontSize: 14),
+                  decoration: InputDecoration(
+                    prefixIcon: Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Icon(
+                        Icons.money,
+                        color: Color(0xFFEB8153),
+                        size: 20,
+                      ),
+                    ),
+                    suffixText: 'IDR',
+                    suffixStyle: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500),
+                    hintText: 'Masukkan jumlah',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      String currentText = jumlahController.text
+                          .replaceAll(RegExp(r'[^0-9]'), '');
+                      int currentValue = int.tryParse(currentText) ?? 0;
+                      int newValue = currentValue + 1;
+                      String formattedValue = NumberFormat('#,###')
+                          .format(newValue)
+                          .replaceAll(',', '.');
+                      jumlahController.text = formattedValue;
+                    },
+                    child: Icon(Icons.arrow_drop_up, color: Color(0xFFEB8153)),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      String currentText = jumlahController.text
+                          .replaceAll(RegExp(r'[^0-9]'), '');
+                      int currentValue = int.tryParse(currentText) ?? 0;
+                      if (currentValue > 0) {
+                        int newValue = currentValue - 1;
+                        String formattedValue = NumberFormat('#,###')
+                            .format(newValue)
+                            .replaceAll(',', '.');
+                        jumlahController.text = formattedValue;
+                      }
+                    },
+                    child:
+                        Icon(Icons.arrow_drop_down, color: Color(0xFFEB8153)),
+                  ),
+                ],
+              ),
+              SizedBox(width: 8),
+            ],
+          ),
+        ),
       ],
     );
+  }
+
+  String _getMonthName(int month) {
+    const monthNames = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return monthNames[month - 1];
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFFEB8153),
+              onPrimary: Colors.white,
+              onSurface: Colors.black87,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                primary: Color(0xFFEB8153),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            dialogBackgroundColor: Colors.white,
+            dialogTheme: DialogTheme(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+      });
+    }
   }
 
   Widget _buildLabel(String text) {
     return Text(
       text,
       style: TextStyle(
-        fontWeight: FontWeight.bold,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
         color: Colors.black87,
       ),
     );
@@ -326,280 +690,32 @@ class _EditPemasukanState extends State<EditPemasukan> {
     required String hintText,
   }) {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
       ),
       child: TextField(
         controller: controller,
         style: TextStyle(fontSize: 14),
         decoration: InputDecoration(
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFEB8153),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    spreadRadius: 1.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                icon,
-                color: Colors.white,
-              ),
-            ),
-          ),
           hintText: hintText,
-          hintStyle: TextStyle(color: Colors.grey),
+          hintStyle: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 14,
+          ),
           border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 15),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildJumlahTextField() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: jumlahController,
-        keyboardType: TextInputType.number,
-        inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly,
-          CurrencyInputFormatter(),
-        ],
-        onChanged: (value) {
-          // Jika field kosong atau hanya berisi Rp0, reset controller dan set cursor ke posisi setelah Rp
-          if (value.isEmpty || value == 'Rp0') {
-            jumlahController.value = TextEditingValue(
-                text: 'Rp0',
-                selection: TextSelection.fromPosition(TextPosition(offset: 2)));
-          }
-        },
-        style: TextStyle(fontSize: 14),
-        decoration: InputDecoration(
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Container(
-              height: 48,
-              width: 48,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color(0xFFEB8153),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 4.0,
-                    spreadRadius: 1.0,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.money,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          hintText: 'Masukkan jumlah',
-          hintStyle: TextStyle(color: Colors.grey),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(vertical: 15),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryDropdown() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200],
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: TypeAheadFormField<Category>(
-        textFieldConfiguration: TextFieldConfiguration(
-          controller: TextEditingController(text: selectedCategory?.name ?? ''),
-          decoration: InputDecoration(
-            hintText: 'Pilih kategori',
-            hintStyle: TextStyle(color: Colors.grey),
-            border: InputBorder.none,
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFEB8153),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4.0,
-                      spreadRadius: 1.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.category,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            suffixIcon: Icon(
-              Icons.arrow_drop_down,
-              color: Colors.grey,
-            ),
-            contentPadding: EdgeInsets.symmetric(
-              vertical: 15,
-              horizontal: 12,
-            ),
-          ),
-        ),
-        suggestionsCallback: (pattern) async {
-          return categories.where((category) =>
-              category.name.toLowerCase().contains(pattern.toLowerCase()));
-        },
-        itemBuilder: (context, Category suggestion) {
-          return Column(
-            children: [
-              ListTile(
-                title: Text(
-                  suggestion.name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
-              Divider(height: 1, color: Colors.grey),
-            ],
-          );
-        },
-        onSuggestionSelected: (Category suggestion) {
-          setState(() {
-            selectedCategory = suggestion;
-          });
-        },
-        noItemsFoundBuilder: (context) => Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            'Tidak ada kategori ditemukan.',
-            style: TextStyle(color: Colors.red),
-          ),
-        ),
-        suggestionsBoxDecoration: SuggestionsBoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          elevation: 4,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDateField() {
-    return GestureDetector(
-      onTap: () {
-        _selectDate(context);
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.grey[200],
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 3,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: TextField(
-          enabled: false,
-          decoration: InputDecoration(
-            hintText: selectedDate == null
-                ? 'Pilih Tanggal'
-                : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
-            hintStyle: TextStyle(color: Colors.black87),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Container(
-                height: 48,
-                width: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFEB8153),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4.0,
-                      spreadRadius: 1.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.calendar_today,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-            ),
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: 15),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
           ),
         ),
       ),
     );
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (picked != null && picked != selectedDate)
-      setState(() {
-        selectedDate = picked;
-      });
   }
 
   Widget _buildActionButtons() {

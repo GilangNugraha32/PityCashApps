@@ -604,7 +604,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         SizedBox(width: 8),
         _buildCircularButton(
           color: Color(0xFF68CF29),
-          icon: Icons.arrow_circle_down_sharp,
+          icon: Icons.file_upload_outlined,
           onPressed: () {
             _showDragAndDropModal(context);
           },

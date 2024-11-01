@@ -87,140 +87,121 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white,
                           borderRadius:
                               BorderRadius.vertical(top: Radius.circular(25.0)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            ),
+                          ],
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // Handle bar
                             Container(
-                              margin: EdgeInsets.only(top: 8, bottom: 8),
-                              width: 40.0,
+                              margin: EdgeInsets.only(top: 12, bottom: 8),
+                              width: 50.0,
                               height: 4.0,
                               decoration: BoxDecoration(
                                 color: Color(0xFFEB8153).withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(2.0),
+                                borderRadius: BorderRadius.circular(4.0),
                               ),
                             ),
-                            Text(
-                              'Pilih Aksi Tambah',
-                              style: TextStyle(
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFEB8153),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
+
+                            // Title
                             Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 20.0,
-                                vertical: 8.0,
+                              padding: EdgeInsets.only(bottom: 8),
+                              child: Text(
+                                'Pilih Aksi Tambah',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFEB8153),
+                                  letterSpacing: 0.5,
+                                ),
                               ),
+                            ),
+
+                            // Divider
+                            Container(
+                              margin: EdgeInsets.symmetric(horizontal: 24.0),
                               child: Divider(
                                 color: Color(0xFFEB8153).withOpacity(0.2),
                                 thickness: 1.0,
                               ),
                             ),
+
+                            // Action buttons
                             Expanded(
                               child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 4.0,
-                                ),
+                                padding:
+                                    EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
                                 child: Column(
                                   children: [
+                                    // Top row buttons
                                     Expanded(
                                       child: Row(
                                         children: [
+                                          // Pemasukan button
                                           Expanded(
-                                            child: Container(
-                                              margin: EdgeInsets.all(4.0),
+                                            child: _buildElevatedActionButton(
                                               width: buttonWidth,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                                border: Border.all(
-                                                  color: Color(0xFFEB8153)
-                                                      .withOpacity(0.2),
-                                                ),
-                                              ),
-                                              child: _buildActionButton(
-                                                icon: Icons.add_card_sharp,
-                                                title: 'Pemasukan',
-                                                onTap: () async {
-                                                  Navigator.pop(context);
-                                                  await Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          TambahPemasukan(),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
+                                              icon: Icons.add_card_sharp,
+                                              title: 'Pemasukan',
+                                              onTap: () async {
+                                                Navigator.pop(context);
+                                                await Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        TambahPemasukan(),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ),
+                                          SizedBox(width: 12),
+                                          // Pengeluaran button
                                           Expanded(
-                                            child: Container(
-                                              margin: EdgeInsets.all(4.0),
+                                            child: _buildElevatedActionButton(
                                               width: buttonWidth,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                                border: Border.all(
-                                                  color: Color(0xFFEB8153)
-                                                      .withOpacity(0.2),
-                                                ),
-                                              ),
-                                              child: _buildActionButton(
-                                                icon: Icons.post_add_outlined,
-                                                title: 'Pengeluaran',
-                                                onTap: () async {
-                                                  Navigator.pop(context);
-                                                  await Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          TambahPengeluaran(),
-                                                    ),
-                                                  );
-                                                },
-                                              ),
+                                              icon: Icons
+                                                  .add_shopping_cart_outlined,
+                                              title: 'Pengeluaran',
+                                              onTap: () async {
+                                                Navigator.pop(context);
+                                                await Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        TambahPengeluaran(),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    Container(
-                                      height: 55.0,
+
+                                    SizedBox(height: 12),
+
+                                    // Bottom kategori button
+                                    _buildElevatedActionButton(
                                       width: double.infinity,
-                                      margin:
-                                          EdgeInsets.fromLTRB(4.0, 0, 4.0, 8.0),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(12.0),
-                                        border: Border.all(
-                                          color: Color(0xFFEB8153)
-                                              .withOpacity(0.2),
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: _buildActionButton(
-                                          icon: Icons.add_chart,
-                                          title: 'Kategori',
-                                          onTap: () async {
-                                            Navigator.pop(context);
-                                            await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    TambahCategories(),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
+                                      icon: Icons.add_chart,
+                                      title: 'Kategori',
+                                      onTap: () async {
+                                        Navigator.pop(context);
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                TambahCategories(),
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ],
                                 ),
@@ -235,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             child: Icon(
-              Icons.my_library_add_outlined,
+              Icons.post_add,
               color: Colors.white,
               size: 32,
             ),
@@ -297,40 +278,44 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildActionButton({
+  Widget _buildElevatedActionButton({
+    required double width,
     required IconData icon,
     required String title,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            color: Color(0xFFFFF4EE),
-            border: Border.all(
-              color: Color(0xFFEB8153).withOpacity(0.3),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, color: Color(0xFFEB8153), size: 24),
-              SizedBox(width: 12),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFFEB8153),
-                ),
+    return SizedBox(
+      width: width,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(15),
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              color: Color(0xFFFFF4EE),
+              border: Border.all(
+                color: Color(0xFFEB8153).withOpacity(0.3),
+                width: 1,
               ),
-            ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, color: Color(0xFFEB8153), size: 24),
+                SizedBox(width: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFFEB8153),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

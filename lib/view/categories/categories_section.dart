@@ -280,7 +280,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                             ),
                             SizedBox(width: 5),
                             _buildActionButton(
-                              Icons.file_download_outlined,
+                              Icons.file_upload_outlined,
                               Color(0xFF68CF29),
                               () {
                                 _showDragAndDropModal(context);

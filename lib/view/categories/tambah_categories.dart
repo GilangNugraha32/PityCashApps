@@ -19,12 +19,90 @@ class _TambahCategoriesState extends State<TambahCategories> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   int? selectedJenisKategori;
+  String selectedJenisKategoriLabel = '';
   final ApiService apiService = ApiService();
 
   final List<Map<String, dynamic>> jenisKategoriOptions = [
     {'label': 'Pemasukan', 'value': 1},
     {'label': 'Pengeluaran', 'value': 2},
   ];
+
+  void _showJenisKategoriModal() {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Text(
+                'Pilih Jenis Kategori',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Divider(
+                color: Colors.black54,
+                thickness: 1,
+                height: 20,
+              ),
+              SizedBox(height: 6),
+              ...jenisKategoriOptions.map((option) {
+                final isLast = option == jenisKategoriOptions.last;
+                return Column(
+                  children: [
+                    ListTile(
+                      title: Text(option['label']),
+                      onTap: () {
+                        setState(() {
+                          selectedJenisKategori = option['value'];
+                          selectedJenisKategoriLabel = option['label'];
+                        });
+                        Navigator.pop(context);
+                      },
+                      trailing: Radio(
+                        value: option['value'],
+                        groupValue: selectedJenisKategori,
+                        activeColor: Color(0xFFEB8153),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedJenisKategori = value;
+                            selectedJenisKategoriLabel = option['label'];
+                          });
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                    if (!isLast)
+                      Divider(
+                        color: Colors.grey[300],
+                        thickness: 1,
+                        height: 1,
+                      ),
+                  ],
+                );
+              }).toList(),
+              SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,29 +174,35 @@ class _TambahCategoriesState extends State<TambahCategories> {
                               fontSize: 14, fontWeight: FontWeight.bold)),
                       SizedBox(height: 6),
                       Container(
-                        height: 50,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
                         child: TextField(
                           controller: nameController,
+                          style: TextStyle(fontSize: 14),
                           decoration: InputDecoration(
                             hintText: 'Masukkan nama kategori',
-                            hintStyle: TextStyle(fontSize: 16),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide.none,
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(
-                                  color: Color(0xFFEB8153), width: 2.0),
+                            suffixIcon: Icon(
+                              Icons.interests_outlined,
+                              color: Color(0xFFEB8153),
+                              size: 20,
                             ),
+                            border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 8.0),
-                            prefixIcon: Icon(Icons.category_outlined,
-                                color: Color(0xFFEB8153)),
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
                           ),
-                          style: TextStyle(fontSize: 16),
                         ),
                       ),
                       SizedBox(height: 12),
@@ -126,41 +210,47 @@ class _TambahCategoriesState extends State<TambahCategories> {
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold)),
                       SizedBox(height: 6),
-                      Container(
-                        height: 50,
-                        child: DropdownButtonFormField<int>(
-                          value: selectedJenisKategori,
-                          onChanged: (int? newValue) {
-                            setState(() {
-                              selectedJenisKategori = newValue;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide.none,
+                      InkWell(
+                        onTap: _showJenisKategoriModal,
+                        child: Container(
+                          height: 50,
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
                             ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                              borderSide: BorderSide(
-                                  color: Color(0xFFEB8153), width: 2.0),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 8.0),
-                            prefixIcon:
-                                Icon(Icons.list, color: Color(0xFFEB8153)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          items: jenisKategoriOptions.map((option) {
-                            return DropdownMenuItem<int>(
-                              value: option['value'],
-                              child: Text(option['label'],
-                                  style: TextStyle(fontSize: 16)),
-                            );
-                          }).toList(),
-                          hint: Text('Pilih jenis kategori',
-                              style: TextStyle(fontSize: 16)),
+                          child: Row(
+                            children: [
+                              Icon(Icons.list, color: Color(0xFFEB8153)),
+                              SizedBox(width: 12),
+                              Text(
+                                selectedJenisKategoriLabel.isEmpty
+                                    ? 'Pilih jenis kategori'
+                                    : selectedJenisKategoriLabel,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: selectedJenisKategoriLabel.isEmpty
+                                      ? Colors.grey[400]
+                                      : Colors.black,
+                                ),
+                              ),
+                              Spacer(),
+                              Icon(Icons.arrow_drop_down,
+                                  color: Color(0xFFEB8153)),
+                            ],
+                          ),
                         ),
                       ),
                       SizedBox(height: 12),
@@ -168,30 +258,38 @@ class _TambahCategoriesState extends State<TambahCategories> {
                           style: TextStyle(
                               fontSize: 14, fontWeight: FontWeight.bold)),
                       SizedBox(height: 6),
-                      TextField(
-                        controller: descriptionController,
-                        decoration: InputDecoration(
-                          hintText: 'Masukkan deskripsi kategori',
-                          hintStyle: TextStyle(fontSize: 16),
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide.none,
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 1,
                           ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: BorderSide(
-                                color: Color(0xFFEB8153), width: 2.0),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 8.0),
-                          prefixIcon: Icon(Icons.description_outlined,
-                              color: Color(0xFFEB8153)),
-                          alignLabelWithHint: true,
                         ),
-                        maxLines: 3,
-                        textAlignVertical: TextAlignVertical.top,
+                        child: TextField(
+                          controller: descriptionController,
+                          maxLines: 3,
+                          style: TextStyle(fontSize: 14),
+                          decoration: InputDecoration(
+                            hintText: 'Masukkan deskripsi kategori',
+                            hintStyle: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 14,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.notes,
+                              color: Color(0xFFEB8153),
+                              size: 20,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                          ),
+                        ),
                       ),
                       SizedBox(height: 24),
                       Row(
