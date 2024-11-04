@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pity_cash/service/share_preference.dart';
+import 'package:pity_cash/view/home/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:flutter/material.dart';
@@ -684,106 +685,96 @@ class _HomeSectionState extends State<HomeSection>
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth;
-        final itemWidth = (cardWidth - 70) /
-            2; // Mengurangi padding, jarak antar item, dan pembatas
+        final itemWidth = (cardWidth - 70) / 2;
 
         return Card(
           elevation: 2.0,
+          color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.white, Colors.grey.shade100],
-              ),
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Ringkasan Keuangan',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Ringkasan Keuangan',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            isBalanceVisible = !isBalanceVisible;
-                          });
-                        },
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFEB8153).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                isBalanceVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          isBalanceVisible = !isBalanceVisible;
+                        });
+                      },
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFEB8153).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isBalanceVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Color(0xFFEB8153),
+                              size: 18,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              isBalanceVisible ? 'Sembunyikan' : 'Tampilkan',
+                              style: TextStyle(
                                 color: Color(0xFFEB8153),
-                                size: 18,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
                               ),
-                              SizedBox(width: 6),
-                              Text(
-                                isBalanceVisible ? 'Sembunyikan' : 'Tampilkan',
-                                style: TextStyle(
-                                  color: Color(0xFFEB8153),
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildSaldoItem(
-                        'Pemasukan Keseluruhan',
-                        saldoKeseluruhan,
-                        Colors.green,
-                        Icons.trending_up,
-                        itemWidth,
-                        isBalanceVisible,
-                      ),
-                      Container(
-                        height: 80,
-                        width: 1,
-                        color: Colors.grey[300],
-                      ),
-                      _buildSaldoItem(
-                        'Pengeluaran Keseluruhan',
-                        minSaldo,
-                        Colors.red,
-                        Icons.trending_down,
-                        itemWidth,
-                        isBalanceVisible,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildSaldoItem(
+                      'Pemasukan Keseluruhan',
+                      saldoKeseluruhan,
+                      Colors.green,
+                      Icons.trending_up,
+                      itemWidth,
+                      isBalanceVisible,
+                    ),
+                    Container(
+                      height: 80,
+                      width: 1,
+                      color: Colors.grey[300],
+                    ),
+                    _buildSaldoItem(
+                      'Pengeluaran Keseluruhan',
+                      minSaldo,
+                      Colors.red,
+                      Icons.trending_down,
+                      itemWidth,
+                      isBalanceVisible,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
@@ -851,58 +842,49 @@ class _HomeSectionState extends State<HomeSection>
 
         return Card(
           elevation: 12.0,
+          color: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
           ),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Colors.white, Colors.grey.shade100],
-              ),
-              borderRadius: BorderRadius.circular(20.0),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Perbandingan Pemasukan dan Pengurangan',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Perbandingan Pemasukan dan Pengurangan',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildPerbandinganItem(
+                      'Pemasukan Keseluruhan',
+                      saldoKeseluruhan,
+                      Colors.green,
+                      Icons.trending_up,
+                      itemWidth,
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildPerbandinganItem(
-                        'Pemasukan Keseluruhan',
-                        saldoKeseluruhan,
-                        Colors.green,
-                        Icons.trending_up,
-                        itemWidth,
-                      ),
-                      Container(
-                        height: 80,
-                        width: 1,
-                        color: Colors.grey[300],
-                      ),
-                      _buildPerbandinganItem(
-                        'Pengeluaran Keseluruhan',
-                        minSaldo,
-                        Colors.red,
-                        Icons.trending_down,
-                        itemWidth,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                    Container(
+                      height: 80,
+                      width: 1,
+                      color: Colors.grey[300],
+                    ),
+                    _buildPerbandinganItem(
+                      'Pengeluaran Keseluruhan',
+                      minSaldo,
+                      Colors.red,
+                      Icons.trending_down,
+                      itemWidth,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         );
@@ -1029,56 +1011,213 @@ class _HomeSectionState extends State<HomeSection>
     }
   }
 
+  String _getMonthName(int month) {
+    const monthNames = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember'
+    ];
+    return monthNames[month - 1];
+  }
+
   Widget _buildRecentTransactions() {
     List<dynamic> recentTransactions = [];
+
+    String _getMonthName(int month) {
+      const monthNames = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
+      ];
+      return monthNames[month - 1];
+    }
+
     if (isIncomeSelected) {
-      recentTransactions = incomes.take(5).toList();
+      if (incomes.isNotEmpty) {
+        recentTransactions = incomes.toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        recentTransactions = recentTransactions.take(5).toList();
+      } else {
+        _fetchIncomes(1);
+      }
     } else {
-      recentTransactions = expenses.take(5).toList();
+      if (expenses.isNotEmpty) {
+        recentTransactions = expenses.toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        recentTransactions = recentTransactions.take(5).toList();
+      } else {
+        _fetchExpenses(1);
+      }
     }
 
     return Card(
-      elevation: 8.0,
+      elevation: 12.0,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(25.0),
+        side: BorderSide(
+          color: Colors.grey.withOpacity(0.2),
+          width: 1,
+        ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              isIncomeSelected
-                  ? 'Pemasukan terbaru Anda'
-                  : 'Pengeluaran terbaru Anda',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFEB8153),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25.0),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white,
+              Colors.grey.shade50,
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        isIncomeSelected
+                            ? Icons.trending_up
+                            : Icons.trending_down,
+                        color: Color(0xFFEB8153),
+                        size: 24,
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        isIncomeSelected ? 'Pemasukan' : 'Pengeluaran',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!isLoading)
+                    TextButton(
+                      child: Text(
+                        'Selengkapnya',
+                        style: TextStyle(
+                          color: Color(0xFFEB8153),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(
+                                initialIndex: isIncomeSelected ? 2 : 3),
+                          ),
+                        );
+                      },
+                    ),
+                ],
               ),
-            ),
-            SizedBox(height: 12),
-            ...recentTransactions.map((transaction) {
-              IconData icon;
-              String date;
-              double amount;
-              if (isIncomeSelected) {
-                icon = Icons.attach_money;
-                date = transaction.date;
-                amount = double.parse(transaction.jumlah);
-              } else {
-                icon = Icons.money_off;
-                date = transaction.tanggal.toString();
-                amount = transaction.jumlah;
-              }
-              return _buildTransactionItem(
-                transaction.name,
-                date,
-                amount,
-                icon,
-              );
-            }).toList(),
-          ],
+              SizedBox(height: 20),
+              if (isLoading)
+                Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFFEB8153)),
+                  ),
+                )
+              else if (recentTransactions.isEmpty)
+                Center(
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.hourglass_empty,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Belum ada transaksi',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                ...recentTransactions.map((transaction) {
+                  IconData icon;
+                  String date;
+                  double amount;
+                  String name;
+                  if (isIncomeSelected) {
+                    icon = Icons.attach_money;
+                    DateTime parsedDate = DateTime.parse(transaction.date);
+                    date =
+                        '${parsedDate.day} ${_getMonthName(parsedDate.month)} ${parsedDate.year}';
+                    amount = double.parse(transaction.jumlah);
+                    name = transaction.name;
+                  } else {
+                    icon = Icons.money_off;
+                    if (transaction.tanggal is DateTime) {
+                      date =
+                          '${transaction.tanggal.day} ${_getMonthName(transaction.tanggal.month)} ${transaction.tanggal.year}';
+                    } else {
+                      DateTime parsedDate =
+                          DateTime.parse(transaction.tanggal.toString());
+                      date =
+                          '${parsedDate.day} ${_getMonthName(parsedDate.month)} ${parsedDate.year}';
+                    }
+                    amount = transaction.jumlah.toDouble();
+                    name = transaction.name;
+                  }
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: _buildTransactionItem(
+                      name,
+                      date,
+                      amount,
+                      icon,
+                    ),
+                  );
+                }).toList(),
+            ],
+          ),
         ),
       ),
     );

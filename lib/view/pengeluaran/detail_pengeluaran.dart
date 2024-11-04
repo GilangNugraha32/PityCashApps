@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_file.dart';
@@ -108,602 +107,880 @@ class DetailPengeluaran extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(30.0, 20.0, 30.0, 0),
+                padding: const EdgeInsets.fromLTRB(15.0, 8.0, 15.0, 0),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        SizedBox(
-                          width: 110,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              if (pengeluaranList.isNotEmpty) {
-                                _showDeleteConfirmationParentDialog(
-                                    context, pengeluaranList[0].idParent);
-                              }
-                            },
-                            icon:
-                                Icon(Icons.delete, color: Colors.red, size: 18),
-                            label: Text(
-                              'Hapus',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                              onPrimary: Colors.red,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                                side: BorderSide(color: Colors.red),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 12),
-                        SizedBox(
-                          width: 110,
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditPengeluaran(
-                                      pengeluaranList: pengeluaranList),
-                                ),
-                              );
-                            },
-                            icon: Icon(Icons.edit,
-                                color: Color(0xFFF7941E), size: 18),
-                            label: Text(
-                              'Edit',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                              onPrimary: Color(0xFFF7941E),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8.0),
-                                side: BorderSide(color: Color(0xFFF7941E)),
-                              ),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25),
                     Expanded(
                       child: SingleChildScrollView(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 1.0),
                           child: Column(
                             children: [
-                              AnimatedContainer(
-                                duration: Duration(milliseconds: 300),
-                                margin: EdgeInsets.only(bottom: 16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Colors.white,
-                                      Color(0xFFFFF5EE),
-                                    ],
-                                  ),
-                                  border: Border.all(
-                                      color: Color(0xFFEB8153).withOpacity(0.3),
-                                      width: 1.5),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Total Keseluruhan',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black54,
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 12, vertical: 6),
-                                            decoration: BoxDecoration(
-                                              color: Color(0xFFEB8153)
-                                                  .withOpacity(0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                            child: AnimatedDefaultTextStyle(
-                                              duration:
-                                                  Duration(milliseconds: 300),
-                                              style: TextStyle(
-                                                color: Color(0xFFEB8153),
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              child: Text(
-                                                '${pengeluaranList.first.tanggal!.day} ${_getMonthName(pengeluaranList.first.tanggal!.month)} ${pengeluaranList.first.tanggal!.year}',
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Divider(
-                                        color:
-                                            Color(0xFFEB8153).withOpacity(0.2),
-                                        thickness: 1,
-                                        height: 24,
-                                      ),
-                                      TweenAnimationBuilder<double>(
-                                        duration: Duration(milliseconds: 1500),
-                                        tween: Tween<double>(
-                                          begin: 0,
-                                          end: totalKeseluruhan.toDouble(),
+                              SizedBox(height: 10),
+                              // Rincian Transaksi Section
+                              Container(
+                                padding: EdgeInsets.all(4),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.receipt_long,
+                                          color: Color(0xFF1A3A63),
+                                          size: 24,
                                         ),
-                                        curve: Curves.easeOutCubic,
-                                        builder: (context, value, child) {
-                                          return Text(
-                                            NumberFormat.currency(
-                                                    locale: 'id_ID',
-                                                    symbol: 'Rp',
-                                                    decimalDigits: 0)
-                                                .format(value),
-                                            style: TextStyle(
-                                              fontSize: 28,
-                                              fontWeight: FontWeight.w700,
-                                              color: Color(0xFFEB8153),
-                                              letterSpacing: 0.5,
-                                              height: 1.2,
-                                            ),
-                                          );
-                                        },
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Rincian Transaksi',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF1A3A63),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 16),
+                                    Card(
+                                      elevation: 1,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide(
+                                          color: Color(0xFFEB8153)
+                                              .withOpacity(0.3),
+                                          width: 0.5,
+                                        ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              ListView.separated(
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: pengeluaranList.length,
-                                separatorBuilder: (context, index) =>
-                                    SizedBox(height: 8),
-                                itemBuilder: (context, index) {
-                                  final pengeluaran = pengeluaranList[index];
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        border: Border.all(
-                                            color: Color(0xFFEB8153), width: 1),
-                                        borderRadius:
-                                            BorderRadius.circular(12)),
-                                    child: ExpansionTile(
-                                      initiallyExpanded: true,
-                                      title: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(20.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Text(
-                                                  pengeluaran.name,
+                                                  'Tanggal Transaksi',
                                                   style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
-                                                    color: Color(0xFF1A3A63),
+                                                    fontSize: 14,
+                                                    color: Colors.grey[600],
                                                   ),
                                                 ),
-                                                SizedBox(height: 4),
-                                                Text(
-                                                  NumberFormat.currency(
-                                                          locale: 'id_ID',
-                                                          symbol: 'Rp',
-                                                          decimalDigits: 0)
-                                                      .format(
-                                                          pengeluaran.jumlah),
-                                                  style: TextStyle(
-                                                    color: Color(0xFFEB8153),
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 15,
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 6),
+                                                  decoration: BoxDecoration(
+                                                    color: Color(0xFFEB8153)
+                                                        .withOpacity(0.1),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                  ),
+                                                  child: Text(
+                                                    '${pengeluaranList.first.tanggal!.day} ${_getMonthName(pengeluaranList.first.tanggal!.month)} ${pengeluaranList.first.tanggal!.year}',
+                                                    style: TextStyle(
+                                                      color: Color(0xFFEB8153),
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
                                                   ),
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                          if (pengeluaranList.length > 1)
-                                            IconButton(
-                                              icon: Icon(Icons.delete_outline),
-                                              color: Colors.red[400],
-                                              onPressed: () =>
-                                                  _showDeleteConfirmationDataDialog(
-                                                      context,
-                                                      pengeluaran.idData),
-                                            ),
-                                        ],
-                                      ),
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Divider(
-                                                  height: 1,
-                                                  color: Colors.grey[300]),
-                                              SizedBox(height: 16),
-                                              Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  ClipRRect(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    child: Container(
-                                                      width: 100,
-                                                      height: 100,
-                                                      decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                            color: Colors
-                                                                .grey[300]!,
-                                                            width: 1),
-                                                      ),
-                                                      child:
-                                                          FutureBuilder<String>(
-                                                        future: ApiService()
-                                                            .fetchPengeluaranImage(
-                                                                pengeluaran
-                                                                    .idData),
-                                                        builder: (context,
-                                                            snapshot) {
-                                                          if (snapshot
-                                                                  .connectionState ==
-                                                              ConnectionState
-                                                                  .waiting) {
-                                                            return Center(
-                                                                child: CircularProgressIndicator(
-                                                                    color: Color(
-                                                                        0xFFEB8153)));
-                                                          }
-
-                                                          if (snapshot.hasError ||
-                                                              !snapshot
-                                                                  .hasData ||
-                                                              snapshot.data!
-                                                                  .isEmpty) {
-                                                            return Image
-                                                                .network(
-                                                              pengeluaran.image !=
-                                                                      null
-                                                                  ? '$baseUrl/${pengeluaran.image}'
-                                                                  : 'https://via.placeholder.com/100',
-                                                              fit: BoxFit.cover,
-                                                              errorBuilder:
-                                                                  (context,
-                                                                      error,
-                                                                      stackTrace) {
-                                                                return Icon(
-                                                                    Icons.error,
-                                                                    color: Colors
-                                                                            .red[
-                                                                        400]);
-                                                              },
-                                                            );
-                                                          }
-
-                                                          return GestureDetector(
-                                                            onTap: () {
-                                                              showDialog(
-                                                                context:
-                                                                    context,
-                                                                builder:
-                                                                    (context) =>
-                                                                        Dialog(
-                                                                  backgroundColor:
-                                                                      Colors
-                                                                          .transparent,
-                                                                  insetPadding:
-                                                                      EdgeInsets
-                                                                          .all(
-                                                                              16),
-                                                                  child:
-                                                                      Container(
-                                                                    decoration:
-                                                                        BoxDecoration(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              20),
-                                                                      boxShadow: [
-                                                                        BoxShadow(
-                                                                          color: Colors
-                                                                              .black
-                                                                              .withOpacity(0.2),
-                                                                          blurRadius:
-                                                                              10,
-                                                                          offset: Offset(
-                                                                              0,
-                                                                              5),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    child:
-                                                                        Column(
-                                                                      mainAxisSize:
-                                                                          MainAxisSize
-                                                                              .min,
-                                                                      children: [
-                                                                        Container(
-                                                                          padding: EdgeInsets.symmetric(
-                                                                              horizontal: 20,
-                                                                              vertical: 16),
-                                                                          decoration:
-                                                                              BoxDecoration(
-                                                                            gradient:
-                                                                                LinearGradient(
-                                                                              colors: [
-                                                                                Color(0xFFEB8153),
-                                                                                Color(0xFFFF9D6C)
-                                                                              ],
-                                                                              begin: Alignment.topLeft,
-                                                                              end: Alignment.bottomRight,
-                                                                            ),
-                                                                            borderRadius:
-                                                                                BorderRadius.vertical(
-                                                                              top: Radius.circular(20),
-                                                                            ),
-                                                                          ),
-                                                                          child:
-                                                                              Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.spaceBetween,
-                                                                            children: [
-                                                                              Row(
-                                                                                children: [
-                                                                                  Icon(
-                                                                                    Icons.receipt_long,
-                                                                                    color: Colors.white,
-                                                                                    size: 24,
-                                                                                  ),
-                                                                                  SizedBox(width: 12),
-                                                                                  Text(
-                                                                                    'Bukti Transaksi',
-                                                                                    style: TextStyle(
-                                                                                      color: Colors.white,
-                                                                                      fontSize: 20,
-                                                                                      fontWeight: FontWeight.bold,
-                                                                                    ),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                              IconButton(
-                                                                                icon: Icon(Icons.close, color: Colors.white),
-                                                                                onPressed: () => Navigator.pop(context),
-                                                                                splashRadius: 24,
-                                                                              )
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          margin:
-                                                                              EdgeInsets.all(16),
-                                                                          constraints:
-                                                                              BoxConstraints(
-                                                                            maxHeight:
-                                                                                MediaQuery.of(context).size.height * 0.7,
-                                                                            maxWidth:
-                                                                                MediaQuery.of(context).size.width * 0.9,
-                                                                          ),
-                                                                          decoration:
-                                                                              BoxDecoration(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(12),
-                                                                            border:
-                                                                                Border.all(
-                                                                              color: Colors.grey.withOpacity(0.2),
-                                                                              width: 1,
-                                                                            ),
-                                                                          ),
-                                                                          child:
-                                                                              ClipRRect(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(12),
-                                                                            child:
-                                                                                InteractiveViewer(
-                                                                              boundaryMargin: EdgeInsets.all(20.0),
-                                                                              minScale: 0.5,
-                                                                              maxScale: 4.0,
-                                                                              child: Image.memory(
-                                                                                base64Decode(snapshot.data!.split(',').last),
-                                                                                fit: BoxFit.contain,
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              );
-                                                            },
-                                                            child: Image.memory(
-                                                              base64Decode(
-                                                                  snapshot.data!
-                                                                      .split(
-                                                                          ',')
-                                                                      .last),
-                                                              fit: BoxFit.cover,
+                                            SizedBox(height: 20),
+                                            ListView.builder(
+                                              shrinkWrap: true,
+                                              physics:
+                                                  NeverScrollableScrollPhysics(),
+                                              itemCount: pengeluaranList.length,
+                                              itemBuilder: (context, index) {
+                                                final item =
+                                                    pengeluaranList[index];
+                                                return Padding(
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 12),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Expanded(
+                                                        child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              item.name,
+                                                              style: TextStyle(
+                                                                fontSize: 15,
+                                                                color: Colors
+                                                                    .black87,
+                                                              ),
                                                             ),
-                                                          );
-                                                        },
+                                                            SizedBox(height: 4),
+                                                            Text(
+                                                              '${item.jumlahSatuan} x ${NumberFormat.currency(
+                                                                locale: 'id_ID',
+                                                                symbol: 'Rp',
+                                                                decimalDigits:
+                                                                    0,
+                                                              ).format(item.nominal)}',
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                                color: Colors
+                                                                    .grey[600],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
                                                       ),
-                                                    ),
+                                                      Text(
+                                                        NumberFormat.currency(
+                                                          locale: 'id_ID',
+                                                          symbol: 'Rp',
+                                                          decimalDigits: 0,
+                                                        ).format(item.jumlah),
+                                                        style: TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color:
+                                                              Color(0xFF1A3A63),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                  SizedBox(width: 16),
+                                                );
+                                              },
+                                            ),
+                                            Divider(
+                                              color:
+                                                  Colors.grey.withOpacity(0.3),
+                                              thickness: 1,
+                                            ),
+                                            SizedBox(height: 8),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  'Biaya dll',
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  NumberFormat.currency(
+                                                    locale: 'id_ID',
+                                                    symbol: 'Rp',
+                                                    decimalDigits: 0,
+                                                  ).format(pengeluaranList
+                                                      .fold<double>(
+                                                          0.0,
+                                                          (sum, item) =>
+                                                              sum + item.dll)),
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xFF1A3A63),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 12),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  'Total Belanja',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Color(0xFF1A3A63),
+                                                  ),
+                                                ),
+                                                TweenAnimationBuilder<double>(
+                                                  duration: Duration(
+                                                      milliseconds: 1500),
+                                                  tween: Tween<double>(
+                                                    begin: 0,
+                                                    end: totalKeseluruhan
+                                                        .toDouble(),
+                                                  ),
+                                                  curve: Curves.easeOutCubic,
+                                                  builder:
+                                                      (context, value, child) {
+                                                    return Text(
+                                                      NumberFormat.currency(
+                                                        locale: 'id_ID',
+                                                        symbol: 'Rp',
+                                                        decimalDigits: 0,
+                                                      ).format(value),
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color:
+                                                            Color(0xFFEB8153),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 30),
+
+                              // Detail Produk Section
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 0.5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.shopping_cart_outlined,
+                                          color: Color(0xFF1A3A63),
+                                          size: 24,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Detail Produk Belanja',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF1A3A63),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    ListView.separated(
+                                      shrinkWrap: true,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: pengeluaranList.length,
+                                      separatorBuilder: (context, index) =>
+                                          SizedBox(height: 12),
+                                      itemBuilder: (context, index) {
+                                        final pengeluaran =
+                                            pengeluaranList[index];
+                                        return Card(
+                                          elevation: 1,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            side: BorderSide(
+                                              color: Color(0xFFEB8153)
+                                                  .withOpacity(0.3),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Theme(
+                                            data: Theme.of(context).copyWith(
+                                              dividerColor: Colors.transparent,
+                                            ),
+                                            child: ExpansionTile(
+                                              initiallyExpanded: true,
+                                              title: Row(
+                                                children: [
                                                   Expanded(
                                                     child: Column(
                                                       crossAxisAlignment:
                                                           CrossAxisAlignment
                                                               .start,
                                                       children: [
-                                                        Container(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal:
-                                                                      12,
-                                                                  vertical: 6),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors
-                                                                .orange[50],
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        8),
-                                                            border: Border.all(
-                                                                color: Colors
-                                                                        .orange[
-                                                                    300]!,
-                                                                width: 1),
-                                                          ),
-                                                          child: Text(
-                                                            pengeluaran.category
-                                                                    ?.name ??
-                                                                'Tidak ada kategori',
-                                                            style: TextStyle(
-                                                              color: Colors
-                                                                  .orange[800],
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              fontSize: 13,
-                                                            ),
+                                                        Text(
+                                                          pengeluaran.name,
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            fontSize: 16,
+                                                            color: Color(
+                                                                0xFF1A3A63),
                                                           ),
                                                         ),
-                                                        SizedBox(height: 12),
+                                                        SizedBox(height: 4),
                                                         Text(
-                                                          pengeluaran
-                                                              .description,
+                                                          NumberFormat.currency(
+                                                            locale: 'id_ID',
+                                                            symbol: 'Rp',
+                                                            decimalDigits: 0,
+                                                          ).format(pengeluaran
+                                                              .jumlah),
                                                           style: TextStyle(
-                                                              fontSize: 14,
-                                                              color: Colors
-                                                                  .grey[700],
-                                                              height: 1.5),
-                                                          maxLines: 3,
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
+                                                            color: Color(
+                                                                0xFFEB8153),
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            fontSize: 15,
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
                                                   ),
+                                                  if (pengeluaranList.length >
+                                                      1)
+                                                    IconButton(
+                                                      icon: Icon(
+                                                          Icons.delete_outline),
+                                                      color: Colors.red[400],
+                                                      onPressed: () =>
+                                                          _showDeleteConfirmationDataDialog(
+                                                        context,
+                                                        pengeluaran.idData,
+                                                      ),
+                                                    ),
                                                 ],
                                               ),
-                                              SizedBox(height: 20),
-                                              Container(
-                                                padding: EdgeInsets.all(12),
-                                                decoration: BoxDecoration(
-                                                    color: Colors.grey[50],
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    border: Border.all(
-                                                        color:
-                                                            Colors.grey[300]!,
-                                                        width: 1)),
-                                                child: Column(
-                                                  children: [
-                                                    _buildInfoRow(
-                                                      'Jumlah Satuan',
-                                                      '${pengeluaran.jumlahSatuan}',
-                                                      'Nominal',
-                                                      NumberFormat.currency(
-                                                              locale: 'id_ID',
-                                                              symbol: 'Rp',
-                                                              decimalDigits: 0)
-                                                          .format(pengeluaran
-                                                              .nominal),
-                                                    ),
-                                                    SizedBox(height: 12),
-                                                    Divider(
-                                                        height: 1,
-                                                        color:
-                                                            Colors.grey[300]),
-                                                    SizedBox(height: 12),
-                                                    _buildInfoRow(
-                                                      'DLL',
-                                                      NumberFormat.currency(
-                                                              locale: 'id_ID',
-                                                              symbol: 'Rp',
-                                                              decimalDigits: 0)
-                                                          .format(
-                                                              pengeluaran.dll),
-                                                      'Jumlah',
-                                                      NumberFormat.currency(
-                                                              locale: 'id_ID',
-                                                              symbol: 'Rp',
-                                                              decimalDigits: 0)
-                                                          .format(pengeluaran
-                                                              .jumlah),
-                                                    ),
-                                                  ],
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Divider(
+                                                          height: 1,
+                                                          color:
+                                                              Colors.grey[300]),
+                                                      SizedBox(height: 16),
+                                                      LayoutBuilder(builder:
+                                                          (context,
+                                                              constraints) {
+                                                        return Row(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8),
+                                                              child: Container(
+                                                                width: constraints
+                                                                        .maxWidth *
+                                                                    0.3,
+                                                                height: constraints
+                                                                        .maxWidth *
+                                                                    0.3,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                            .grey[
+                                                                        300]!,
+                                                                    width: 1,
+                                                                  ),
+                                                                ),
+                                                                child:
+                                                                    FutureBuilder<
+                                                                        String>(
+                                                                  future: ApiService()
+                                                                      .fetchPengeluaranImage(
+                                                                          pengeluaran
+                                                                              .idData),
+                                                                  builder: (context,
+                                                                      snapshot) {
+                                                                    if (snapshot
+                                                                            .connectionState ==
+                                                                        ConnectionState
+                                                                            .waiting) {
+                                                                      return Center(
+                                                                        child:
+                                                                            CircularProgressIndicator(
+                                                                          color:
+                                                                              Color(0xFFEB8153),
+                                                                        ),
+                                                                      );
+                                                                    }
+
+                                                                    if (snapshot.hasError ||
+                                                                        !snapshot
+                                                                            .hasData ||
+                                                                        snapshot
+                                                                            .data!
+                                                                            .isEmpty) {
+                                                                      return Image
+                                                                          .network(
+                                                                        pengeluaran.image !=
+                                                                                null
+                                                                            ? '$baseUrl/${pengeluaran.image}'
+                                                                            : 'https://via.placeholder.com/100',
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                        errorBuilder: (context,
+                                                                            error,
+                                                                            stackTrace) {
+                                                                          return Icon(
+                                                                              Icons.error,
+                                                                              color: Colors.red[400]);
+                                                                        },
+                                                                      );
+                                                                    }
+
+                                                                    return GestureDetector(
+                                                                      onTap:
+                                                                          () {
+                                                                        showDialog(
+                                                                          context:
+                                                                              context,
+                                                                          builder: (context) =>
+                                                                              Dialog(
+                                                                            backgroundColor:
+                                                                                Colors.transparent,
+                                                                            insetPadding:
+                                                                                EdgeInsets.all(16),
+                                                                            child:
+                                                                                Container(
+                                                                              decoration: BoxDecoration(
+                                                                                color: Colors.white,
+                                                                                borderRadius: BorderRadius.circular(20),
+                                                                                boxShadow: [
+                                                                                  BoxShadow(
+                                                                                    color: Colors.black.withOpacity(0.2),
+                                                                                    blurRadius: 10,
+                                                                                    offset: Offset(0, 5),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              child: Column(
+                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                children: [
+                                                                                  Container(
+                                                                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                                                                    decoration: BoxDecoration(
+                                                                                      gradient: LinearGradient(
+                                                                                        colors: [
+                                                                                          Color(0xFFEB8153),
+                                                                                          Color(0xFFFF9D6C)
+                                                                                        ],
+                                                                                        begin: Alignment.topLeft,
+                                                                                        end: Alignment.bottomRight,
+                                                                                      ),
+                                                                                      borderRadius: BorderRadius.vertical(
+                                                                                        top: Radius.circular(20),
+                                                                                      ),
+                                                                                    ),
+                                                                                    child: Row(
+                                                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                      children: [
+                                                                                        Row(
+                                                                                          children: [
+                                                                                            Icon(
+                                                                                              Icons.receipt_long,
+                                                                                              color: Colors.white,
+                                                                                              size: 24,
+                                                                                            ),
+                                                                                            SizedBox(width: 12),
+                                                                                            Text(
+                                                                                              'Bukti Transaksi',
+                                                                                              style: TextStyle(
+                                                                                                color: Colors.white,
+                                                                                                fontSize: 20,
+                                                                                                fontWeight: FontWeight.bold,
+                                                                                              ),
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                        IconButton(
+                                                                                          icon: Icon(Icons.close, color: Colors.white),
+                                                                                          onPressed: () => Navigator.pop(context),
+                                                                                          splashRadius: 24,
+                                                                                        )
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                  Container(
+                                                                                    margin: EdgeInsets.all(16),
+                                                                                    constraints: BoxConstraints(
+                                                                                      maxHeight: MediaQuery.of(context).size.height * 0.7,
+                                                                                      maxWidth: MediaQuery.of(context).size.width * 0.9,
+                                                                                    ),
+                                                                                    decoration: BoxDecoration(
+                                                                                      borderRadius: BorderRadius.circular(12),
+                                                                                      border: Border.all(
+                                                                                        color: Colors.grey.withOpacity(0.2),
+                                                                                        width: 1,
+                                                                                      ),
+                                                                                    ),
+                                                                                    child: ClipRRect(
+                                                                                      borderRadius: BorderRadius.circular(12),
+                                                                                      child: InteractiveViewer(
+                                                                                        boundaryMargin: EdgeInsets.all(20.0),
+                                                                                        minScale: 0.5,
+                                                                                        maxScale: 4.0,
+                                                                                        child: Image.memory(
+                                                                                          base64Decode(snapshot.data!.split(',').last),
+                                                                                          fit: BoxFit.contain,
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        );
+                                                                      },
+                                                                      child: Image
+                                                                          .memory(
+                                                                        base64Decode(snapshot
+                                                                            .data!
+                                                                            .split(',')
+                                                                            .last),
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                      ),
+                                                                    );
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(width: 16),
+                                                            Expanded(
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Container(
+                                                                    padding: EdgeInsets.symmetric(
+                                                                        horizontal:
+                                                                            12,
+                                                                        vertical:
+                                                                            6),
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      color: Colors
+                                                                          .orange[50],
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              8),
+                                                                      border: Border.all(
+                                                                          color: Colors.orange[
+                                                                              300]!,
+                                                                          width:
+                                                                              1),
+                                                                    ),
+                                                                    child: Row(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .min,
+                                                                      children: [
+                                                                        Icon(
+                                                                          Icons
+                                                                              .insert_chart_outlined_outlined,
+                                                                          size:
+                                                                              16,
+                                                                          color:
+                                                                              Colors.orange[800],
+                                                                        ),
+                                                                        SizedBox(
+                                                                            width:
+                                                                                4),
+                                                                        Flexible(
+                                                                          child:
+                                                                              Text(
+                                                                            pengeluaran.category?.name ??
+                                                                                'Tidak ada kategori',
+                                                                            style:
+                                                                                TextStyle(
+                                                                              color: Colors.orange[800],
+                                                                              fontWeight: FontWeight.w600,
+                                                                              fontSize: 13,
+                                                                            ),
+                                                                            overflow:
+                                                                                TextOverflow.ellipsis,
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                      height:
+                                                                          12),
+                                                                  Text(
+                                                                    pengeluaran
+                                                                        .description,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          14,
+                                                                      color: Colors
+                                                                              .grey[
+                                                                          700],
+                                                                      height:
+                                                                          1.5,
+                                                                    ),
+                                                                    maxLines: 3,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      }),
+                                                      SizedBox(height: 20),
+                                                      Container(
+                                                        padding:
+                                                            EdgeInsets.all(16),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              Colors.grey[50],
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(12),
+                                                          border: Border.all(
+                                                              color: Colors
+                                                                  .grey[300]!,
+                                                              width: 1),
+                                                        ),
+                                                        child: Column(
+                                                          children: [
+                                                            _buildInfoRow(
+                                                              'Jumlah Satuan',
+                                                              '${pengeluaran.jumlahSatuan}',
+                                                              'Nominal',
+                                                              NumberFormat
+                                                                  .currency(
+                                                                locale: 'id_ID',
+                                                                symbol: 'Rp',
+                                                                decimalDigits:
+                                                                    0,
+                                                              ).format(
+                                                                  pengeluaran
+                                                                      .nominal),
+                                                            ),
+                                                            SizedBox(
+                                                                height: 12),
+                                                            Divider(
+                                                                height: 1,
+                                                                color: Colors
+                                                                    .grey[300]),
+                                                            SizedBox(
+                                                                height: 12),
+                                                            _buildInfoRow(
+                                                              'DLL',
+                                                              NumberFormat
+                                                                  .currency(
+                                                                locale: 'id_ID',
+                                                                symbol: 'Rp',
+                                                                decimalDigits:
+                                                                    0,
+                                                              ).format(
+                                                                  pengeluaran
+                                                                      .dll),
+                                                              'Jumlah',
+                                                              NumberFormat
+                                                                  .currency(
+                                                                locale: 'id_ID',
+                                                                symbol: 'Rp',
+                                                                decimalDigits:
+                                                                    0,
+                                                              ).format(
+                                                                  pengeluaran
+                                                                      .jumlah),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: 16),
+                                                      Container(
+                                                        width: double.infinity,
+                                                        padding:
+                                                            EdgeInsets.all(12),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color:
+                                                              Colors.grey[100],
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                        ),
+                                                        child: Wrap(
+                                                          spacing: 16,
+                                                          runSpacing: 8,
+                                                          alignment:
+                                                              WrapAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Icon(
+                                                                  Icons
+                                                                      .access_time,
+                                                                  size: 16,
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      600],
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 4),
+                                                                Text(
+                                                                  'Dibuat: ${DateFormat('dd MMM yyyy').format(pengeluaran.createdAt.toLocal())}',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color: Colors
+                                                                            .grey[
+                                                                        600],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Icon(
+                                                                  Icons.update,
+                                                                  size: 16,
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      600],
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 4),
+                                                                Text(
+                                                                  'Diperbarui: ${DateFormat('dd MMM yyyy').format(pengeluaran.updatedAt.toLocal())}',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color: Colors
+                                                                            .grey[
+                                                                        600],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                              SizedBox(height: 16),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Dibuat: ${DateFormat('dd MMM yyyy').format(pengeluaran.createdAt.toLocal())}',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        color:
-                                                            Colors.grey[600]),
-                                                  ),
-                                                  Text(
-                                                    'Diperbarui: ${DateFormat('dd MMM yyyy').format(pengeluaran.updatedAt.toLocal())}',
-                                                    style: TextStyle(
-                                                        fontSize: 12,
-                                                        color:
-                                                            Colors.grey[600]),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
+                                        );
+                                      },
                                     ),
-                                  );
-                                },
+                                  ],
+                                ),
                               ),
                               SizedBox(height: 20),
                             ],
                           ),
                         ),
+                      ),
+                    ),
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.white,
+                                side: BorderSide(
+                                  color: Colors.red,
+                                  width: 0.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () {
+                                if (pengeluaranList.isNotEmpty) {
+                                  _showDeleteConfirmationParentDialog(
+                                      context, pengeluaranList[0].idParent);
+                                }
+                              },
+                              child: Text(
+                                'Hapus',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            height: 40,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.white,
+                                side: BorderSide(
+                                  color: Color(0xFFEB8153),
+                                  width: 1.0,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditPengeluaran(
+                                        pengeluaranList: pengeluaranList),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                'Edit',
+                                style: TextStyle(
+                                  color: Color(0xFFEB8153),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],

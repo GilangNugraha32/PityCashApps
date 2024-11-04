@@ -1123,12 +1123,11 @@ class _CategoriesSectionState extends State<CategoriesSection> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  ElevatedButton.icon(
+                  ElevatedButton(
                     onPressed: () {
                       _confirmDelete(context, category.id);
                     },
-                    icon: Icon(Icons.delete_outline, size: 18),
-                    label: Text(
+                    child: Text(
                       'Hapus',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -1146,7 +1145,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                     ),
                   ),
                   SizedBox(width: 8),
-                  ElevatedButton.icon(
+                  ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -1158,8 +1157,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                 )),
                       );
                     },
-                    icon: Icon(Icons.edit_outlined, size: 18),
-                    label: Text(
+                    child: Text(
                       'Edit',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,

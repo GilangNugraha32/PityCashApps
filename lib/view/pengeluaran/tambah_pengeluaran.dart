@@ -297,52 +297,135 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                             ),
                             SizedBox(height: 20),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                ElevatedButton(
-                                  onPressed: _addForm,
-                                  style: ElevatedButton.styleFrom(
-                                    primary: Colors.blue,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.85,
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: Color(0xFFEB8153),
+                                      width: 1.5,
+                                    ),
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color:
+                                            Color(0xFFEB8153).withOpacity(0.15),
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: ElevatedButton.icon(
+                                    onPressed: _addForm,
+                                    icon: Icon(
+                                      Icons.add_circle_outline,
+                                      color: Color(0xFFEB8153),
+                                      size: 20,
+                                    ),
+                                    label: Text(
+                                      'Tambah Form Pengeluaran',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFFEB8153),
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      primary: Colors.white,
+                                      elevation: 0,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                        vertical: 10,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                   ),
-                                  child: Text('+ Tambah Pengeluaran'),
                                 ),
                               ],
                             ),
                             SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    primary: Color(0xFFDA0000),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text('Batal'),
-                                ),
-                                SizedBox(width: 8),
-                                ElevatedButton(
-                                  onPressed: _handleSubmit,
-                                  style: ElevatedButton.styleFrom(
-                                    primary: Color(0xFFE85C0D),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text('Simpan'),
-                                ),
-                              ],
-                            ),
                           ],
                         ),
                       ),
+                    ),
+                  ),
+                  Container(
+                    height: 70,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 1,
+                          blurRadius: 3,
+                          offset: Offset(0, -1),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Total Form:',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              Text(
+                                '${formKeys.length} Data Pengeluaran',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        SizedBox(
+                          width: 90,
+                          height: 38,
+                          child: ElevatedButton(
+                            onPressed: _handleSubmit,
+                            child: Text(
+                              'Simpan',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              primary: Color(0xFFE85C0D),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              elevation: 1,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -402,11 +485,12 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
         _selectDate(context);
       },
       child: Container(
-        height: 60,
-        margin: EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        height: 45, // Mengurangi tinggi container
+        margin: EdgeInsets.symmetric(
+            horizontal: 4, vertical: 6), // Mengurangi margin vertical
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(10), // Mengurangi radius
           color: Colors.white,
         ),
         child: Row(
@@ -414,20 +498,21 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
           children: [
             AnimatedContainer(
               duration: Duration(milliseconds: 200),
-              padding: EdgeInsets.all(12),
+              padding: EdgeInsets.all(8), // Mengurangi padding
               child: Icon(
                 Icons.calendar_month_outlined,
                 color: Color(0xFFEB8153),
-                size: 24,
+                size: 20, // Mengurangi ukuran icon
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(
+                  horizontal: 12), // Mengurangi padding horizontal
               decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(
                     color: Colors.grey[300]!,
-                    width: 1.5,
+                    width: 1, // Mengurangi ketebalan border
                   ),
                 ),
               ),
@@ -437,9 +522,9 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                     : '${selectedDate!.day} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
                 style: TextStyle(
                   color: Colors.black87,
-                  fontSize: 16,
+                  fontSize: 14, // Mengurangi ukuran font
                   fontWeight: FontWeight.w500,
-                  letterSpacing: 0.5,
+                  letterSpacing: 0.3, // Mengurangi letter spacing
                 ),
               ),
             ),
@@ -595,10 +680,11 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       return int.tryParse(text) ?? 1; // Default to 1 if parsing fails
     }).toList();
 
+    // DLL (biaya tambahan) defaultnya 0 jika tidak diisi
     List<int> dll = dllControllers.map((controller) {
       String text = controller.text
           .replaceAll(RegExp(r'[^0-9]'), ''); // Remove non-digit characters
-      return int.tryParse(text) ?? 0; // Convert to int
+      return int.tryParse(text) ?? 0; // Default to 0 if empty or invalid
     }).toList();
 
     List<int> jumlah = jumlahControllers.map((controller) {
@@ -612,14 +698,45 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 
     int? category = selectedCategory?.id;
 
-    // Check for errors before submitting
-    if (names.isEmpty ||
-        descriptions.isEmpty ||
-        nominals.isEmpty ||
-        jumlahSatuan.isEmpty ||
-        dll.isEmpty ||
-        jumlah.isEmpty ||
-        category == null) {
+    // Check for empty fields and build error message
+    List<String> emptyFields = [];
+
+    if (names.any((name) => name.isEmpty)) {
+      emptyFields.add('Nama');
+    }
+    if (descriptions.any((desc) => desc.isEmpty)) {
+      emptyFields.add('Deskripsi');
+    }
+    if (nominals.any((nominal) => nominal == 0)) {
+      emptyFields.add('Nominal');
+    }
+    if (jumlahSatuan.any((js) => js == 0)) {
+      emptyFields.add('Jumlah Satuan');
+    }
+    if (jumlah.any((j) => j == 0)) {
+      emptyFields.add('Jumlah');
+    }
+    if (category == null) {
+      emptyFields.add('Kategori');
+    }
+
+    if (emptyFields.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Field berikut belum diisi: ${emptyFields.join(", ")}',
+            style:
+                TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.yellow[600],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
+      );
+
       throw Exception("All fields must be filled out before submission.");
     }
 
@@ -638,7 +755,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         'description': descriptions[i],
         'jumlah_satuan': jumlahSatuan[i].toString(),
         'nominal': nominals[i].toString(),
-        'dll': dll[i].toString(),
+        'dll': dll[i].toString(), // DLL akan bernilai 0 jika field kosong
         'jumlah': jumlah[i].toString(),
         'id': category.toString(),
         'updated_at': DateTime.now().toIso8601String(),
@@ -843,16 +960,242 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         // Kategori Section
         _buildLabel('Kategori'),
         SizedBox(height: 8),
-        _buildCategoryDropdown(),
+        InkWell(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (context) => _buildCategoryModal(),
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+              border: Border.all(
+                color: Colors.grey.shade300,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.insert_chart_outlined_outlined,
+                  color: Color(0xFFEB8153),
+                  size: 20,
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    selectedCategory?.name ?? 'Pilih kategori',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: selectedCategory != null
+                          ? Colors.black
+                          : Colors.grey[400],
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: Color(0xFFEB8153),
+                ),
+              ],
+            ),
+          ),
+        ),
         SizedBox(height: 16),
 
         // Image Picker Section (Only for last form)
         if (widget.isLast) ...[
-          _buildLabel('Pilih Gambar'),
+          _buildLabel('Pilih Gambar (Opsional)'),
           SizedBox(height: 8),
           _buildImagePicker(),
         ],
       ],
+    );
+  }
+
+  Widget _buildCategoryModal() {
+    TextEditingController searchController = TextEditingController();
+    ValueNotifier<List<Category>> filteredCategories =
+        ValueNotifier<List<Category>>(categories);
+
+    Category? initialCategory;
+    if (selectedCategory != null) {
+      initialCategory = categories.firstWhere(
+        (category) => category.name == selectedCategory!.name,
+        orElse: () => selectedCategory!,
+      );
+    }
+
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.8,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(
+                'Pilih Kategori',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 25),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Cari kategori...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Color(0xFFEB8153),
+                      size: 22,
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  onChanged: (value) {
+                    filteredCategories.value = categories
+                        .where((category) => category.name
+                            .toLowerCase()
+                            .contains(value.toLowerCase()))
+                        .toList();
+                  },
+                ),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Icon(
+                    Icons.dashboard_outlined,
+                    size: 16,
+                    color: Colors.grey[600],
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    'Kategori Pengeluaran',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Expanded(
+                child: ValueListenableBuilder<List<Category>>(
+                  valueListenable: filteredCategories,
+                  builder: (context, categories, child) {
+                    if (categories.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'Tidak ada kategori yang ditemukan',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      padding: EdgeInsets.zero,
+                      itemCount: categories.length,
+                      separatorBuilder: (context, index) => Divider(
+                        height: 1,
+                        color: Colors.grey.shade200,
+                      ),
+                      itemBuilder: (context, index) {
+                        final category = categories[index];
+                        final isSelected =
+                            initialCategory?.name == category.name;
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            category.name,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          trailing: Radio<Category>(
+                            value: category,
+                            groupValue: isSelected ? category : initialCategory,
+                            onChanged: (Category? value) {
+                              setState(() {
+                                selectedCategory = value;
+                                initialCategory = value;
+                              });
+                              this.setState(() {});
+                              Navigator.pop(context);
+                            },
+                            activeColor: Color(0xFFEB8153),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              selectedCategory = category;
+                              initialCategory = category;
+                            });
+                            this.setState(() {});
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1373,126 +1716,6 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         selectedImage = result; // Save the selected image
       });
     }
-  }
-
-  Widget _buildCategoryDropdown() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 3,
-            offset: Offset(0, 2),
-          ),
-        ],
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 1,
-        ),
-      ),
-      child: TypeAheadFormField<Category>(
-        textFieldConfiguration: TextFieldConfiguration(
-          controller: TextEditingController(text: selectedCategory?.name ?? ''),
-          style: TextStyle(fontSize: 14),
-          decoration: InputDecoration(
-            prefixIcon: Container(
-              margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              padding: EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: Color(0xFFEB8153).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                Icons.insert_chart_outlined_outlined,
-                color: Color(0xFFEB8153),
-                size: 20,
-              ),
-            ),
-            suffixIcon: Icon(
-              Icons.arrow_drop_down,
-              color: Color(0xFFEB8153),
-            ),
-            hintText: 'Cari atau pilih kategori',
-            hintStyle: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 14,
-            ),
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-          ),
-        ),
-        suggestionsCallback: (pattern) async {
-          return categories.where((category) =>
-              category.name.toLowerCase().contains(pattern.toLowerCase()));
-        },
-        itemBuilder: (context, Category suggestion) {
-          return Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey.shade200),
-              ),
-            ),
-            child: ListTile(
-              title: Text(
-                suggestion.name,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: selectedCategory == suggestion
-                      ? FontWeight.normal
-                      : FontWeight.normal,
-                ),
-              ),
-              leading: Radio<Category>(
-                value: suggestion,
-                groupValue: selectedCategory,
-                onChanged: (Category? value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
-                activeColor: Color(0xFFEB8153),
-              ),
-              tileColor: selectedCategory == suggestion
-                  ? Color(0xFFEB8153).withOpacity(0.1)
-                  : null,
-            ),
-          );
-        },
-        onSuggestionSelected: (Category suggestion) {
-          setState(() {
-            selectedCategory = suggestion;
-          });
-        },
-        noItemsFoundBuilder: (context) => Container(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.orange,
-                size: 20,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Tidak ada kategori ditemukan',
-                style: TextStyle(
-                  color: Colors.orange,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   String _getMonthName(int month) {

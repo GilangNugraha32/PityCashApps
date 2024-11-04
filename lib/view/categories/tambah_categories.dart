@@ -48,19 +48,17 @@ class _TambahCategoriesState extends State<TambahCategories> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Text(
-                'Pilih Jenis Kategori',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Pilih Jenis Kategori',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              Divider(
-                color: Colors.black54,
-                thickness: 1,
-                height: 20,
-              ),
-              SizedBox(height: 6),
+              SizedBox(height: 15),
               ...jenisKategoriOptions.map((option) {
                 final isLast = option == jenisKategoriOptions.last;
                 return Column(

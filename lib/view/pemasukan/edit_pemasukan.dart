@@ -357,121 +357,52 @@ class _EditPemasukanState extends State<EditPemasukan> {
         // Kategori
         _buildLabel('Kategori'),
         SizedBox(height: 8),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                spreadRadius: 1,
-                blurRadius: 3,
-                offset: Offset(0, 2),
+        InkWell(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-            ],
-            border: Border.all(
-              color: Colors.grey.shade300,
-              width: 1,
+              builder: (context) => _buildCategoryModal(),
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+              border: Border.all(
+                color: Colors.grey.shade300,
+                width: 1,
+              ),
             ),
-          ),
-          child: TypeAheadFormField<Category>(
-            textFieldConfiguration: TextFieldConfiguration(
-              controller:
-                  TextEditingController(text: selectedCategory?.name ?? ''),
-              style: TextStyle(fontSize: 14),
-              decoration: InputDecoration(
-                prefixIcon: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFEB8153).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.insert_chart_outlined_outlined,
-                    color: Color(0xFFEB8153),
-                    size: 20,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.insert_chart_outlined_outlined,
+                  color: Color(0xFFEB8153),
+                  size: 20,
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    selectedCategory?.name ?? 'Pilih kategori',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: selectedCategory != null
+                          ? Colors.black
+                          : Colors.grey[400],
+                    ),
                   ),
                 ),
-                suffixIcon: Icon(
+                Icon(
                   Icons.arrow_drop_down,
                   color: Color(0xFFEB8153),
                 ),
-                hintText: 'Cari atau pilih kategori',
-                hintStyle: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                ),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-              ),
-            ),
-            suggestionsCallback: (pattern) async {
-              return categories.where((category) =>
-                  category.name.toLowerCase().contains(pattern.toLowerCase()));
-            },
-            itemBuilder: (context, Category suggestion) {
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Colors.grey.shade200),
-                  ),
-                ),
-                child: ListTile(
-                  title: Text(
-                    suggestion.name,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: selectedCategory == suggestion
-                          ? FontWeight.normal
-                          : FontWeight.normal,
-                    ),
-                  ),
-                  leading: Radio<Category>(
-                    value: suggestion,
-                    groupValue: selectedCategory,
-                    onChanged: (Category? value) {
-                      setState(() {
-                        selectedCategory = value;
-                      });
-                    },
-                    activeColor: Color(0xFFEB8153),
-                  ),
-                  tileColor: selectedCategory == suggestion
-                      ? Color(0xFFEB8153).withOpacity(0.1)
-                      : null,
-                ),
-              );
-            },
-            onSuggestionSelected: (Category suggestion) {
-              setState(() {
-                selectedCategory = suggestion;
-              });
-            },
-            noItemsFoundBuilder: (context) => Container(
-              padding: EdgeInsets.all(16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.warning_amber_rounded,
-                    color: Colors.orange,
-                    size: 20,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'Tidak ada kategori ditemukan',
-                    style: TextStyle(
-                      color: Colors.orange,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -612,6 +543,185 @@ class _EditPemasukanState extends State<EditPemasukan> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCategoryModal() {
+    TextEditingController searchController = TextEditingController();
+    ValueNotifier<List<Category>> filteredCategories =
+        ValueNotifier<List<Category>>(categories);
+
+    // Find the category in the list that matches the selected category name
+    Category? initialCategory;
+    if (selectedCategory != null) {
+      initialCategory = categories.firstWhere(
+        (category) => category.name == selectedCategory!.name,
+        orElse: () => selectedCategory!,
+      );
+    }
+
+    return StatefulBuilder(
+      builder: (BuildContext context, StateSetter setState) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.8,
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Text(
+                'Pilih Kategori',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 25),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Cari kategori...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Color(0xFFEB8153),
+                      size: 22,
+                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  ),
+                  onChanged: (value) {
+                    filteredCategories.value = categories
+                        .where((category) => category.name
+                            .toLowerCase()
+                            .contains(value.toLowerCase()))
+                        .toList();
+                  },
+                ),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Icon(
+                    Icons.dashboard_outlined,
+                    size: 16,
+                    color: Colors.grey[600],
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    'Kategori Pemasukan',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8),
+              Expanded(
+                child: ValueListenableBuilder<List<Category>>(
+                  valueListenable: filteredCategories,
+                  builder: (context, categories, child) {
+                    if (categories.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.search_off,
+                              size: 48,
+                              color: Colors.grey[400],
+                            ),
+                            SizedBox(height: 16),
+                            Text(
+                              'Tidak ada kategori yang ditemukan',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      padding: EdgeInsets.zero,
+                      itemCount: categories.length,
+                      separatorBuilder: (context, index) => Divider(
+                        height: 1,
+                        color: Colors.grey.shade200,
+                      ),
+                      itemBuilder: (context, index) {
+                        final category = categories[index];
+                        final isSelected =
+                            initialCategory?.name == category.name;
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(
+                            category.name,
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          trailing: Radio<Category>(
+                            value: category,
+                            groupValue: isSelected ? category : initialCategory,
+                            onChanged: (Category? value) {
+                              setState(() {
+                                selectedCategory = value;
+                                initialCategory = value;
+                              });
+                              this.setState(() {});
+                              Navigator.pop(context);
+                            },
+                            activeColor: Color(0xFFEB8153),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              selectedCategory = category;
+                              initialCategory = category;
+                            });
+                            this.setState(() {});
+                            Navigator.pop(context);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
