@@ -198,11 +198,11 @@ class _HomeSectionState extends State<HomeSection>
                     isLoggedIn ? 'Hi, $name' : 'Hi, Guest',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Icon(Icons.notifications, color: Colors.white, size: 24),
+                  Icon(Icons.notifications, color: Colors.white, size: 20),
                 ],
               ),
               SizedBox(height: 30),
@@ -210,7 +210,7 @@ class _HomeSectionState extends State<HomeSection>
                 child: Text(
                   'Saldo Pity Cash',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Colors.white.withOpacity(0.9),
                   ),
@@ -241,7 +241,7 @@ class _HomeSectionState extends State<HomeSection>
                                         ).format(saldo)
                                       : 'Rp' + _formatHiddenBalance(saldo),
                                   style: TextStyle(
-                                    fontSize: 32,
+                                    fontSize: 28,
                                     fontWeight: FontWeight.bold,
                                     color: isLowBalance
                                         ? Color(0xFFF54D42)
@@ -256,7 +256,7 @@ class _HomeSectionState extends State<HomeSection>
                                       ? Icons.visibility
                                       : Icons.visibility_off,
                                   color: Colors.white,
-                                  size: 24,
+                                  size: 18,
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -282,7 +282,7 @@ class _HomeSectionState extends State<HomeSection>
                                 Icon(
                                   Icons.info_outline,
                                   color: Colors.yellow,
-                                  size: 16,
+                                  size: 14,
                                 ),
                                 SizedBox(width: 4),
                                 Text(
@@ -335,19 +335,19 @@ class _HomeSectionState extends State<HomeSection>
 
   Widget _buildIncomeExpenseToggle() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 60),
+      margin: EdgeInsets.symmetric(horizontal: 70),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: Offset(0, 4),
+            blurRadius: 6,
+            offset: Offset(0, 3),
           ),
         ],
       ),
-      padding: EdgeInsets.all(6),
+      padding: EdgeInsets.all(5),
       child: Row(
         children: [
           Expanded(
@@ -357,10 +357,10 @@ class _HomeSectionState extends State<HomeSection>
               },
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 300),
-                padding: EdgeInsets.symmetric(vertical: 14),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: isIncomeSelected ? Color(0xFFEB8153) : Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Center(
                   child: Text(
@@ -368,7 +368,7 @@ class _HomeSectionState extends State<HomeSection>
                     style: TextStyle(
                       color:
                           isIncomeSelected ? Colors.white : Color(0xFFB8B8B8),
-                      fontSize: 14,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -383,10 +383,10 @@ class _HomeSectionState extends State<HomeSection>
               },
               child: AnimatedContainer(
                 duration: Duration(milliseconds: 300),
-                padding: EdgeInsets.symmetric(vertical: 14),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: !isIncomeSelected ? Color(0xFFEB8153) : Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Center(
                   child: Text(
@@ -394,7 +394,7 @@ class _HomeSectionState extends State<HomeSection>
                     style: TextStyle(
                       color:
                           !isIncomeSelected ? Colors.white : Color(0xFFB8B8B8),
-                      fontSize: 14,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -411,7 +411,7 @@ class _HomeSectionState extends State<HomeSection>
     return Card(
       elevation: 2.0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24.0),
+        borderRadius: BorderRadius.circular(20.0),
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -420,17 +420,17 @@ class _HomeSectionState extends State<HomeSection>
             end: Alignment.bottomRight,
             colors: [Colors.white, Color(0xFFF8F8F8)],
           ),
-          borderRadius: BorderRadius.circular(24.0),
+          borderRadius: BorderRadius.circular(20.0),
           boxShadow: [
             BoxShadow(
               color: Colors.orange.withOpacity(0.1),
-              spreadRadius: 3,
-              blurRadius: 12,
-              offset: Offset(0, 4),
+              spreadRadius: 2,
+              blurRadius: 10,
+              offset: Offset(0, 3),
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 20.0),
+        padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 18.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -439,13 +439,13 @@ class _HomeSectionState extends State<HomeSection>
               child: Text(
                 'Perbandingan Pemasukan & Pengeluaran',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 25),
             GestureDetector(
               onTap: () {
                 setState(() {
@@ -457,8 +457,8 @@ class _HomeSectionState extends State<HomeSection>
                 });
               },
               child: Container(
-                height: 180,
-                width: 180,
+                height: 150,
+                width: 150,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
@@ -468,7 +468,7 @@ class _HomeSectionState extends State<HomeSection>
                       tween: Tween<double>(begin: 0, end: 1),
                       builder: (context, double value, child) {
                         return CustomPaint(
-                          size: Size(180, 180),
+                          size: Size(150, 150),
                           painter: DoubleRadialChartPainter(
                             outerPercentage: (saldoKeseluruhan /
                                     (saldoKeseluruhan + minSaldo)) *
@@ -488,16 +488,16 @@ class _HomeSectionState extends State<HomeSection>
                       duration: Duration(milliseconds: 300),
                       opacity: _animationController.value,
                       child: Container(
-                        padding: EdgeInsets.all(8),
-                        width: 140,
+                        padding: EdgeInsets.all(7),
+                        width: 120,
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.98),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(5),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.15),
-                              blurRadius: 4,
-                              spreadRadius: 1,
+                              blurRadius: 3,
+                              spreadRadius: 0.5,
                             ),
                           ],
                         ),
@@ -509,16 +509,16 @@ class _HomeSectionState extends State<HomeSection>
                               style: TextStyle(
                                 color: Color(0xFF66BB6A),
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                fontSize: 11,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            SizedBox(height: 3),
                             Text(
                               'Pengeluaran: ${((minSaldo / (saldoKeseluruhan + minSaldo)) * 100).toStringAsFixed(1)}%',
                               style: TextStyle(
                                 color: Color(0xFFEF5350),
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                fontSize: 11,
                               ),
                             ),
                           ],
@@ -529,7 +529,7 @@ class _HomeSectionState extends State<HomeSection>
                 ),
               ),
             ),
-            SizedBox(height: 24),
+            SizedBox(height: 20),
             TweenAnimationBuilder(
               duration: Duration(milliseconds: 1500),
               curve: Curves.easeOutCubic,
@@ -539,13 +539,13 @@ class _HomeSectionState extends State<HomeSection>
               ),
               builder: (context, double value, child) {
                 return Container(
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 18),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: Colors.grey.withOpacity(0.5), // Opacity dinaikkan
-                      width: 1, // Width dinaikkan
+                      color: Colors.grey.withOpacity(0.5),
+                      width: 0.5,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -559,11 +559,11 @@ class _HomeSectionState extends State<HomeSection>
                       Text(
                         'Total Keseluruhan',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           color: Colors.black54,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: 3),
                       Text(
                         isBalanceVisible
                             ? NumberFormat.currency(
@@ -573,18 +573,18 @@ class _HomeSectionState extends State<HomeSection>
                               ).format(value)
                             : 'Rp' + _formatHiddenBalance(value),
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
                       ),
-                      SizedBox(height: 15),
+                      SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           _buildLegendItemEnhanced("Pemasukan",
                               Color(0xFF66BB6A), Icons.arrow_upward),
-                          SizedBox(width: 20),
+                          SizedBox(width: 15),
                           _buildLegendItemEnhanced("Pengeluaran",
                               Color(0xFFEF5350), Icons.arrow_downward),
                         ],
@@ -602,27 +602,27 @@ class _HomeSectionState extends State<HomeSection>
 
   Widget _buildBadge(String text, IconData icon) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
+            blurRadius: 4,
+            offset: Offset(0, 2),
           ),
         ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: Colors.black87),
+          Icon(icon, size: 14, color: Colors.black87),
           SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
@@ -634,20 +634,20 @@ class _HomeSectionState extends State<HomeSection>
 
   Widget _buildLegendItemEnhanced(String label, Color color, IconData icon) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: color, size: 16),
-          SizedBox(width: 6),
+          Icon(icon, color: color, size: 14),
+          SizedBox(width: 4),
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -661,18 +661,18 @@ class _HomeSectionState extends State<HomeSection>
     return Row(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: 10,
+          height: 10,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
           ),
         ),
-        SizedBox(width: 4),
+        SizedBox(width: 3),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: FontWeight.bold,
             color: Color(0xFF7589A2),
           ),
@@ -685,16 +685,16 @@ class _HomeSectionState extends State<HomeSection>
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth;
-        final itemWidth = (cardWidth - 70) / 2;
+        final itemWidth = (cardWidth - 60) / 2;
 
         return Card(
           elevation: 2.0,
           color: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(18.0),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -704,7 +704,7 @@ class _HomeSectionState extends State<HomeSection>
                     Text(
                       'Ringkasan Keuangan',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
@@ -717,10 +717,10 @@ class _HomeSectionState extends State<HomeSection>
                       },
                       child: Container(
                         padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           color: Color(0xFFEB8153).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -730,14 +730,14 @@ class _HomeSectionState extends State<HomeSection>
                                   ? Icons.visibility
                                   : Icons.visibility_off,
                               color: Color(0xFFEB8153),
-                              size: 18,
+                              size: 16,
                             ),
-                            SizedBox(width: 6),
+                            SizedBox(width: 4),
                             Text(
                               isBalanceVisible ? 'Sembunyikan' : 'Tampilkan',
                               style: TextStyle(
                                 color: Color(0xFFEB8153),
-                                fontSize: 12,
+                                fontSize: 11,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -747,7 +747,7 @@ class _HomeSectionState extends State<HomeSection>
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -760,7 +760,7 @@ class _HomeSectionState extends State<HomeSection>
                       isBalanceVisible,
                     ),
                     Container(
-                      height: 80,
+                      height: 70,
                       width: 1,
                       color: Colors.grey[300],
                     ),
@@ -796,7 +796,7 @@ class _HomeSectionState extends State<HomeSection>
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 11, // Dikecilkan dari 13
                     fontWeight: FontWeight.bold,
                     color: Colors.grey[700],
                   ),
@@ -805,11 +805,11 @@ class _HomeSectionState extends State<HomeSection>
               Icon(
                 icon,
                 color: color,
-                size: 18,
+                size: 16, // Dikecilkan dari 18
               ),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 6), // Dikecilkan dari 8
           TweenAnimationBuilder(
             tween: Tween<double>(begin: 0, end: amount),
             duration: Duration(seconds: 1),
@@ -821,7 +821,7 @@ class _HomeSectionState extends State<HomeSection>
                         .format(value)
                     : 'Rp' + _formatHiddenBalance(value),
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 13, // Dikecilkan dari 15
                   fontWeight: FontWeight.bold,
                   color: color,
                 ),
@@ -837,29 +837,28 @@ class _HomeSectionState extends State<HomeSection>
     return LayoutBuilder(
       builder: (context, constraints) {
         final cardWidth = constraints.maxWidth;
-        final itemWidth = (cardWidth - 70) /
-            2; // Mengurangi padding, jarak antar item, dan pembatas
+        final itemWidth = (cardWidth - 60) / 2; // Dikurangi padding
 
         return Card(
-          elevation: 12.0,
+          elevation: 8.0, // Dikurangi dari 12
           color: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(16.0), // Dikecilkan dari 20
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(16.0), // Dikecilkan dari 20
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Perbandingan Pemasukan dan Pengurangan',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14, // Dikecilkan dari 16
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 16), // Dikecilkan dari 20
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -871,7 +870,7 @@ class _HomeSectionState extends State<HomeSection>
                       itemWidth,
                     ),
                     Container(
-                      height: 80,
+                      height: 70, // Dikecilkan dari 80
                       width: 1,
                       color: Colors.grey[300],
                     ),
@@ -896,15 +895,15 @@ class _HomeSectionState extends State<HomeSection>
       String title, double amount, Color color, IconData icon, double width) {
     return Container(
       width: width,
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.all(8), // Dikecilkan dari 10
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(12), // Dikecilkan dari 15
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(0.2),
-            blurRadius: 6,
-            offset: Offset(0, 3),
+            blurRadius: 4, // Dikecilkan dari 6
+            offset: Offset(0, 2), // Dikecilkan dari 3
           ),
         ],
       ),
@@ -918,16 +917,16 @@ class _HomeSectionState extends State<HomeSection>
                 child: Text(
                   title,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10, // Dikecilkan dari 11
                     fontWeight: FontWeight.bold,
                     color: color.withOpacity(0.8),
                   ),
                 ),
               ),
-              Icon(icon, color: color, size: 18),
+              Icon(icon, color: color, size: 16), // Dikecilkan dari 18
             ],
           ),
-          SizedBox(height: 6),
+          SizedBox(height: 4), // Dikecilkan dari 6
           Text(
             NumberFormat.currency(
               locale: 'id_ID',
@@ -935,7 +934,7 @@ class _HomeSectionState extends State<HomeSection>
               decimalDigits: 0,
             ).format(amount),
             style: TextStyle(
-              fontSize: 13,
+              fontSize: 12, // Dikecilkan dari 13
               fontWeight: FontWeight.bold,
               color: color,
             ),
@@ -1011,41 +1010,23 @@ class _HomeSectionState extends State<HomeSection>
     }
   }
 
-  String _getMonthName(int month) {
-    const monthNames = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember'
-    ];
-    return monthNames[month - 1];
-  }
-
   Widget _buildRecentTransactions() {
     List<dynamic> recentTransactions = [];
 
     String _getMonthName(int month) {
       const monthNames = [
-        'Januari',
-        'Februari',
-        'Maret',
-        'April',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
         'Mei',
-        'Juni',
-        'Juli',
-        'Agustus',
-        'September',
-        'Oktober',
-        'November',
-        'Desember'
+        'Jun',
+        'Jul',
+        'Agt',
+        'Sep',
+        'Okt',
+        'Nov',
+        'Des'
       ];
       return monthNames[month - 1];
     }
@@ -1054,7 +1035,7 @@ class _HomeSectionState extends State<HomeSection>
       if (incomes.isNotEmpty) {
         recentTransactions = incomes.toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        recentTransactions = recentTransactions.take(5).toList();
+        recentTransactions = recentTransactions.take(4).toList();
       } else {
         _fetchIncomes(1);
       }
@@ -1062,17 +1043,17 @@ class _HomeSectionState extends State<HomeSection>
       if (expenses.isNotEmpty) {
         recentTransactions = expenses.toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        recentTransactions = recentTransactions.take(5).toList();
+        recentTransactions = recentTransactions.take(4).toList();
       } else {
         _fetchExpenses(1);
       }
     }
 
     return Card(
-      elevation: 12.0,
+      elevation: 8.0,
       color: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(25.0),
+        borderRadius: BorderRadius.circular(20.0),
         side: BorderSide(
           color: Colors.grey.withOpacity(0.2),
           width: 1,
@@ -1080,18 +1061,15 @@ class _HomeSectionState extends State<HomeSection>
       ),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(25.0),
+          borderRadius: BorderRadius.circular(20.0),
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Colors.white,
-              Colors.grey.shade50,
-            ],
+            colors: [Colors.white, Colors.grey.shade50],
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -1105,13 +1083,13 @@ class _HomeSectionState extends State<HomeSection>
                             ? Icons.trending_up
                             : Icons.trending_down,
                         color: Color(0xFFEB8153),
-                        size: 24,
+                        size: 20,
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 8),
                       Text(
                         isIncomeSelected ? 'Pemasukan' : 'Pengeluaran',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
@@ -1121,10 +1099,11 @@ class _HomeSectionState extends State<HomeSection>
                   if (!isLoading)
                     TextButton(
                       child: Text(
-                        'Selengkapnya',
+                        'Selengkapnya....',
                         style: TextStyle(
                           color: Color(0xFFEB8153),
                           fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
                       ),
                       onPressed: () {
@@ -1139,7 +1118,7 @@ class _HomeSectionState extends State<HomeSection>
                     ),
                 ],
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
               if (isLoading)
                 Center(
                   child: CircularProgressIndicator(
@@ -1153,14 +1132,14 @@ class _HomeSectionState extends State<HomeSection>
                     children: [
                       Icon(
                         Icons.hourglass_empty,
-                        size: 40,
+                        size: 32,
                         color: Colors.grey,
                       ),
-                      SizedBox(height: 12),
+                      SizedBox(height: 8),
                       Text(
                         'Belum ada transaksi',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           color: Colors.grey,
                           fontWeight: FontWeight.w500,
                         ),
@@ -1196,15 +1175,15 @@ class _HomeSectionState extends State<HomeSection>
                     name = transaction.name;
                   }
                   return Container(
-                    margin: EdgeInsets.only(bottom: 12),
+                    margin: EdgeInsets.only(bottom: 8),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
+                          blurRadius: 3,
+                          offset: Offset(0, 1),
                         ),
                       ],
                     ),
@@ -1226,23 +1205,31 @@ class _HomeSectionState extends State<HomeSection>
   Widget _buildTransactionItem(
       String title, String date, double amount, IconData icon) {
     return ListTile(
+      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       leading: Container(
-        padding: EdgeInsets.all(8),
+        padding: EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: Color(0xFFEB8153).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(icon, color: Color(0xFFEB8153)),
+        child: Icon(icon, color: Color(0xFFEB8153), size: 18),
       ),
-      title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(date),
+      title: Text(
+        title,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+      ),
+      subtitle: Text(date, style: TextStyle(fontSize: 11)),
       trailing: Text(
         NumberFormat.currency(
           locale: 'id_ID',
           symbol: 'Rp',
           decimalDigits: 0,
         ).format(amount),
-        style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFFEB8153)),
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Color(0xFFEB8153),
+          fontSize: 12,
+        ),
       ),
     );
   }
@@ -1314,38 +1301,42 @@ class DoubleRadialChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final outerRadius = min(size.width, size.height) / 2;
-    final innerRadius = outerRadius * 0.7;
+    final innerRadius = outerRadius * 0.6; // Diperkecil dari 0.7 ke 0.6
 
     // Gambar background abu-abu untuk outer circle
     final bgOuterPaint = Paint()
       ..color = Colors.grey.withOpacity(0.1)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 20;
-    canvas.drawCircle(center, outerRadius - 10, bgOuterPaint);
+      ..strokeWidth = 15; // Diperkecil dari 20 ke 15
+    canvas.drawCircle(center, outerRadius - 8,
+        bgOuterPaint); // Diperkecil offset dari 10 ke 8
 
     // Gambar background abu-abu untuk inner circle
     final bgInnerPaint = Paint()
       ..color = Colors.grey.withOpacity(0.1)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 20;
-    canvas.drawCircle(center, innerRadius - 10, bgInnerPaint);
+      ..strokeWidth = 15; // Diperkecil dari 20 ke 15
+    canvas.drawCircle(center, innerRadius - 8,
+        bgInnerPaint); // Diperkecil offset dari 10 ke 8
 
     // Gambar outer circle
     final outerPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 20
+      ..strokeWidth = 15 // Diperkecil dari 20 ke 15
       ..strokeCap = StrokeCap.round
       ..color = outerColor;
 
     // Gambar inner circle
     final innerPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 20
+      ..strokeWidth = 15 // Diperkecil dari 20 ke 15
       ..strokeCap = StrokeCap.round
       ..color = innerColor;
 
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: outerRadius - 10),
+      Rect.fromCircle(
+          center: center,
+          radius: outerRadius - 8), // Diperkecil offset dari 10 ke 8
       -pi / 2,
       (outerPercentage / 100) * 2 * pi,
       false,
@@ -1353,7 +1344,9 @@ class DoubleRadialChartPainter extends CustomPainter {
     );
 
     canvas.drawArc(
-      Rect.fromCircle(center: center, radius: innerRadius - 10),
+      Rect.fromCircle(
+          center: center,
+          radius: innerRadius - 8), // Diperkecil offset dari 10 ke 8
       -pi / 2,
       (innerPercentage / 100) * 2 * pi,
       false,

@@ -153,25 +153,28 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(24.0),
-                bottomLeft: Radius.circular(24.0),
+                bottomRight: Radius.circular(16.0),
+                bottomLeft: Radius.circular(16.0),
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
+              padding: const EdgeInsets.fromLTRB(12.0, 32.0, 12.0, 12.0),
               child: Column(
                 children: [
+                  SizedBox(
+                    height: 10,
+                  ),
                   _buildHeader(),
-                  SizedBox(height: 24),
+                  SizedBox(height: 16),
                   Text(
                     'Tambah Pemasukan',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 12),
                 ],
               ),
             ),
@@ -181,20 +184,20 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
               width: double.infinity,
               decoration: BoxDecoration(),
               child: Padding(
-                padding: const EdgeInsets.all(30.0),
+                padding: const EdgeInsets.all(20.0),
                 child: SingleChildScrollView(
                   child: Card(
-                    elevation: 4,
+                    elevation: 2,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(20.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInputFields(),
-                          SizedBox(height: 30),
+                          SizedBox(height: 20),
                           _buildActionButtons(),
                         ],
                       ),
@@ -215,7 +218,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         Align(
           alignment: Alignment.centerLeft,
           child: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: Colors.white, size: 20),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -223,10 +226,9 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         ),
         Align(
           alignment: Alignment.centerRight,
-          child: Icon(
-            Icons.notifications,
-            color: Colors.white,
-            size: 24,
+          child: IconButton(
+            icon: Icon(Icons.notifications, color: Colors.white, size: 20),
+            onPressed: () {},
           ),
         ),
       ],
@@ -237,14 +239,15 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: 20),
+        SizedBox(height: 8),
         // Nama Pemasukan
         _buildLabel('Nama Pemasukan'),
-        SizedBox(height: 8),
+        SizedBox(height: 2),
         Container(
           width: double.infinity,
+          height: 36,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(6),
             color: Colors.white,
             border: Border.all(
               color: Colors.grey.shade300,
@@ -253,35 +256,35 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
           ),
           child: TextField(
             controller: nameController,
-            style: TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 11),
             decoration: InputDecoration(
               hintText: 'Masukkan nama pemasukan',
               hintStyle: TextStyle(
                 color: Colors.grey[400],
-                fontSize: 14,
+                fontSize: 11,
               ),
               suffixIcon: Icon(
                 Icons.description_outlined,
                 color: Color(0xFFEB8153),
-                size: 20,
+                size: 16,
               ),
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
+                horizontal: 12,
+                vertical: 15,
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 8),
 
         // Deskripsi
         _buildLabel('Deskripsi'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
             color: Colors.white,
             border: Border.all(
               color: Colors.grey.shade300,
@@ -290,48 +293,48 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
           ),
           child: TextField(
             controller: descriptionController,
-            maxLines: 3,
-            style: TextStyle(fontSize: 14),
+            maxLines: 2,
+            style: TextStyle(fontSize: 12),
             decoration: InputDecoration(
               hintText: 'Masukkan deskripsi pemasukan',
               hintStyle: TextStyle(
                 color: Colors.grey[400],
-                fontSize: 14,
+                fontSize: 12,
               ),
               prefixIcon: Icon(
                 Icons.notes,
                 color: Color(0xFFEB8153),
-                size: 20,
+                size: 16,
               ),
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
+                horizontal: 12,
+                vertical: 10,
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 12),
 
         // Kategori
         _buildLabel('Kategori'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         InkWell(
           onTap: () {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               builder: (context) => _buildCategoryModal(),
             );
           },
           child: Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
               color: Colors.white,
               border: Border.all(
                 color: Colors.grey.shade300,
@@ -343,14 +346,14 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                 Icon(
                   Icons.insert_chart_outlined_outlined,
                   color: Color(0xFFEB8153),
-                  size: 20,
+                  size: 16,
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     selectedCategory?.name ?? 'Pilih kategori',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       color: selectedCategory != null
                           ? Colors.black
                           : Colors.grey[400],
@@ -360,20 +363,22 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                 Icon(
                   Icons.arrow_drop_down,
                   color: Color(0xFFEB8153),
+                  size: 16,
                 ),
               ],
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 12),
 
         // Tanggal
         _buildLabel('Tanggal'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         Container(
           width: double.infinity,
+          height: 36,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(6),
             color: Colors.white,
             border: Border.all(
               color: Colors.grey.shade300,
@@ -386,11 +391,11 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
               enabled: false,
               decoration: InputDecoration(
                 suffixIcon: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                   child: Icon(
                     Icons.calendar_today,
                     color: Color(0xFFEB8153),
-                    size: 20,
+                    size: 14,
                   ),
                 ),
                 hintText: selectedDate == null
@@ -398,26 +403,27 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                     : '${selectedDate!.day.toString().padLeft(2, '0')} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
                 hintStyle: TextStyle(
                   color: Colors.black87,
-                  fontSize: 14,
+                  fontSize: 11,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+                  horizontal: 8,
+                  vertical: 15,
                 ),
               ),
             ),
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 12),
 
         // Jumlah
         _buildLabel('Jumlah'),
-        SizedBox(height: 8),
+        SizedBox(height: 2),
         Container(
           width: double.infinity,
+          height: 36,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(6),
             color: Colors.white,
             border: Border.all(
               color: Colors.grey.shade300,
@@ -434,31 +440,30 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                     FilteringTextInputFormatter.digitsOnly,
                     ThousandSeparatorInputFormatter(),
                   ],
-                  style: TextStyle(fontSize: 14),
+                  style: TextStyle(fontSize: 11),
                   decoration: InputDecoration(
                     prefixIcon: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
                       child: Icon(
                         Icons.money,
                         color: Color(0xFFEB8153),
-                        size: 20,
+                        size: 16,
                       ),
                     ),
                     suffixText: 'IDR',
                     suffixStyle: TextStyle(
                         color: Colors.grey[600],
-                        fontSize: 14,
+                        fontSize: 11,
                         fontWeight: FontWeight.w500),
                     hintText: 'Masukkan jumlah',
                     hintStyle: TextStyle(
                       color: Colors.grey[400],
-                      fontSize: 14,
+                      fontSize: 11,
                     ),
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                      horizontal: 12,
+                      vertical: 15,
                     ),
                   ),
                 ),
@@ -477,7 +482,8 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                           .replaceAll(',', '.');
                       jumlahController.text = formattedValue;
                     },
-                    child: Icon(Icons.arrow_drop_up, color: Color(0xFFEB8153)),
+                    child: Icon(Icons.arrow_drop_up,
+                        color: Color(0xFFEB8153), size: 14),
                   ),
                   InkWell(
                     onTap: () {
@@ -492,12 +498,12 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                         jumlahController.text = formattedValue;
                       }
                     },
-                    child:
-                        Icon(Icons.arrow_drop_down, color: Color(0xFFEB8153)),
+                    child: Icon(Icons.arrow_drop_down,
+                        color: Color(0xFFEB8153), size: 14),
                   ),
                 ],
               ),
-              SizedBox(width: 8),
+              SizedBox(width: 6),
             ],
           ),
         ),
@@ -516,43 +522,37 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.8,
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          height: MediaQuery.of(context).size.height *
+              0.6, // Mengurangi tinggi modal
+          padding: EdgeInsets.symmetric(
+              horizontal: 16, vertical: 12), // Mengurangi padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Handle Bar
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: EdgeInsets.only(bottom: 24),
+                  width: 32, // Mengurangi lebar handle bar
+                  height: 3, // Mengurangi tinggi handle bar
+                  margin: EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),
               ),
-
-              // Title
               Text(
                 'Pilih Kategori',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 16, // Mengurangi ukuran font judul
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 25),
-
-              // Search Field
+              SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: 1,
-                  ),
-                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: TextField(
                   controller: searchController,
@@ -560,16 +560,16 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                     hintText: 'Cari kategori...',
                     hintStyle: TextStyle(
                       color: Colors.grey[400],
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                     border: InputBorder.none,
                     prefixIcon: Icon(
                       Icons.search,
                       color: Color(0xFFEB8153),
-                      size: 22,
+                      size: 18,
                     ),
                     contentPadding:
-                        EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   onChanged: (value) {
                     filteredCategories.value = categories
@@ -580,21 +580,19 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                   },
                 ),
               ),
-              SizedBox(height: 24),
-
-              // Category Header
+              SizedBox(height: 16),
               Row(
                 children: [
                   Icon(
                     Icons.dashboard_outlined,
-                    size: 16,
+                    size: 14,
                     color: Colors.grey[600],
                   ),
                   SizedBox(width: 4),
                   Text(
                     'Kategori Pemasukan',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey[600],
                     ),
@@ -602,8 +600,6 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                 ],
               ),
               SizedBox(height: 8),
-
-              // Category List
               Expanded(
                 child: ValueListenableBuilder<List<Category>>(
                   valueListenable: filteredCategories,
@@ -615,15 +611,15 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                           children: [
                             Icon(
                               Icons.search_off,
-                              size: 48,
+                              size: 36,
                               color: Colors.grey[400],
                             ),
-                            SizedBox(height: 16),
+                            SizedBox(height: 12),
                             Text(
                               'Tidak ada kategori yang ditemukan',
                               style: TextStyle(
                                 color: Colors.grey[600],
-                                fontSize: 16,
+                                fontSize: 14,
                               ),
                             ),
                           ],
@@ -640,11 +636,12 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                       itemBuilder: (context, index) {
                         final category = categories[index];
                         return ListTile(
+                          dense: true, // Membuat list tile lebih compact
                           contentPadding: EdgeInsets.zero,
                           title: Text(
                             category.name,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 13,
                               fontWeight: selectedCategory == category
                                   ? FontWeight.w700
                                   : FontWeight.w600,
@@ -689,7 +686,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: FontWeight.w600,
         color: Colors.black87,
       ),
@@ -704,7 +701,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         color: Colors.white,
         border: Border.all(
           color: Colors.grey.shade300,
@@ -713,17 +710,17 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
       ),
       child: TextField(
         controller: controller,
-        style: TextStyle(fontSize: 14),
+        style: TextStyle(fontSize: 13),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(
             color: Colors.grey[400],
-            fontSize: 14,
+            fontSize: 13,
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
+            horizontal: 12,
+            vertical: 10,
           ),
         ),
       ),
@@ -733,61 +730,59 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
   Widget _buildJumlahTextField() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.grey[200], // Same as buildTextField
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.grey[200],
       ),
       child: TextField(
         controller: jumlahController,
         keyboardType: TextInputType.number,
         inputFormatters: [
-          FilteringTextInputFormatter.digitsOnly, // Allow only digits
-          ThousandSeparatorInputFormatter(), // Add your custom formatter
+          FilteringTextInputFormatter.digitsOnly,
+          ThousandSeparatorInputFormatter(),
         ],
-        style: TextStyle(fontSize: 14), // Text size same as buildTextField
+        style: TextStyle(fontSize: 13),
         decoration: InputDecoration(
           prefixIcon: Padding(
-            padding: const EdgeInsets.only(right: 8.0),
+            padding: const EdgeInsets.only(right: 6.0),
             child: Container(
-              height: 48, // Adjust height according to other TextFields
-              width: 48, // Adjust width to be circular
+              height: 36,
+              width: 36,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFEB8153), // Circle background color
+                color: Color(0xFFEB8153),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26, // Shadow color
-                    blurRadius: 4.0, // Blur radius
-                    spreadRadius: 1.0, // Shadow spread radius
-                    offset: Offset(0, 2), // Shadow position
+                    color: Colors.black26,
+                    blurRadius: 3.0,
+                    spreadRadius: 0.5,
+                    offset: Offset(0, 1),
                   ),
                 ],
               ),
               child: Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(6.0),
                 child: Icon(
                   Icons.money,
-                  color: Colors.white, // Change icon color to white
+                  color: Colors.white,
+                  size: 18,
                 ),
               ),
             ),
           ),
-          hintText: 'Masukkan jumlah dalam bentuk Rp', // Hint text
-          hintStyle: TextStyle(color: Colors.grey),
-          prefixText:
-              showPrefix ? 'Rp' : null, // Show 'Rp' only if there's input
+          hintText: 'Masukkan jumlah dalam bentuk Rp',
+          hintStyle: TextStyle(color: Colors.grey, fontSize: 13),
+          prefixText: showPrefix ? 'Rp' : null,
           prefixStyle: TextStyle(
             color: Colors.black87,
-            fontSize: 15,
+            fontSize: 13,
             fontWeight: FontWeight.normal,
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
-            vertical: 15, // Vertical space same as buildTextField
+            vertical: 12,
           ),
         ),
-        onChanged: (value) {
-          // Update state if needed, but normally not required here
-        },
+        onChanged: (value) {},
       ),
     );
   }
@@ -817,52 +812,48 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors
-              .grey[200], // Menggunakan warna yang sama dengan buildTextField
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.grey[200],
         ),
         child: TextField(
-          enabled: false, // Disable text editing, only allow date picker
+          enabled: false,
           decoration: InputDecoration(
             hintText: selectedDate == null
                 ? 'Pilih Tanggal'
                 : '${selectedDate!.day.toString().padLeft(2, '0')} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
             hintStyle: TextStyle(
               color: Colors.black87,
-              fontSize: 15, // Ukuran text diperkecil
+              fontSize: 13,
             ),
             prefixIcon: Padding(
-              padding: const EdgeInsets.only(
-                  right: 8.0), // Jarak antara ikon dan teks
+              padding: const EdgeInsets.only(right: 6.0),
               child: Container(
-                height: 48, // Sesuaikan tinggi sesuai dengan TextField
-                width: 48, // Sesuaikan lebar agar berbentuk lingkaran
+                height: 36,
+                width: 36,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFFEB8153), // Latar belakang lingkaran
+                  color: Color(0xFFEB8153),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black26, // Warna bayangan
-                      blurRadius: 4.0, // Blur radius
-                      spreadRadius: 1.0, // Radius penyebaran bayangan
-                      offset: Offset(0, 5), // Posisi bayangan
+                      color: Colors.black26,
+                      blurRadius: 3.0,
+                      spreadRadius: 0.5,
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(6.0),
                   child: Icon(
                     Icons.calendar_today,
                     color: Colors.white,
-                    size: 22,
+                    size: 18,
                   ),
                 ),
               ),
             ),
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(
-              vertical: 15, // Jarak vertikal dalam TextField
-            ),
+            contentPadding: EdgeInsets.symmetric(vertical: 12),
           ),
         ),
       ),
@@ -879,35 +870,34 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Color(0xFFEB8153), // Header background
-              onPrimary: Colors.white, // Header text
-              onSurface: Colors.black87, // Calendar text
+              primary: Color(0xFFEB8153),
+              onPrimary: Colors.white,
+              onSurface: Colors.black87,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                primary: Color(0xFFEB8153), // Button text color
+                primary: Color(0xFFEB8153),
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(12), // Radius untuk button
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
             ),
             dialogBackgroundColor: Colors.white,
             dialogTheme: DialogTheme(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20), // Radius untuk dialog
+                borderRadius: BorderRadius.circular(15),
               ),
             ),
           ),
           child: Container(
             child: child,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
+                  blurRadius: 8,
+                  offset: Offset(0, 3),
                 ),
               ],
             ),
@@ -928,29 +918,32 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
       children: [
         ElevatedButton(
           onPressed: () {
-            Navigator.pop(context); // Add action for Cancel button
+            Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(
-            primary: Color(0xFFDA0000), // Color for "Cancel"
+            primary: Color(0xFFDA0000),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Set radius to 8
+              borderRadius: BorderRadius.circular(4),
             ),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            minimumSize: Size(60, 28),
           ),
-          child: Text('Batal'),
+          child: Text('Batal', style: TextStyle(fontSize: 11)),
         ),
-        SizedBox(width: 16), // Add spacing between buttons
-
+        SizedBox(width: 8),
         ElevatedButton(
           onPressed: () {
             submit();
           },
           style: ElevatedButton.styleFrom(
-            primary: Color(0xFFE85C0D), // Updated color for "Simpan"
+            primary: Color(0xFFE85C0D),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), // Set radius to 8
+              borderRadius: BorderRadius.circular(4),
             ),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            minimumSize: Size(60, 28),
           ),
-          child: Text('Simpan'),
+          child: Text('Simpan', style: TextStyle(fontSize: 11)),
         ),
       ],
     );

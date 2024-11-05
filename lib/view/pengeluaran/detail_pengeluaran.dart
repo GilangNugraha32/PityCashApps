@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/api_service.dart';
+import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/view/home/home.dart';
 import 'package:pity_cash/view/pemasukan/edit_pemasukan.dart';
 import 'package:pity_cash/view/pengeluaran/edit_pengeluaran.dart';
@@ -49,65 +50,61 @@ class DetailPengeluaran extends StatelessWidget {
         children: [
           Container(
             width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.1117,
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30.0),
-                bottomRight: Radius.circular(30.0),
-              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 1,
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
-              child: Column(
-                children: [
-                  Stack(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: IconButton(
-                          icon: Icon(Icons.arrow_back, color: Colors.white),
-                          onPressed: () => Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeScreen(initialIndex: 3),
-                            ),
-                          ),
-                        ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 12.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                      icon: Icon(
+                        Icons.arrow_back_ios,
+                        color: Colors.white,
+                        size: 13,
                       ),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Icon(Icons.notifications,
-                            color: Colors.white, size: 24),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 24),
-                  Text(
-                    'Detail Pengeluaran',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
-                  ),
-                  SizedBox(height: 10),
-                ],
+                    SizedBox(width: 16),
+                    Text(
+                      'Detail Pengeluaran',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          SizedBox(height: 20),
           Expanded(
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30.0),
-                  topRight: Radius.circular(30.0),
-                ),
               ),
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(15.0, 8.0, 15.0, 0),
+                padding: const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 0),
                 child: Column(
                   children: [
                     Expanded(
@@ -128,24 +125,24 @@ class DetailPengeluaran extends StatelessWidget {
                                         Icon(
                                           Icons.receipt_long,
                                           color: Color(0xFF1A3A63),
-                                          size: 24,
+                                          size: 18,
                                         ),
-                                        SizedBox(width: 8),
+                                        SizedBox(width: 6),
                                         Text(
                                           'Rincian Transaksi',
                                           style: TextStyle(
-                                            fontSize: 18,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFF1A3A63),
                                           ),
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 16),
+                                    SizedBox(height: 12),
                                     Card(
                                       elevation: 1,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
+                                        borderRadius: BorderRadius.circular(12),
                                         side: BorderSide(
                                           color: Color(0xFFEB8153)
                                               .withOpacity(0.3),
@@ -154,11 +151,11 @@ class DetailPengeluaran extends StatelessWidget {
                                       ),
                                       child: Container(
                                         width: double.infinity,
-                                        padding: const EdgeInsets.all(20.0),
+                                        padding: const EdgeInsets.all(16.0),
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           borderRadius:
-                                              BorderRadius.circular(16),
+                                              BorderRadius.circular(12),
                                         ),
                                         child: Column(
                                           crossAxisAlignment:
@@ -172,26 +169,26 @@ class DetailPengeluaran extends StatelessWidget {
                                                 Text(
                                                   'Tanggal Transaksi',
                                                   style: TextStyle(
-                                                    fontSize: 14,
+                                                    fontSize: 12,
                                                     color: Colors.grey[600],
                                                   ),
                                                 ),
                                                 Container(
                                                   padding: EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 6),
+                                                      horizontal: 10,
+                                                      vertical: 4),
                                                   decoration: BoxDecoration(
                                                     color: Color(0xFFEB8153)
                                                         .withOpacity(0.1),
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            20),
+                                                            16),
                                                   ),
                                                   child: Text(
                                                     '${pengeluaranList.first.tanggal!.day} ${_getMonthName(pengeluaranList.first.tanggal!.month)} ${pengeluaranList.first.tanggal!.year}',
                                                     style: TextStyle(
                                                       color: Color(0xFFEB8153),
-                                                      fontSize: 14,
+                                                      fontSize: 12,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                     ),
@@ -199,7 +196,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                 ),
                                               ],
                                             ),
-                                            SizedBox(height: 20),
+                                            SizedBox(height: 10),
                                             ListView.builder(
                                               shrinkWrap: true,
                                               physics:
@@ -210,7 +207,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                     pengeluaranList[index];
                                                 return Padding(
                                                   padding: EdgeInsets.only(
-                                                      bottom: 12),
+                                                      bottom: 10),
                                                   child: Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment
@@ -225,12 +222,12 @@ class DetailPengeluaran extends StatelessWidget {
                                                             Text(
                                                               item.name,
                                                               style: TextStyle(
-                                                                fontSize: 15,
+                                                                fontSize: 13,
                                                                 color: Colors
                                                                     .black87,
                                                               ),
                                                             ),
-                                                            SizedBox(height: 4),
+                                                            SizedBox(height: 2),
                                                             Text(
                                                               '${item.jumlahSatuan} x ${NumberFormat.currency(
                                                                 locale: 'id_ID',
@@ -239,7 +236,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                                     0,
                                                               ).format(item.nominal)}',
                                                               style: TextStyle(
-                                                                fontSize: 13,
+                                                                fontSize: 11,
                                                                 color: Colors
                                                                     .grey[600],
                                                               ),
@@ -254,7 +251,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                           decimalDigits: 0,
                                                         ).format(item.jumlah),
                                                         style: TextStyle(
-                                                          fontSize: 15,
+                                                          fontSize: 13,
                                                           fontWeight:
                                                               FontWeight.w500,
                                                           color:
@@ -280,7 +277,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                 Text(
                                                   'Biaya dll',
                                                   style: TextStyle(
-                                                    fontSize: 15,
+                                                    fontSize: 14,
                                                     color: Colors.black87,
                                                   ),
                                                 ),
@@ -295,7 +292,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                           (sum, item) =>
                                                               sum + item.dll)),
                                                   style: TextStyle(
-                                                    fontSize: 15,
+                                                    fontSize: 13,
                                                     fontWeight: FontWeight.w500,
                                                     color: Color(0xFF1A3A63),
                                                   ),
@@ -311,7 +308,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                 Text(
                                                   'Total Belanja',
                                                   style: TextStyle(
-                                                    fontSize: 16,
+                                                    fontSize: 14,
                                                     fontWeight: FontWeight.bold,
                                                     color: Color(0xFF1A3A63),
                                                   ),
@@ -352,7 +349,7 @@ class DetailPengeluaran extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 30),
+                              SizedBox(height: 20),
 
                               // Detail Produk Section
                               Container(
@@ -365,13 +362,12 @@ class DetailPengeluaran extends StatelessWidget {
                                         Icon(
                                           Icons.shopping_cart_outlined,
                                           color: Color(0xFF1A3A63),
-                                          size: 24,
+                                          size: 18,
                                         ),
-                                        SizedBox(width: 8),
                                         Text(
                                           'Detail Produk Belanja',
                                           style: TextStyle(
-                                            fontSize: 18,
+                                            fontSize: 14,
                                             fontWeight: FontWeight.bold,
                                             color: Color(0xFF1A3A63),
                                           ),
@@ -379,11 +375,13 @@ class DetailPengeluaran extends StatelessWidget {
                                       ],
                                     ),
                                     ListView.separated(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 12),
                                       shrinkWrap: true,
                                       physics: NeverScrollableScrollPhysics(),
                                       itemCount: pengeluaranList.length,
                                       separatorBuilder: (context, index) =>
-                                          SizedBox(height: 12),
+                                          SizedBox(height: 8),
                                       itemBuilder: (context, index) {
                                         final pengeluaran =
                                             pengeluaranList[index];
@@ -391,11 +389,11 @@ class DetailPengeluaran extends StatelessWidget {
                                           elevation: 1,
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(8),
+                                                BorderRadius.circular(12),
                                             side: BorderSide(
                                               color: Color(0xFFEB8153)
                                                   .withOpacity(0.3),
-                                              width: 1,
+                                              width: 0.5,
                                             ),
                                           ),
                                           child: Theme(
@@ -417,12 +415,12 @@ class DetailPengeluaran extends StatelessWidget {
                                                           style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            fontSize: 16,
+                                                            fontSize: 14,
                                                             color: Color(
                                                                 0xFF1A3A63),
                                                           ),
                                                         ),
-                                                        SizedBox(height: 4),
+                                                        SizedBox(height: 2),
                                                         Text(
                                                           NumberFormat.currency(
                                                             locale: 'id_ID',
@@ -435,30 +433,55 @@ class DetailPengeluaran extends StatelessWidget {
                                                                 0xFFEB8153),
                                                             fontWeight:
                                                                 FontWeight.w600,
-                                                            fontSize: 15,
+                                                            fontSize: 13,
                                                           ),
                                                         ),
                                                       ],
                                                     ),
                                                   ),
-                                                  if (pengeluaranList.length >
-                                                      1)
-                                                    IconButton(
-                                                      icon: Icon(
-                                                          Icons.delete_outline),
-                                                      color: Colors.red[400],
-                                                      onPressed: () =>
-                                                          _showDeleteConfirmationDataDialog(
-                                                        context,
-                                                        pengeluaran.idData,
-                                                      ),
-                                                    ),
+                                                  FutureBuilder<
+                                                      Map<String, dynamic>?>(
+                                                    future:
+                                                        SharedPreferencesService()
+                                                            .getRoles(),
+                                                    builder:
+                                                        (context, snapshot) {
+                                                      if (snapshot.hasData &&
+                                                          snapshot.data !=
+                                                              null) {
+                                                        bool isReader = snapshot
+                                                                        .data![
+                                                                    'roles'][0]
+                                                                ['name'] ==
+                                                            'Reader';
+                                                        if (!isReader &&
+                                                            pengeluaranList
+                                                                    .length >
+                                                                1) {
+                                                          return IconButton(
+                                                            icon: Icon(Icons
+                                                                .delete_outline),
+                                                            color:
+                                                                Colors.red[400],
+                                                            iconSize: 18,
+                                                            onPressed: () =>
+                                                                _showDeleteConfirmationDataDialog(
+                                                              context,
+                                                              pengeluaran
+                                                                  .idData,
+                                                            ),
+                                                          );
+                                                        }
+                                                      }
+                                                      return Container();
+                                                    },
+                                                  ),
                                                 ],
                                               ),
                                               children: [
                                                 Padding(
                                                   padding: const EdgeInsets.all(
-                                                      16.0),
+                                                      12.0),
                                                   child: Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
@@ -468,7 +491,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                           height: 1,
                                                           color:
                                                               Colors.grey[300]),
-                                                      SizedBox(height: 16),
+                                                      SizedBox(height: 12),
                                                       LayoutBuilder(builder:
                                                           (context,
                                                               constraints) {
@@ -481,14 +504,14 @@ class DetailPengeluaran extends StatelessWidget {
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
-                                                                          8),
+                                                                          6),
                                                               child: Container(
                                                                 width: constraints
                                                                         .maxWidth *
-                                                                    0.3,
+                                                                    0.25,
                                                                 height: constraints
                                                                         .maxWidth *
-                                                                    0.3,
+                                                                    0.25,
                                                                 decoration:
                                                                     BoxDecoration(
                                                                   border: Border
@@ -596,14 +619,14 @@ class DetailPengeluaran extends StatelessWidget {
                                                                                             Icon(
                                                                                               Icons.receipt_long,
                                                                                               color: Colors.white,
-                                                                                              size: 24,
+                                                                                              size: 16,
                                                                                             ),
                                                                                             SizedBox(width: 12),
                                                                                             Text(
-                                                                                              'Bukti Transaksi',
+                                                                                              'Gambar ${pengeluaran.name}',
                                                                                               style: TextStyle(
                                                                                                 color: Colors.white,
-                                                                                                fontSize: 20,
+                                                                                                fontSize: 12,
                                                                                                 fontWeight: FontWeight.bold,
                                                                                               ),
                                                                                             ),
@@ -663,7 +686,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                                 ),
                                                               ),
                                                             ),
-                                                            SizedBox(width: 16),
+                                                            SizedBox(width: 12),
                                                             Expanded(
                                                               child: Column(
                                                                 crossAxisAlignment:
@@ -673,21 +696,21 @@ class DetailPengeluaran extends StatelessWidget {
                                                                   Container(
                                                                     padding: EdgeInsets.symmetric(
                                                                         horizontal:
-                                                                            12,
+                                                                            8,
                                                                         vertical:
-                                                                            6),
+                                                                            4),
                                                                     decoration:
                                                                         BoxDecoration(
                                                                       color: Colors
                                                                           .orange[50],
                                                                       borderRadius:
                                                                           BorderRadius.circular(
-                                                                              8),
+                                                                              6),
                                                                       border: Border.all(
                                                                           color: Colors.orange[
                                                                               300]!,
                                                                           width:
-                                                                              1),
+                                                                              0.5),
                                                                     ),
                                                                     child: Row(
                                                                       mainAxisSize:
@@ -698,7 +721,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                                           Icons
                                                                               .insert_chart_outlined_outlined,
                                                                           size:
-                                                                              16,
+                                                                              14,
                                                                           color:
                                                                               Colors.orange[800],
                                                                         ),
@@ -714,7 +737,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                                                 TextStyle(
                                                                               color: Colors.orange[800],
                                                                               fontWeight: FontWeight.w600,
-                                                                              fontSize: 13,
+                                                                              fontSize: 11,
                                                                             ),
                                                                             overflow:
                                                                                 TextOverflow.ellipsis,
@@ -725,19 +748,19 @@ class DetailPengeluaran extends StatelessWidget {
                                                                   ),
                                                                   SizedBox(
                                                                       height:
-                                                                          12),
+                                                                          8),
                                                                   Text(
                                                                     pengeluaran
                                                                         .description,
                                                                     style:
                                                                         TextStyle(
                                                                       fontSize:
-                                                                          14,
+                                                                          12,
                                                                       color: Colors
                                                                               .grey[
                                                                           700],
                                                                       height:
-                                                                          1.5,
+                                                                          1.4,
                                                                     ),
                                                                     maxLines: 3,
                                                                     overflow:
@@ -750,21 +773,21 @@ class DetailPengeluaran extends StatelessWidget {
                                                           ],
                                                         );
                                                       }),
-                                                      SizedBox(height: 20),
+                                                      SizedBox(height: 16),
                                                       Container(
                                                         padding:
-                                                            EdgeInsets.all(16),
+                                                            EdgeInsets.all(12),
                                                         decoration:
                                                             BoxDecoration(
                                                           color:
                                                               Colors.grey[50],
                                                           borderRadius:
                                                               BorderRadius
-                                                                  .circular(12),
+                                                                  .circular(8),
                                                           border: Border.all(
                                                               color: Colors
                                                                   .grey[300]!,
-                                                              width: 1),
+                                                              width: 0.5),
                                                         ),
                                                         child: Column(
                                                           children: [
@@ -782,14 +805,12 @@ class DetailPengeluaran extends StatelessWidget {
                                                                   pengeluaran
                                                                       .nominal),
                                                             ),
-                                                            SizedBox(
-                                                                height: 12),
+                                                            SizedBox(height: 8),
                                                             Divider(
                                                                 height: 1,
                                                                 color: Colors
                                                                     .grey[300]),
-                                                            SizedBox(
-                                                                height: 12),
+                                                            SizedBox(height: 8),
                                                             _buildInfoRow(
                                                               'DLL',
                                                               NumberFormat
@@ -815,22 +836,22 @@ class DetailPengeluaran extends StatelessWidget {
                                                           ],
                                                         ),
                                                       ),
-                                                      SizedBox(height: 16),
+                                                      SizedBox(height: 12),
                                                       Container(
                                                         width: double.infinity,
                                                         padding:
-                                                            EdgeInsets.all(12),
+                                                            EdgeInsets.all(8),
                                                         decoration:
                                                             BoxDecoration(
                                                           color:
                                                               Colors.grey[100],
                                                           borderRadius:
                                                               BorderRadius
-                                                                  .circular(8),
+                                                                  .circular(6),
                                                         ),
                                                         child: Wrap(
-                                                          spacing: 16,
-                                                          runSpacing: 8,
+                                                          spacing: 12,
+                                                          runSpacing: 6,
                                                           alignment:
                                                               WrapAlignment
                                                                   .spaceBetween,
@@ -843,7 +864,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                                 Icon(
                                                                   Icons
                                                                       .access_time,
-                                                                  size: 16,
+                                                                  size: 14,
                                                                   color: Colors
                                                                           .grey[
                                                                       600],
@@ -855,7 +876,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                                   style:
                                                                       TextStyle(
                                                                     fontSize:
-                                                                        12,
+                                                                        11,
                                                                     color: Colors
                                                                             .grey[
                                                                         600],
@@ -870,7 +891,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                               children: [
                                                                 Icon(
                                                                   Icons.update,
-                                                                  size: 16,
+                                                                  size: 14,
                                                                   color: Colors
                                                                           .grey[
                                                                       600],
@@ -882,7 +903,7 @@ class DetailPengeluaran extends StatelessWidget {
                                                                   style:
                                                                       TextStyle(
                                                                     fontSize:
-                                                                        12,
+                                                                        11,
                                                                     color: Colors
                                                                             .grey[
                                                                         600],
@@ -911,77 +932,91 @@ class DetailPengeluaran extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            width: double.infinity,
-                            height: 40,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.white,
-                                side: BorderSide(
-                                  color: Colors.red,
-                                  width: 0.5,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              onPressed: () {
-                                if (pengeluaranList.isNotEmpty) {
-                                  _showDeleteConfirmationParentDialog(
-                                      context, pengeluaranList[0].idParent);
-                                }
-                              },
-                              child: Text(
-                                'Hapus',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                ),
-                              ),
-                            ),
+                    FutureBuilder<Map<String, dynamic>?>(
+                      future: SharedPreferencesService().getRoles(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          bool isReader =
+                              snapshot.data!['roles'][0]['name'] == 'Reader';
+                          if (isReader) {
+                            return Container();
+                          }
+                        }
+                        return Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
                           ),
-                          SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 40,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                primary: Colors.white,
-                                side: BorderSide(
-                                  color: Color(0xFFEB8153),
-                                  width: 1.0,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditPengeluaran(
-                                        pengeluaranList: pengeluaranList),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                height: 32,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.white,
+                                    side: BorderSide(
+                                      color: Colors.red,
+                                      width: 0.5,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
                                   ),
-                                );
-                              },
-                              child: Text(
-                                'Edit',
-                                style: TextStyle(
-                                  color: Color(0xFFEB8153),
+                                  onPressed: () {
+                                    if (pengeluaranList.isNotEmpty) {
+                                      _showDeleteConfirmationParentDialog(
+                                          context, pengeluaranList[0].idParent);
+                                    }
+                                  },
+                                  child: Text(
+                                    'Hapus',
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                              SizedBox(height: 8),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 32,
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    primary: Colors.white,
+                                    side: BorderSide(
+                                      color: Color(0xFFEB8153),
+                                      width: 0.5,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditPengeluaran(
+                                            pengeluaranList: pengeluaranList),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    'Edit',
+                                    style: TextStyle(
+                                      color: Color(0xFFEB8153),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -1026,82 +1061,129 @@ class DetailPengeluaran extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.red.withOpacity(0.5), width: 0.5),
           ),
+          backgroundColor: Colors.white,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          titlePadding:
+              EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 4),
           title: Text(
             'Konfirmasi Hapus',
-            style: TextStyle(color: Colors.red),
-          ),
-          content: Text('Apakah Anda yakin ingin menghapus data ini?'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
-              },
-              child: Text(
-                'Batal',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.grey,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
             ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  final apiService = ApiService();
-                  await apiService.deleteDataPengeluaran(id);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Berhasil dihapus!',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus data ini?',
+            style: TextStyle(fontSize: 11),
+          ),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  height: 28,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Batal',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
                       ),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.grey[400],
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(6.0),
                       ),
-                      margin: EdgeInsets.all(10),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
                     ),
-                  );
-                  Navigator.of(context).pop(); // Tutup dialog
-                  Navigator.of(context).pop(); // Kembali ke halaman sebelumnya
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreen(initialIndex: 3),
-                    ),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Gagal menghapus data: $e',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      backgroundColor: Colors.red,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      margin: EdgeInsets.all(10),
-                    ),
-                  );
-                }
-              },
-              child: Text('Hapus'),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
-              ),
+                SizedBox(width: 8),
+                SizedBox(
+                  height: 28,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        final apiService = ApiService();
+                        await apiService.deleteDataPengeluaran(id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Berhasil dihapus!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 10,
+                              ),
+                            ),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            margin: EdgeInsets.all(8),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(initialIndex: 3),
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Gagal menghapus data: $e',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 10,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            margin: EdgeInsets.all(8),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(
+                      'Hapus',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -1115,86 +1197,129 @@ class DetailPengeluaran extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.red.withOpacity(0.5), width: 0.5),
           ),
+          backgroundColor: Colors.white,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          titlePadding:
+              EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 4),
           title: Text(
             'Konfirmasi Hapus',
-            style: TextStyle(color: Colors.red),
-          ),
-          content:
-              Text('Apakah Anda yakin ingin menghapus semua data terkait?'),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
-              },
-              child: Text(
-                'Batal',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.grey,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
+            style: TextStyle(
+              color: Colors.red,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
             ),
-            ElevatedButton(
-              onPressed: () async {
-                try {
-                  final apiService = ApiService();
-                  await apiService.deleteParentPengeluaran(idParent);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Semua data berhasil dihapus!',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus semua data terkait?',
+            style: TextStyle(fontSize: 11),
+          ),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(
+                  height: 28,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'Batal',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
                       ),
-                      backgroundColor: Colors.green,
-                      behavior: SnackBarBehavior.floating,
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.grey[400],
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(6.0),
                       ),
-                      margin: EdgeInsets.all(10),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
                     ),
-                  );
-                  Navigator.of(context).pop(); // Tutup dialog
-                  Navigator.of(context).pop(); // Kembali ke halaman sebelumnya
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreen(initialIndex: 3),
-                    ),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Gagal menghapus data: $e',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      backgroundColor: Colors.red,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      margin: EdgeInsets.all(10),
-                    ),
-                  );
-                }
-              },
-              child: Text(
-                'Hapus',
-                style: TextStyle(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
-              ),
+                SizedBox(width: 8),
+                SizedBox(
+                  height: 28,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      try {
+                        final apiService = ApiService();
+                        await apiService.deleteParentPengeluaran(idParent);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Semua data berhasil dihapus!',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 10,
+                              ),
+                            ),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            margin: EdgeInsets.all(8),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pop();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeScreen(initialIndex: 3),
+                          ),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Gagal menghapus data: $e',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 10,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            margin: EdgeInsets.all(8),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(
+                      'Hapus',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.0),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         );

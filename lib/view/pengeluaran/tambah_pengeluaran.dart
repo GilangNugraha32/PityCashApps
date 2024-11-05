@@ -214,25 +214,26 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(30.0),
-                bottomRight: Radius.circular(30.0),
+                bottomLeft: Radius.circular(20.0),
+                bottomRight: Radius.circular(20.0),
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
+              padding: const EdgeInsets.fromLTRB(16.0, 30.0, 16.0, 12.0),
               child: Column(
                 children: [
+                  SizedBox(height: 10),
                   _buildHeader(),
-                  SizedBox(height: 24),
+                  SizedBox(height: 16),
                   Text(
                     'Tambah Pengeluaran',
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 12),
                 ],
               ),
             ),
@@ -247,15 +248,15 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30.0),
-                  topRight: Radius.circular(30.0),
+                  topLeft: Radius.circular(20.0),
+                  topRight: Radius.circular(20.0),
                 ),
               ),
               child: Column(
                 children: [
                   // Fixed Date Field
                   Padding(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: _buildDateField(),
                   ),
 
@@ -264,59 +265,66 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                     child: SingleChildScrollView(
                       controller: _scrollController,
                       child: Padding(
-                        padding: const EdgeInsets.all(20.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Column(
                               children: List.generate(formKeys.length, (index) {
-                                return PengeluaranForm(
-                                  key: formKeys[index],
-                                  onRemove: () => _removeForm(index),
-                                  onSubmit: (List<Map<String, dynamic>>
-                                      pengeluaranList) {
-                                    print(
-                                        'Submitted data for form $index: $pengeluaranList');
-                                  },
-                                  isLast: index == formKeys.length - 1,
-                                  selectedDate: selectedDate,
-                                  categories: categories,
-                                  isFirst: index == 0,
-                                  onDateChanged: (DateTime newDate) {
-                                    setState(() {
-                                      selectedDate = newDate;
-                                      for (var key in formKeys) {
-                                        (key.currentState
-                                                as _PengeluaranFormState)
-                                            .updateDate(newDate);
-                                      }
-                                    });
-                                  },
+                                return Column(
+                                  children: [
+                                    PengeluaranForm(
+                                      key: formKeys[index],
+                                      onRemove: () => _removeForm(index),
+                                      onSubmit: (List<Map<String, dynamic>>
+                                          pengeluaranList) {
+                                        print(
+                                            'Submitted data for form $index: $pengeluaranList');
+                                      },
+                                      isLast: index == formKeys.length - 1,
+                                      selectedDate: selectedDate,
+                                      categories: categories,
+                                      isFirst: index == 0,
+                                      onDateChanged: (DateTime newDate) {
+                                        setState(() {
+                                          selectedDate = newDate;
+                                          for (var key in formKeys) {
+                                            (key.currentState
+                                                    as _PengeluaranFormState)
+                                                .updateDate(newDate);
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    SizedBox(
+                                        height:
+                                            16), // Menambahkan jarak 16 pixel antar form
+                                  ],
                                 );
                               }),
                             ),
-                            SizedBox(height: 20),
+                            SizedBox(height: 16),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Container(
                                   width:
-                                      MediaQuery.of(context).size.width * 0.85,
-                                  height: 45,
+                                      MediaQuery.of(context).size.width * 0.8,
+                                  height: 40,
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     border: Border.all(
                                       color: Color(0xFFEB8153),
-                                      width: 1.5,
+                                      width: 1.0,
                                     ),
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(8),
                                     boxShadow: [
                                       BoxShadow(
                                         color:
-                                            Color(0xFFEB8153).withOpacity(0.15),
+                                            Color(0xFFEB8153).withOpacity(0.1),
                                         spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: Offset(0, 2),
+                                        blurRadius: 2,
+                                        offset: Offset(0, 1),
                                       ),
                                     ],
                                   ),
@@ -325,48 +333,48 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                                     icon: Icon(
                                       Icons.add_circle_outline,
                                       color: Color(0xFFEB8153),
-                                      size: 20,
+                                      size: 16,
                                     ),
                                     label: Text(
                                       'Tambah Form Pengeluaran',
                                       style: TextStyle(
-                                        fontSize: 15,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.w600,
                                         color: Color(0xFFEB8153),
-                                        letterSpacing: 0.3,
+                                        letterSpacing: 0.2,
                                       ),
                                     ),
                                     style: ElevatedButton.styleFrom(
                                       primary: Colors.white,
                                       elevation: 0,
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 10,
+                                        horizontal: 16,
+                                        vertical: 8,
                                       ),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 20),
+                            SizedBox(height: 16),
                           ],
                         ),
                       ),
                     ),
                   ),
                   Container(
-                    height: 70,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    height: 60,
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
+                          color: Colors.grey.withOpacity(0.15),
                           spreadRadius: 1,
-                          blurRadius: 3,
+                          blurRadius: 2,
                           offset: Offset(0, -1),
                         ),
                       ],
@@ -382,15 +390,15 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                               Text(
                                 'Total Form:',
                                 style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
                                   color: Colors.black87,
                                 ),
                               ),
                               Text(
                                 '${formKeys.length} Data Pengeluaran',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 10,
                                   color: Colors.grey[600],
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -398,30 +406,30 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                             ],
                           ),
                         ),
-                        SizedBox(width: 8),
+                        SizedBox(width: 6),
                         SizedBox(
-                          width: 90,
-                          height: 38,
+                          width: 80,
+                          height: 34,
                           child: ElevatedButton(
                             onPressed: _handleSubmit,
                             child: Text(
                               'Simpan',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w800,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
                               primary: Color(0xFFE85C0D),
                               padding: EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 6,
+                                horizontal: 6,
+                                vertical: 4,
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
+                                borderRadius: BorderRadius.circular(5),
                               ),
-                              elevation: 1,
+                              elevation: 0.5,
                             ),
                           ),
                         ),
@@ -438,24 +446,19 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
   }
 
   Widget _buildHeader() {
-    return Stack(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
+        IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Icon(
-            Icons.notifications,
-            color: Colors.white,
-            size: 24,
-          ),
+        Icon(
+          Icons.notifications,
+          color: Colors.white,
+          size: 24,
         ),
       ],
     );
@@ -485,12 +488,12 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
         _selectDate(context);
       },
       child: Container(
-        height: 45, // Mengurangi tinggi container
+        height: 35, // Mengurangi tinggi container
         margin: EdgeInsets.symmetric(
-            horizontal: 4, vertical: 6), // Mengurangi margin vertical
+            horizontal: 4, vertical: 4), // Mengurangi margin vertical
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey[300]!),
-          borderRadius: BorderRadius.circular(10), // Mengurangi radius
+          borderRadius: BorderRadius.circular(8), // Mengurangi radius
           color: Colors.white,
         ),
         child: Row(
@@ -498,21 +501,21 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
           children: [
             AnimatedContainer(
               duration: Duration(milliseconds: 200),
-              padding: EdgeInsets.all(8), // Mengurangi padding
+              padding: EdgeInsets.all(6), // Mengurangi padding
               child: Icon(
                 Icons.calendar_month_outlined,
                 color: Color(0xFFEB8153),
-                size: 20, // Mengurangi ukuran icon
+                size: 16, // Mengurangi ukuran icon
               ),
             ),
             Container(
               padding: EdgeInsets.symmetric(
-                  horizontal: 12), // Mengurangi padding horizontal
+                  horizontal: 8), // Mengurangi padding horizontal
               decoration: BoxDecoration(
                 border: Border(
                   left: BorderSide(
                     color: Colors.grey[300]!,
-                    width: 1, // Mengurangi ketebalan border
+                    width: 0.5, // Mengurangi ketebalan border
                   ),
                 ),
               ),
@@ -522,9 +525,9 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
                     : '${selectedDate!.day} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
                 style: TextStyle(
                   color: Colors.black87,
-                  fontSize: 14, // Mengurangi ukuran font
+                  fontSize: 12, // Mengurangi ukuran font
                   fontWeight: FontWeight.w500,
-                  letterSpacing: 0.3, // Mengurangi letter spacing
+                  letterSpacing: 0.2, // Mengurangi letter spacing
                 ),
               ),
             ),
@@ -845,22 +848,21 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           color: Colors.grey.shade300,
           width: 1,
         ),
-        borderRadius: BorderRadius.circular(10.0),
+        borderRadius: BorderRadius.circular(8.0),
         color: Colors.white,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            SizedBox(height: 10),
+            SizedBox(height: 6),
             _buildInputFields(),
-            SizedBox(height: 20),
+            SizedBox(height: 12),
             Divider(
               thickness: 1,
               color: Colors.grey,
             ),
-            // Only show action buttons for the second form and onwards
             if (!widget.isFirst) _buildActionButtons(),
           ],
         ),
@@ -874,21 +876,21 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       children: [
         // Nama Pengeluaran Section
         _buildLabel('Nama Pengeluaran'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         _buildTextField(
           icon: Icons.sticky_note_2_outlined,
           controller: nameControllers.last,
           hintText: 'Masukkan nama pengeluaran',
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
 
         // Deskripsi Section
         _buildLabel('Deskripsi'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
             color: Colors.white,
             border: Border.all(
               color: Colors.grey.shade300,
@@ -897,28 +899,28 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           ),
           child: TextField(
             controller: descriptionControllers.last,
-            maxLines: 3,
-            style: TextStyle(fontSize: 14),
+            maxLines: 4,
+            style: TextStyle(fontSize: 12),
             decoration: InputDecoration(
               hintText: 'Masukkan deskripsi pengeluaran',
               hintStyle: TextStyle(
                 color: Colors.grey[400],
-                fontSize: 14,
+                fontSize: 12,
               ),
               prefixIcon: Icon(
                 Icons.notes,
                 color: Color(0xFFEB8153),
-                size: 20,
+                size: 16,
               ),
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 14,
+                horizontal: 12,
+                vertical: 10,
               ),
             ),
           ),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
 
         // Nominal & Jumlah Satuan Section
         Column(
@@ -928,54 +930,54 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildLabel('Nominal'),
-                SizedBox(height: 8),
+                SizedBox(height: 4),
                 _buildNominalTextField(),
               ],
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildLabel('Jumlah Satuan'),
-                SizedBox(height: 8),
+                SizedBox(height: 4),
                 _buildJumlahSatuanTextField(),
               ],
             ),
           ],
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
 
         // Biaya Tambahan Section
         _buildLabel('Biaya Tambahan (DLL)'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         _buildDllTextField(),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
 
         // Total Jumlah Section
         _buildLabel('Jumlah'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         _buildJumlahField(),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
 
         // Kategori Section
         _buildLabel('Kategori'),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         InkWell(
           onTap: () {
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               builder: (context) => _buildCategoryModal(),
             );
           },
           child: Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
               color: Colors.white,
               border: Border.all(
                 color: Colors.grey.shade300,
@@ -987,14 +989,14 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                 Icon(
                   Icons.insert_chart_outlined_outlined,
                   color: Color(0xFFEB8153),
-                  size: 20,
+                  size: 16,
                 ),
-                SizedBox(width: 12),
+                SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     selectedCategory?.name ?? 'Pilih kategori',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 12,
                       color: selectedCategory != null
                           ? Colors.black
                           : Colors.grey[400],
@@ -1004,19 +1006,20 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                 Icon(
                   Icons.arrow_drop_down,
                   color: Color(0xFFEB8153),
+                  size: 16,
                 ),
               ],
             ),
           ),
         ),
-        SizedBox(height: 16),
+        SizedBox(height: 12),
 
         // Image Picker Section (Only for last form)
-        if (widget.isLast) ...[
-          _buildLabel('Pilih Gambar (Opsional)'),
-          SizedBox(height: 8),
-          _buildImagePicker(),
-        ],
+        // if (widget.isLast) ...[
+        _buildLabel('Pilih Gambar (Opsional)'),
+        SizedBox(height: 4),
+        _buildImagePicker(),
+        // ],
       ],
     );
   }
@@ -1037,16 +1040,16 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.8,
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          height: MediaQuery.of(context).size.height * 0.7,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: Container(
-                  width: 40,
+                  width: 32,
                   height: 4,
-                  margin: EdgeInsets.only(bottom: 24),
+                  margin: EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     borderRadius: BorderRadius.circular(2),
@@ -1056,11 +1059,11 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               Text(
                 'Pilih Kategori',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 25),
+              SizedBox(height: 16),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -1068,7 +1071,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                     color: Colors.grey.shade300,
                     width: 1,
                   ),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: TextField(
                   controller: searchController,
@@ -1076,16 +1079,16 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                     hintText: 'Cari kategori...',
                     hintStyle: TextStyle(
                       color: Colors.grey[400],
-                      fontSize: 14,
+                      fontSize: 12,
                     ),
                     border: InputBorder.none,
                     prefixIcon: Icon(
                       Icons.search,
                       color: Color(0xFFEB8153),
-                      size: 22,
+                      size: 18,
                     ),
                     contentPadding:
-                        EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   onChanged: (value) {
                     filteredCategories.value = categories
@@ -1096,19 +1099,19 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                   },
                 ),
               ),
-              SizedBox(height: 24),
+              SizedBox(height: 16),
               Row(
                 children: [
                   Icon(
                     Icons.dashboard_outlined,
-                    size: 16,
+                    size: 14,
                     color: Colors.grey[600],
                   ),
                   SizedBox(width: 4),
                   Text(
                     'Kategori Pengeluaran',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey[600],
                     ),
@@ -1127,15 +1130,15 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                           children: [
                             Icon(
                               Icons.search_off,
-                              size: 48,
+                              size: 32,
                               color: Colors.grey[400],
                             ),
-                            SizedBox(height: 16),
+                            SizedBox(height: 12),
                             Text(
                               'Tidak ada kategori yang ditemukan',
                               style: TextStyle(
                                 color: Colors.grey[600],
-                                fontSize: 16,
+                                fontSize: 12,
                               ),
                             ),
                           ],
@@ -1158,7 +1161,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                           title: Text(
                             category.name,
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 12,
                               fontWeight: isSelected
                                   ? FontWeight.w700
                                   : FontWeight.w600,
@@ -1203,8 +1206,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   Widget _buildNominalTextField() {
     return Container(
       width: double.infinity,
+      height: 40,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(6),
         color: Colors.white,
         border: Border.all(
           color: Colors.grey.shade300,
@@ -1217,11 +1221,12 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             child: TextField(
               controller: nominalControllers.last,
               keyboardType: TextInputType.number,
+              textAlignVertical: TextAlignVertical.center,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 ThousandSeparatorInputFormatter(),
               ],
-              style: TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 12),
               onChanged: (value) {
                 if (value.isEmpty) {
                   nominalControllers.last.text = "0";
@@ -1234,28 +1239,30 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               },
               decoration: InputDecoration(
                 prefixIcon: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Icon(
                     Icons.money,
                     color: Color(0xFFEB8153),
-                    size: 20,
+                    size: 16,
                   ),
                 ),
                 suffixText: 'IDR',
                 suffixStyle: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500),
                 hintText: 'Masukkan jumlah',
                 hintStyle: TextStyle(
                   color: Colors.grey[400],
-                  fontSize: 14,
+                  fontSize: 12,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 12,
                   vertical: 14,
                 ),
+                isDense: true,
+                alignLabelWithHint: true,
               ),
             ),
           ),
@@ -1276,7 +1283,8 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                   nominalControllers.last.text = formattedValue;
                   _calculateTotal('');
                 },
-                child: Icon(Icons.arrow_drop_up, color: Color(0xFFEB8153)),
+                child: Icon(Icons.arrow_drop_up,
+                    color: Color(0xFFEB8153), size: 16),
               ),
               InkWell(
                 onTap: () {
@@ -1294,22 +1302,23 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                     _calculateTotal('');
                   }
                 },
-                child: Icon(Icons.arrow_drop_down, color: Color(0xFFEB8153)),
+                child: Icon(Icons.arrow_drop_down,
+                    color: Color(0xFFEB8153), size: 16),
               ),
             ],
           ),
-          SizedBox(width: 8),
+          SizedBox(width: 6),
         ],
       ),
     );
   }
 
-// TextField for "Jumlah Satuan"
   Widget _buildJumlahSatuanTextField() {
     return Container(
       width: double.infinity,
+      height: 40,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(6),
         color: Colors.white,
         border: Border.all(
           color: Colors.grey.shade300,
@@ -1322,10 +1331,11 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             child: TextField(
               controller: jumlahSatuanControllers.last,
               keyboardType: TextInputType.number,
+              textAlignVertical: TextAlignVertical.center,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
               ],
-              style: TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 12),
               onChanged: (value) {
                 if (value.isEmpty) {
                   jumlahSatuanControllers.last.text = "0";
@@ -1339,23 +1349,25 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               },
               decoration: InputDecoration(
                 prefixIcon: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Icon(
                     Icons.format_list_numbered,
                     color: Color(0xFFEB8153),
-                    size: 20,
+                    size: 16,
                   ),
                 ),
                 hintText: 'Masukkan jumlah satuan',
                 hintStyle: TextStyle(
                   color: Colors.grey[400],
-                  fontSize: 14,
+                  fontSize: 12,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 12,
                   vertical: 14,
                 ),
+                isDense: true,
+                alignLabelWithHint: true,
               ),
             ),
           ),
@@ -1372,7 +1384,8 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                   jumlahSatuanControllers.last.text = newValue.toString();
                   _calculateTotal('');
                 },
-                child: Icon(Icons.arrow_drop_up, color: Color(0xFFEB8153)),
+                child: Icon(Icons.arrow_drop_up,
+                    color: Color(0xFFEB8153), size: 16),
               ),
               InkWell(
                 onTap: () {
@@ -1386,22 +1399,23 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                     _calculateTotal('');
                   }
                 },
-                child: Icon(Icons.arrow_drop_down, color: Color(0xFFEB8153)),
+                child: Icon(Icons.arrow_drop_down,
+                    color: Color(0xFFEB8153), size: 16),
               ),
             ],
           ),
-          SizedBox(width: 8),
+          SizedBox(width: 6),
         ],
       ),
     );
   }
 
-// TextField for "Dll" (Biaya Tambahan)
   Widget _buildDllTextField() {
     return Container(
       width: double.infinity,
+      height: 40,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(6),
         color: Colors.white,
         border: Border.all(
           color: Colors.grey.shade300,
@@ -1414,11 +1428,12 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             child: TextField(
               controller: dllControllers.last,
               keyboardType: TextInputType.number,
+              textAlignVertical: TextAlignVertical.center,
               inputFormatters: [
                 FilteringTextInputFormatter.digitsOnly,
                 ThousandSeparatorInputFormatter(),
               ],
-              style: TextStyle(fontSize: 14),
+              style: TextStyle(fontSize: 12),
               onChanged: (value) {
                 if (value.isEmpty) {
                   dllControllers.last.text = "0";
@@ -1430,28 +1445,30 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               },
               decoration: InputDecoration(
                 prefixIcon: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Icon(
                     Icons.attach_money,
                     color: Color(0xFFEB8153),
-                    size: 20,
+                    size: 16,
                   ),
                 ),
                 suffixText: 'IDR',
                 suffixStyle: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500),
                 hintText: 'Masukkan biaya tambahan (DLL)',
                 hintStyle: TextStyle(
                   color: Colors.grey[400],
-                  fontSize: 14,
+                  fontSize: 12,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 12,
                   vertical: 14,
                 ),
+                isDense: true,
+                alignLabelWithHint: true,
               ),
             ),
           ),
@@ -1472,7 +1489,8 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                   dllControllers.last.text = formattedValue;
                   _calculateTotal('');
                 },
-                child: Icon(Icons.arrow_drop_up, color: Color(0xFFEB8153)),
+                child: Icon(Icons.arrow_drop_up,
+                    color: Color(0xFFEB8153), size: 16),
               ),
               InkWell(
                 onTap: () {
@@ -1490,11 +1508,12 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                     _calculateTotal('');
                   }
                 },
-                child: Icon(Icons.arrow_drop_down, color: Color(0xFFEB8153)),
+                child: Icon(Icons.arrow_drop_down,
+                    color: Color(0xFFEB8153), size: 16),
               ),
             ],
           ),
-          SizedBox(width: 8),
+          SizedBox(width: 6),
         ],
       ),
     );
@@ -1504,8 +1523,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   Widget _buildJumlahField() {
     return Container(
       width: double.infinity,
+      height: 40,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(6),
         color: Colors.white,
         border: Border.all(
           color: Colors.grey.shade300,
@@ -1518,31 +1538,34 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
             child: TextField(
               controller: jumlahControllers.last,
               readOnly: true,
-              style: TextStyle(fontSize: 14),
+              textAlignVertical: TextAlignVertical.center,
+              style: TextStyle(fontSize: 12),
               decoration: InputDecoration(
                 prefixIcon: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   child: Icon(
                     Icons.receipt,
                     color: Color(0xFFEB8153),
-                    size: 20,
+                    size: 16,
                   ),
                 ),
                 suffixText: 'IDR',
                 suffixStyle: TextStyle(
                     color: Colors.grey[600],
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500),
                 hintText: 'Jumlah total akan dihitung otomatis',
                 hintStyle: TextStyle(
                   color: Colors.grey[400],
-                  fontSize: 14,
+                  fontSize: 12,
                 ),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
+                  horizontal: 12,
                   vertical: 14,
                 ),
+                isDense: true,
+                alignLabelWithHint: true,
               ),
             ),
           ),
@@ -1588,6 +1611,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       style: TextStyle(
         fontWeight: FontWeight.bold,
         color: Colors.black87,
+        fontSize: 12,
       ),
     );
   }
@@ -1599,34 +1623,47 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }) {
     return Container(
       width: double.infinity,
+      height: 40,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(6),
         color: Colors.white,
         border: Border.all(
           color: Colors.grey.shade300,
           width: 1,
         ),
       ),
-      child: TextField(
-        controller: controller,
-        style: TextStyle(fontSize: 14),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(
-            color: Colors.grey[400],
-            fontSize: 14,
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              textAlignVertical: TextAlignVertical.center,
+              style: TextStyle(fontSize: 12),
+              decoration: InputDecoration(
+                suffixIcon: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Icon(
+                    icon,
+                    color: Color(0xFFEB8153),
+                    size: 16,
+                  ),
+                ),
+                hintText: hintText,
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 12,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
+                isDense: true,
+                alignLabelWithHint: true,
+              ),
+            ),
           ),
-          suffixIcon: Icon(
-            icon,
-            color: Color(0xFFEB8153),
-            size: 20,
-          ),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
+        ],
       ),
     );
   }
@@ -1676,10 +1713,10 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                     child: Text(
                       selectedImage != null
                           ? selectedImage!.files.first.name
-                          : 'Cari atau pilih gambar',
+                          : 'Cari atau pilih gambar...',
                       style: TextStyle(
                         color: Colors.grey[400],
-                        fontSize: 14,
+                        fontSize: 12,
                       ),
                     ),
                   ),
@@ -1743,51 +1780,36 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors
-              .grey[200], // Menggunakan warna yang sama dengan buildTextField
+          borderRadius: BorderRadius.circular(6),
+          color: Colors.white,
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 1,
+          ),
         ),
         child: TextField(
-          enabled: false, // Disable text editing, only allow date picker
+          enabled: false,
+          style: TextStyle(fontSize: 10),
           decoration: InputDecoration(
             hintText: selectedDate == null
                 ? 'Pilih Tanggal'
                 : '${selectedDate!.day.toString().padLeft(2, '0')} ${_getMonthName(selectedDate!.month)} ${selectedDate!.year}',
             hintStyle: TextStyle(
-              color: Colors.black87,
-              fontSize: 15, // Ukuran text diperkecil
+              color: Colors.grey[600],
+              fontSize: 10,
             ),
             prefixIcon: Padding(
-              padding: const EdgeInsets.only(
-                  right: 8.0), // Jarak antara ikon dan teks
-              child: Container(
-                height: 48, // Sesuaikan tinggi sesuai dengan TextField
-                width: 48, // Sesuaikan lebar agar berbentuk lingkaran
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0xFFEB8153), // Latar belakang lingkaran
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26, // Warna bayangan
-                      blurRadius: 4.0, // Blur radius
-                      spreadRadius: 1.0, // Radius penyebaran bayangan
-                      offset: Offset(0, 5), // Posisi bayangan
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(
-                    Icons.calendar_today,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                ),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Icon(
+                Icons.calendar_today,
+                color: Color(0xFFEB8153),
+                size: 16,
               ),
             ),
             border: InputBorder.none,
             contentPadding: EdgeInsets.symmetric(
-              vertical: 15, // Jarak vertikal dalam TextField
+              horizontal: 12,
+              vertical: 10,
             ),
           ),
         ),
@@ -1805,39 +1827,26 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Color(0xFFEB8153), // Header background
-              onPrimary: Colors.white, // Header text
-              onSurface: Colors.black87, // Calendar text
+              primary: Color(0xFFEB8153),
+              onPrimary: Colors.white,
+              onSurface: Colors.black87,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                primary: Color(0xFFEB8153), // Button text color
+                primary: Color(0xFFEB8153),
                 shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.circular(12), // Radius untuk button
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
             dialogBackgroundColor: Colors.white,
             dialogTheme: DialogTheme(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20), // Radius untuk dialog
+                borderRadius: BorderRadius.circular(6),
               ),
             ),
           ),
-          child: Container(
-            child: child,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 10,
-                  offset: Offset(0, 5),
-                ),
-              ],
-            ),
-          ),
+          child: child!,
         );
       },
     );
@@ -1857,10 +1866,14 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
           style: ElevatedButton.styleFrom(
             primary: Color(0xFFDA0000),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6),
             ),
+            minimumSize: Size(80, 30),
           ),
-          child: Text('Hapus Form'),
+          child: Text(
+            'Hapus Form',
+            style: TextStyle(fontSize: 10),
+          ),
         ),
         SizedBox(width: 16),
       ],

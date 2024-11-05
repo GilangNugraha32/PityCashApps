@@ -10,7 +10,6 @@ import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/home/home.dart';
-import 'package:pity_cash/view/pemasukan/detail_pemasukan.dart';
 import 'package:pity_cash/view/pemasukan/edit_pemasukan.dart';
 import 'package:pity_cash/view/pemasukan/tambah_pemasukan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,21 +61,20 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
           ),
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: Container(
-            padding: EdgeInsets.fromLTRB(24, 24, 24, 24),
+            padding: EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black26,
-                  blurRadius: 10.0,
-                  offset: const Offset(0.0, 10.0),
+                  blurRadius: 4.0,
+                  offset: const Offset(0.0, 2.0),
                 ),
               ],
             ),
@@ -90,33 +88,27 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     Text(
                       'Detail Pemasukan',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
+                      icon: Icon(Icons.close, size: 16),
+                      onPressed: () => Navigator.of(context).pop(),
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
                     ),
                   ],
                 ),
-                SizedBox(
-                  height: 10,
-                ),
+                SizedBox(height: 2),
                 Text(
                   '${DateTime.parse(pemasukan.date).day} ${_getMonthName(DateTime.parse(pemasukan.date).month)} ${DateTime.parse(pemasukan.date).year}',
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
                     color: Colors.grey[600],
                   ),
                 ),
-                SizedBox(height: 4),
-                Divider(color: Colors.grey[300], thickness: 1),
-                SizedBox(height: 16),
+                Divider(height: 12),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -129,19 +121,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1A3A63),
-                              fontSize: 14,
+                              fontSize: 11,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: 1),
                           Text(
                             pemasukan.name,
-                            style:
-                                TextStyle(color: Colors.black87, fontSize: 16),
+                            style: TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(width: 16),
+                    SizedBox(width: 8),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,23 +142,22 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Color(0xFF1A3A63),
-                              fontSize: 14,
+                              fontSize: 11,
                             ),
                           ),
-                          SizedBox(height: 4),
+                          SizedBox(height: 1),
                           Container(
                             padding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
+                                horizontal: 4, vertical: 1),
                             decoration: BoxDecoration(
                               color: Colors.green[50],
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               pemasukan.category!.name,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 10,
                                 color: Colors.green[400],
-                                fontWeight: FontWeight.normal,
                               ),
                             ),
                           ),
@@ -176,23 +166,23 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 8),
                 Text(
                   'Deskripsi',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1A3A63),
-                    fontSize: 14,
+                    fontSize: 11,
                   ),
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 1),
                 Text(
                   pemasukan.description,
-                  style: TextStyle(color: Colors.black87, fontSize: 16),
+                  style: TextStyle(fontSize: 12),
                 ),
-                SizedBox(height: 16),
-                Divider(color: Colors.grey[300], thickness: 1),
-                SizedBox(height: 16),
+                SizedBox(height: 8),
+                Divider(),
+                SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -201,7 +191,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1A3A63),
-                        fontSize: 14,
+                        fontSize: 11,
                       ),
                     ),
                     Text(
@@ -209,45 +199,68 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       style: TextStyle(
                         color: Color(0xFFEB8153),
                         fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                        fontSize: 14,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    child: Text('Hapus', style: TextStyle(color: Colors.red)),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _showDeleteConfirmationDialog(context, pemasukan);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Colors.red),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 1),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    child: Text('Edit',
-                        style: TextStyle(color: Color(0xFFF7941E))),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _navigateToEditPage(pemasukan);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: Color(0xFFF7941E)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                  ),
+                SizedBox(height: 12),
+                FutureBuilder<Map<String, dynamic>?>(
+                  future: SharedPreferencesService().getRoles(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data != null) {
+                      bool isReader =
+                          snapshot.data!['roles'][0]['name'] == 'Reader';
+                      if (isReader) return Container();
+                    }
+                    return Column(
+                      children: [
+                        Container(
+                          height: 28, // Mengecilkan tinggi button
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            child: Text('Hapus',
+                                style:
+                                    TextStyle(color: Colors.red, fontSize: 11)),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _showDeleteConfirmationDialog(context, pemasukan);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: Colors.red),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 0), // Mengurangi padding vertikal
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Container(
+                          height: 28, // Mengecilkan tinggi button
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            child: Text('Edit',
+                                style: TextStyle(
+                                    color: Color(0xFFF7941E), fontSize: 11)),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              _navigateToEditPage(pemasukan);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: Color(0xFFF7941E)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4.0),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 0), // Mengurangi padding vertikal
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -536,7 +549,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   Widget _buildHeaderSection() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -544,27 +557,28 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(30.0),
-          bottomLeft: Radius.circular(30.0),
+          bottomRight: Radius.circular(25.0),
+          bottomLeft: Radius.circular(25.0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 7,
-            offset: Offset(0, 3),
+            color: Colors.grey.withOpacity(0.4),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 2),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
+        padding: const EdgeInsets.fromLTRB(12.0, 45.0, 12.0, 12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 10),
             _buildHeaderTopRow(),
-            SizedBox(height: 15),
-            _buildSaldoSection(),
             SizedBox(height: 12),
+            _buildSaldoSection(),
+            SizedBox(height: 10),
             _buildToggleButton(),
           ],
         ),
@@ -580,14 +594,14 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           'Inflow',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
         Icon(
           Icons.notifications,
           color: Colors.white,
-          size: 24,
+          size: 22,
         ),
       ],
     );
@@ -600,12 +614,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           Text(
             'Saldo Pity Cash',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               color: Colors.white.withOpacity(0.9),
             ),
           ),
-          SizedBox(height: 5),
+          SizedBox(height: 4),
           FutureBuilder<double>(
             future: ApiService().fetchMinimalSaldo(),
             builder: (context, snapshot) {
@@ -622,7 +636,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(width: 40),
+                          SizedBox(width: 35),
                           Expanded(
                             child: Text(
                               isBalanceVisible
@@ -633,7 +647,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                     ).format(saldo)
                                   : 'Rp' + _formatHiddenBalance(saldo),
                               style: TextStyle(
-                                fontSize: 32,
+                                fontSize: 28,
                                 fontWeight: FontWeight.bold,
                                 color: isLowBalance
                                     ? Color(0xFFF54D42)
@@ -648,7 +662,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                   ? Icons.visibility
                                   : Icons.visibility_off,
                               color: Colors.white,
-                              size: 24,
+                              size: 22,
                             ),
                             onPressed: () {
                               setState(() {
@@ -661,12 +675,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     ),
                     if (isLowBalance)
                       Container(
-                        margin: EdgeInsets.only(top: 8),
+                        margin: EdgeInsets.only(top: 6),
                         padding:
-                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: Colors.yellow.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -674,18 +688,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             Icon(
                               Icons.info_outline,
                               color: Colors.yellow,
-                              size: 16,
+                              size: 14,
                             ),
-                            SizedBox(width: 4),
+                            SizedBox(width: 3),
                             Text(
                               'Saldo di bawah batas minimal',
                               style: TextStyle(
                                 color: Colors.yellow,
                                 fontWeight: FontWeight.w500,
-                                fontSize: 12,
+                                fontSize: 11,
                               ),
                             ),
-                            SizedBox(width: 4),
+                            SizedBox(width: 3),
                             Text(
                               '(${NumberFormat.currency(
                                 locale: 'id_ID',
@@ -694,7 +708,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               ).format(minimalSaldo)})',
                               style: TextStyle(
                                 color: Colors.yellow.withOpacity(0.8),
-                                fontSize: 12,
+                                fontSize: 11,
                               ),
                             ),
                           ],
@@ -723,12 +737,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
 
   Widget _buildToggleButton() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 60),
+      margin: EdgeInsets.symmetric(horizontal: 50),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
-      padding: EdgeInsets.all(6),
+      padding: EdgeInsets.all(5),
       child: Row(
         children: [
           _buildToggleOption('Inflow', isIncomeSelected),
@@ -751,17 +765,17 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           );
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 14),
+          padding: EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? Color(0xFFEB8153) : Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.circular(10.0),
           ),
           child: Center(
             child: Text(
               text,
               style: TextStyle(
                 color: isSelected ? Colors.white : Color(0xFFB8B8B8),
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -773,33 +787,35 @@ class _PemasukanSectionState extends State<PemasukanSection> {
 
   Widget _buildSearchForm() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(8.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
+              color: Colors.grey.withOpacity(0.15),
               spreadRadius: 1,
-              blurRadius: 5,
-              offset: Offset(0, 6),
+              blurRadius: 3,
+              offset: Offset(0, 3),
             ),
           ],
         ),
         child: TextField(
           controller: _searchController,
+          style: TextStyle(fontSize: 13),
           decoration: InputDecoration(
             hintText: 'Cari...',
-            prefixIcon: Icon(Icons.search),
+            hintStyle: TextStyle(fontSize: 13),
+            prefixIcon: Icon(Icons.search, size: 18),
             filled: true,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.0),
+              borderRadius: BorderRadius.circular(8.0),
               borderSide: BorderSide.none,
             ),
+            contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
           ),
           onTap: () {
-            // Scroll ke bawah saat search diklik
             Future.delayed(Duration(milliseconds: 300), () {
               Scrollable.ensureVisible(
                 context,
@@ -821,13 +837,13 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
           border: Border.all(color: Colors.grey[300]!),
         ),
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: _buildDateRangeAndActionButtons(),
             ),
             Expanded(
@@ -854,9 +870,10 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       bottom: 0,
                       child: Container(
                         color: Colors.white,
-                        padding: EdgeInsets.all(16.0),
+                        padding: EdgeInsets.all(12.0),
                         child: Center(
                           child: CircularProgressIndicator(
+                            strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
                                 Color(0xFFEB8153)),
                           ),
@@ -896,42 +913,45 @@ class _PemasukanSectionState extends State<PemasukanSection> {
         '${date.day} ${_getMonthName(date.month)} ${date.year}';
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(10),
         onTap: () => _showDetailDialog(pemasukan),
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 formattedDate,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 11,
                   color: Colors.black87,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 4),
               Divider(color: Colors.grey[300], height: 1),
-              SizedBox(height: 12),
+              SizedBox(height: 6),
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: Color(0xFFEB8153).withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(Icons.monetization_on_outlined,
-                        color: Color(0xFFEB8153)),
+                    child: Icon(
+                      Icons.monetization_on_outlined,
+                      color: Color(0xFFEB8153),
+                      size: 16,
+                    ),
                   ),
-                  SizedBox(width: 16),
+                  SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -939,22 +959,21 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                         Text(
                           pemasukan.name,
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 13, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(height: 4),
+                        SizedBox(height: 2),
                         Container(
                           padding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                           decoration: BoxDecoration(
                             color: Colors.orange[50],
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             pemasukan.category!.name,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 10,
                               color: Colors.orange[400],
-                              fontWeight: FontWeight.normal,
                             ),
                           ),
                         ),
@@ -964,7 +983,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                   Text(
                     ' Rp${NumberFormat.currency(locale: 'id_ID', symbol: '', decimalDigits: 0).format(double.tryParse(pemasukan.jumlah) ?? 0)}',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: Colors.green,
                     ),
@@ -985,10 +1004,10 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           child: GestureDetector(
             onTap: () => _selectDateRange(context),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
                 color: Color(0xFFEB8153).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                     color: Color(0xFFEB8153).withOpacity(0.2), width: 0.5),
               ),
@@ -997,9 +1016,9 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                   Icon(
                     Icons.date_range,
                     color: Color(0xFFEB8153),
-                    size: 16,
+                    size: 12,
                   ),
-                  SizedBox(width: 5),
+                  SizedBox(width: 4),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1010,19 +1029,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
                           style: TextStyle(
                             color: Color(0xFFEB8153),
-                            fontSize: 14,
+                            fontSize: 11,
                             fontWeight: FontWeight.w500,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        SizedBox(height: 4),
                         Text(
                           selectedDateRange == null
                               ? 'Pilih rentang tanggal sesuai kebutuhan Anda'
                               : 'Rentang tanggal yang dipilih',
                           style: TextStyle(
                             color: Color(0xFFFF9D6C),
-                            fontSize: 11,
+                            fontSize: 9,
                             fontStyle: FontStyle.italic,
                           ),
                         ),
@@ -1032,228 +1050,235 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                   Icon(
                     Icons.arrow_forward_ios,
                     color: Color(0xFFEB8153),
-                    size: 14,
+                    size: 10,
                   ),
                 ],
               ),
             ),
           ),
         ),
-        SizedBox(width: 10),
-        _buildActionButton(Icons.print_outlined, Color(0xFF51A6F5), () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              String? selectedFormat;
-              return AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                title: Text(
-                  'Cetak Laporan',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFEB8153),
-                    fontSize: 22,
-                  ),
-                ),
-                content: StatefulBuilder(
-                  builder: (BuildContext context, StateSetter setState) {
-                    return Container(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Pilih format laporan:',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                          SizedBox(height: 15),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 15),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.grey[300]!),
-                            ),
-                            child: Theme(
-                              data: Theme.of(context).copyWith(
-                                canvasColor: Colors.white,
+        SizedBox(width: 6),
+        FutureBuilder<Map<String, dynamic>?>(
+          future: SharedPreferencesService().getRoles(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data != null) {
+              bool isReader = snapshot.data!['roles'][0]['name'] == 'Reader';
+              if (isReader) {
+                return Container();
+              }
+            }
+            return Row(
+              children: [
+                _buildActionButton(Icons.print_outlined, Color(0xFF51A6F5), () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      String? selectedFormat;
+                      return AlertDialog(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Cetak Laporan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                fontSize: 14,
                               ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  isExpanded: true,
-                                  value: selectedFormat,
-                                  hint: Text('Pilih format'),
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      selectedFormat = newValue;
-                                    });
-                                  },
-                                  items: <String>['PDF', 'Excel']
-                                      .map<DropdownMenuItem<String>>(
-                                          (String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Container(
-                                        padding:
-                                            EdgeInsets.symmetric(vertical: 10),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          value,
-                                          style: TextStyle(fontSize: 16),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.close,
+                                  color: Colors.grey[400], size: 20),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
+                            ),
+                          ],
+                        ),
+                        content: StatefulBuilder(
+                          builder:
+                              (BuildContext context, StateSetter setState) {
+                            return Container(
+                              width: MediaQuery.of(context).size.width * 0.6,
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[50],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Pilih format laporan:',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Container(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 10),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      border:
+                                          Border.all(color: Colors.grey[300]!),
+                                    ),
+                                    child: Theme(
+                                      data: Theme.of(context).copyWith(
+                                        canvasColor: Colors.white,
+                                      ),
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          isExpanded: true,
+                                          value: selectedFormat,
+                                          hint: Text('Pilih format',
+                                              style: TextStyle(fontSize: 12)),
+                                          onChanged: (String? newValue) {
+                                            setState(() {
+                                              selectedFormat = newValue;
+                                            });
+                                          },
+                                          items: <String>['PDF', 'Excel']
+                                              .map<DropdownMenuItem<String>>(
+                                                  (String value) {
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 6),
+                                                child: Text(
+                                                  value,
+                                                  style:
+                                                      TextStyle(fontSize: 12),
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                          icon: Icon(Icons.arrow_drop_down,
+                                              color: Color(0xFFEB8153),
+                                              size: 20),
                                         ),
                                       ),
-                                    );
-                                  }).toList(),
-                                  dropdownColor: Colors.white,
-                                  elevation: 8,
-                                  style: TextStyle(
-                                      color: Colors.black, fontSize: 16),
-                                  icon: Icon(Icons.arrow_drop_down,
-                                      color: Color(0xFFEB8153)),
-                                  menuMaxHeight: 300,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                actions: <Widget>[
-                  ElevatedButton(
-                    child: Text(
-                      'Batal',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  ElevatedButton(
-                    child: Text('Cetak', style: TextStyle(fontSize: 16)),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color(0xFFEB8153),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () async {
-                      if (selectedFormat != null) {
-                        try {
-                          String filePath;
-                          if (selectedFormat == 'PDF') {
-                            filePath = await ApiService().exportIncomePDF();
-                          } else if (selectedFormat == 'Excel') {
-                            filePath = await ApiService().exportIncomeExcel();
-                          } else {
-                            throw Exception('Format tidak valid');
-                          }
-
-                          final downloadsDir =
-                              await getExternalStorageDirectory();
-                          if (downloadsDir != null) {
-                            final fileName = filePath.split('/').last;
-                            final newPath =
-                                '${downloadsDir.path}/Download/$fileName';
-                            await File(filePath).copy(newPath);
-                            await File(filePath).delete();
-
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'File berhasil diekspor ke: $newPath',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                backgroundColor: Colors.green,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                margin: EdgeInsets.all(10),
+                                    ),
+                                  ),
+                                ],
                               ),
                             );
-                          } else {
-                            throw Exception(
-                                'Tidak dapat menemukan direktori Downloads');
-                          }
-                        } catch (e) {
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Gagal mengekspor file: $e',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              backgroundColor: Colors.red,
-                              behavior: SnackBarBehavior.floating,
+                          },
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            child: Text(
+                              'Batal',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 11),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.red[400],
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              minimumSize: Size(60, 28),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(5),
                               ),
-                              margin: EdgeInsets.all(10),
                             ),
-                          );
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Pilih format terlebih dahulu',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16),
-                            ),
-                            backgroundColor: Colors.red,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            margin: EdgeInsets.all(10),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
                           ),
-                        );
-                      }
+                          ElevatedButton(
+                            child:
+                                Text('Cetak', style: TextStyle(fontSize: 11)),
+                            style: ElevatedButton.styleFrom(
+                              primary: Color(0xFFEB8153),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 4),
+                              minimumSize: Size(60, 28),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                            ),
+                            onPressed: () async {
+                              if (selectedFormat != null) {
+                                try {
+                                  String filePath;
+                                  if (selectedFormat == 'PDF') {
+                                    filePath =
+                                        await ApiService().exportIncomePDF();
+                                  } else if (selectedFormat == 'Excel') {
+                                    filePath =
+                                        await ApiService().exportIncomeExcel();
+                                  } else {
+                                    throw Exception('Format tidak valid');
+                                  }
+
+                                  final downloadsDir =
+                                      await getExternalStorageDirectory();
+                                  if (downloadsDir != null) {
+                                    final fileName = filePath.split('/').last;
+                                    final newPath =
+                                        '${downloadsDir.path}/Download/$fileName';
+                                    await File(filePath).copy(newPath);
+                                    await File(filePath).delete();
+
+                                    Navigator.of(context).pop();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'File berhasil diekspor ke: $newPath',
+                                            style: TextStyle(fontSize: 11)),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  } else {
+                                    throw Exception(
+                                        'Tidak dapat menemukan direktori Downloads');
+                                  }
+                                } catch (e) {
+                                  Navigator.of(context).pop();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Gagal mengekspor file: $e',
+                                          style: TextStyle(fontSize: 11)),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Pilih format terlebih dahulu',
+                                        style: TextStyle(fontSize: 11)),
+                                    backgroundColor: Colors.red,
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      );
                     },
-                  ),
-                ],
-              );
-            },
-          );
-        }),
-        SizedBox(width: 5),
-        _buildActionButton(Icons.file_upload_outlined, Color(0xFF68CF29),
-            () {
-          _showDragAndDropModal(context);
-        }),
+                  );
+                }),
+                SizedBox(width: 4),
+                _buildActionButton(
+                    Icons.file_upload_outlined, Color(0xFF68CF29), () {
+                  _showDragAndDropModal(context);
+                }),
+              ],
+            );
+          },
+        ),
       ],
     );
   }
@@ -1266,14 +1291,14 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(16.0),
+          top: Radius.circular(12.0),
         ),
       ),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1284,27 +1309,27 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       Text(
                         'Import Data Pemasukan',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close, color: Colors.grey),
+                        icon: Icon(Icons.close, color: Colors.grey, size: 20),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: 12),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'File Excel yang diunggah',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8),
                   Center(
                     child: _buildDragAndDropZone(
                       context,
@@ -1316,7 +1341,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       },
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 16),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton(
@@ -1348,9 +1373,9 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                   backgroundColor: Colors.green,
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  margin: EdgeInsets.all(10),
+                                  margin: EdgeInsets.all(8),
                                 ),
                               );
                             }
@@ -1373,9 +1398,9 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                 backgroundColor: Colors.red,
                                 behavior: SnackBarBehavior.floating,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                margin: EdgeInsets.all(10),
+                                margin: EdgeInsets.all(8),
                               ),
                             );
                           }
@@ -1383,11 +1408,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       },
                       child: Text(
                         'Download Template Excel',
-                        style: TextStyle(color: Color(0xFFEB8153)),
+                        style:
+                            TextStyle(color: Color(0xFFEB8153), fontSize: 12),
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: selectedFilePath != null
                         ? () async {
@@ -1408,9 +1434,9 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                   backgroundColor: Colors.green,
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  margin: EdgeInsets.all(10),
+                                  margin: EdgeInsets.all(8),
                                 ),
                               );
                               _refreshIncomes();
@@ -1426,28 +1452,28 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                   backgroundColor: Colors.red,
                                   behavior: SnackBarBehavior.floating,
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  margin: EdgeInsets.all(10),
+                                  margin: EdgeInsets.all(8),
                                 ),
                               );
                             }
                           }
                         : null,
-                    child: Text('Upload'),
+                    child: Text('Upload', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       primary: Color(0xFFEB8153),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       padding: EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: MediaQuery.of(context).size.width * 0.2,
+                        vertical: 12,
+                        horizontal: MediaQuery.of(context).size.width * 0.15,
                       ),
                       minimumSize: Size(double.infinity, 0),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8),
                 ],
               ),
             );
@@ -1465,11 +1491,11 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     return GestureDetector(
       onTap: () => _pickFile(context, onFileSelected),
       child: Container(
-        height: 175,
+        height: 140,
         width: double.infinity,
         decoration: BoxDecoration(
           border: Border.all(color: Color(0xFFEB8153)),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(6.0),
           color: Colors.grey[200],
         ),
         child: Center(
@@ -1477,13 +1503,13 @@ class _PemasukanSectionState extends State<PemasukanSection> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.cloud_upload_outlined,
-                  size: 40, color: Color(0xFFEB8153)),
-              SizedBox(height: 10),
+                  size: 32, color: Color(0xFFEB8153)),
+              SizedBox(height: 8),
               Text(
                 selectedFilePath != null
                     ? 'File terpilih: ${selectedFilePath.split('/').last}'
                     : 'Tap to upload, xlsx or xls',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(fontSize: 13, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1512,7 +1538,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(12),
           ),
           title: Column(
             children: [
@@ -1521,12 +1547,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                 style: TextStyle(
                   color: Color(0xFFEB8153),
                   fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                  fontSize: 16,
                 ),
               ),
               Divider(
                 color: Color(0xFFEB8153),
-                thickness: 2,
+                thickness: 1,
               ),
             ],
           ),
@@ -1539,29 +1565,29 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                 final data = importedIncome[index];
                 return Card(
                   elevation: 0,
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  margin: EdgeInsets.symmetric(vertical: 6, horizontal: 2),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Color(0xFFEB8153), width: 1.5),
+                    borderRadius: BorderRadius.circular(8),
+                    side: BorderSide(color: Color(0xFFEB8153), width: 1),
                   ),
                   child: Padding(
-                    padding: EdgeInsets.all(12),
+                    padding: EdgeInsets.all(8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         CircleAvatar(
                           backgroundColor: Color(0xFFFFF5EE),
-                          radius: 25,
+                          radius: 20,
                           child: Text(
                             data['Nama'][0],
                             style: TextStyle(
                               color: Color(0xFFEB8153),
                               fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                              fontSize: 14,
                             ),
                           ),
                         ),
-                        SizedBox(width: 15),
+                        SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1570,24 +1596,22 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                 data['Nama'] as String,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   color: Color(0xFFEB8153),
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              SizedBox(height: 3),
                               Text(
                                 'Tanggal: ${data['Tanggal']}',
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 12),
                               ),
-                              SizedBox(height: 3),
                               Text(
                                 'Jumlah: ${data['Jumlah']}',
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 12),
                               ),
-                              SizedBox(height: 3),
                               Text(
                                 'Kode Kategori: ${data['Kode Kategori']}',
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 12),
                               ),
                             ],
                           ),
@@ -1603,14 +1627,14 @@ class _PemasukanSectionState extends State<PemasukanSection> {
             ElevatedButton(
               child: Text(
                 'Tutup',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 12),
               ),
               style: ElevatedButton.styleFrom(
                 primary: Color(0xFFEB8153),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
@@ -1624,26 +1648,26 @@ class _PemasukanSectionState extends State<PemasukanSection> {
 
   Widget _buildDateRangeIcon() {
     return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
+      padding: const EdgeInsets.only(right: 6.0),
       child: Container(
-        height: 48,
-        width: 48,
+        height: 40,
+        width: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Color(0xFFEB8153),
           boxShadow: [
             BoxShadow(
               color: Colors.black26,
-              blurRadius: 4.0,
-              spreadRadius: 1.0,
-              offset: Offset(0, 5),
+              blurRadius: 3.0,
+              spreadRadius: 0.5,
+              offset: Offset(0, 3),
             ),
           ],
         ),
         child: Icon(
           Icons.calendar_today,
           color: Colors.white,
-          size: 22,
+          size: 18,
         ),
       ),
     );
@@ -1658,13 +1682,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
         return Transform.scale(
           scale: scale,
           child: Container(
-            width: 52,
-            height: 52,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: color.withOpacity(0.2),
               shape: BoxShape.circle,
-              border: Border.all(
-                  color: color, width: 0.5), // Garis pembatas yang lebih tipis
+              border: Border.all(color: color, width: 0.5),
             ),
             child: Material(
               color: Colors.transparent,
@@ -1676,7 +1699,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                 child: Icon(
                   icon,
                   color: color,
-                  size: 28,
+                  size: 22,
                 ),
               ),
             ),

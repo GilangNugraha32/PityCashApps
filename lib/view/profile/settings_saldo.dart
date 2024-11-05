@@ -109,10 +109,7 @@ class _SettingsSaldoState extends State<SettingsSaldo>
           ),
         ),
       );
-      // Kembali ke halaman sebelumnya
       Navigator.pop(context, true);
-
-      // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -175,16 +172,16 @@ class _SettingsSaldoState extends State<SettingsSaldo>
                       ),
                     ),
                     child: SingleChildScrollView(
-                      padding: EdgeInsets.all(24.0),
+                      padding: EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           _buildCurrentSaldoCard(),
-                          SizedBox(height: 24),
+                          SizedBox(height: 16),
                           _buildMinSaldoInput(),
-                          SizedBox(height: 24),
+                          SizedBox(height: 16),
                           _buildSaveButton(),
-                          SizedBox(height: 24),
+                          SizedBox(height: 16),
                           _buildInfoCard(),
                         ],
                       ),
@@ -201,18 +198,18 @@ class _SettingsSaldoState extends State<SettingsSaldo>
 
   Widget _buildAppBar() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: Colors.white),
+            icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
             onPressed: () => Navigator.pop(context),
           ),
           Text(
             'Pengaturan Saldo',
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -228,19 +225,19 @@ class _SettingsSaldoState extends State<SettingsSaldo>
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Saldo Saat Ini',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: FontWeight.w500,
                 color: Colors.grey[600],
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 8),
             AnimatedBuilder(
               animation: _animation,
               builder: (context, child) {
@@ -251,7 +248,7 @@ class _SettingsSaldoState extends State<SettingsSaldo>
                     decimalDigits: 0,
                   ).format(currentSaldo * _animation.value),
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFFEB8153),
                   ),
@@ -269,30 +266,30 @@ class _SettingsSaldoState extends State<SettingsSaldo>
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(Icons.account_balance_wallet,
-                    color: Color(0xFFEB8153), size: 24),
-                SizedBox(width: 10),
+                    color: Color(0xFFEB8153), size: 20),
+                SizedBox(width: 8),
                 Text(
                   'Atur Minimal Saldo',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFFEB8153),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 16),
             Text(
               'Minimal Saldo',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[800],
               ),
@@ -301,7 +298,7 @@ class _SettingsSaldoState extends State<SettingsSaldo>
             TextFormField(
               controller: _minSaldoController,
               keyboardType: TextInputType.number,
-              style: TextStyle(fontSize: 16, color: Colors.black87),
+              style: TextStyle(fontSize: 14, color: Colors.black87),
               decoration: InputDecoration(
                 hintText: 'Masukkan minimal saldo',
                 filled: true,
@@ -322,11 +319,11 @@ class _SettingsSaldoState extends State<SettingsSaldo>
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 8),
             Text(
               'Masukkan jumlah minimal saldo yang Anda inginkan',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 color: Colors.grey[600],
                 fontStyle: FontStyle.italic,
               ),
@@ -342,13 +339,13 @@ class _SettingsSaldoState extends State<SettingsSaldo>
       onPressed: _updateMinSaldo,
       style: ElevatedButton.styleFrom(
         primary: Color(0xFFEB8153),
-        padding: EdgeInsets.symmetric(vertical: 16),
+        padding: EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 5,
       ),
       child: Text(
         'Simpan Pengaturan',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -359,29 +356,29 @@ class _SettingsSaldoState extends State<SettingsSaldo>
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       color: Colors.blue[50],
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.info_outline, color: Colors.blue[700], size: 24),
-                SizedBox(width: 10),
+                Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                SizedBox(width: 8),
                 Text(
                   'Informasi',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.blue[700],
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 8),
             Text(
               'Anda akan menerima peringatan ketika saldo Anda mencapai batas minimal yang telah diatur.',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 12,
                 color: Colors.black87,
               ),
             ),

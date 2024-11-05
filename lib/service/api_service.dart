@@ -1,6 +1,6 @@
-
 import 'dart:io';
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -186,9 +186,15 @@ class ApiService {
 
   // Fetch all categories with pagination
   Future<List<Category>> fetchCategories({int page = 1}) async {
-    print('Fetching categories from page: $page');
+    print('Mengambil kategori dari halaman: $page');
     try {
       await _setAuthToken();
+
+      // Ambil roles dari SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final rolesString = prefs.getString('roles');
+      final roles = rolesString != null ? json.decode(rolesString) : null;
+
       final response = await _dio.get(
         '$baseUrl/category/all',
         queryParameters: {'page': page},
@@ -196,20 +202,26 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = response.data['data']['data'] as List;
-        print('Categories fetched: $data'); // Print the fetched data
+        print('Kategori yang diambil: $data');
+
+        // Simpan roles untuk penggunaan selanjutnya
+        if (roles != null) {
+          await prefs.setString('roles', json.encode(roles));
+        }
+
         return data
             .map((categoryJson) => Category.fromJson(categoryJson))
             .toList();
       } else {
-        throw Exception('Failed to load categories');
+        throw Exception('Gagal memuat kategori');
       }
     } catch (e) {
       if (e is DioError) {
-        print('DioError fetching categories: ${e.response?.data}');
+        print('DioError saat mengambil kategori: ${e.response?.data}');
       } else {
-        print('Error fetching categories: $e');
+        print('Error saat mengambil kategori: $e');
       }
-      throw Exception('Failed to load categories');
+      throw Exception('Gagal memuat kategori');
     }
   }
 
@@ -445,12 +457,35 @@ class ApiService {
     print('Mengimpor kategori dari Excel: $filePath');
 
     try {
-      await _setAuthToken(); // Pastikan token otorisasi diset sebelum request
+      await _setAuthToken();
 
-      // Buat FormData untuk mengirim file
+      // Generate random string untuk nama file yang akan dikirim ke server
+      String randomString = '';
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      final random = Random();
+      for (var i = 0; i < 16; i++) {
+        randomString += chars[random.nextInt(chars.length)];
+      }
+
+      // Buat temporary file dengan nama random
+      final tempDir = await getTemporaryDirectory();
+      final originalFile = File(filePath);
+      final fileExtension = filePath.split('.').last;
+      final randomFileName = '$randomString.$fileExtension';
+      final tempFile = File('${tempDir.path}/$randomFileName');
+
+      // Copy file asli ke temporary file
+      await originalFile.copy(tempFile.path);
+
+      print('Nama file yang diacak untuk server: $randomFileName');
+
+      // Gunakan temporary file untuk upload
       var formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(filePath,
-            filename: 'template_kategori.xlsx'),
+        'file': await MultipartFile.fromFile(
+          tempFile.path,
+          filename:
+              randomFileName, // Pastikan nama file yang dikirim ke server sudah diacak
+        ),
       });
 
       final response = await _dio.post(
@@ -464,19 +499,19 @@ class ApiService {
         ),
       );
 
+      // Hapus temporary file setelah upload
+      await tempFile.delete();
+
       print('Respons server: ${response.data}');
 
-      // Cek status code
       if (response.statusCode == 200) {
         print('Kategori berhasil diimpor');
 
-        // Validasi respons format JSON
         if (response.data is Map<String, dynamic>) {
           final status = response.data['status'];
           final message = response.data['message'];
           final importedData = response.data['data'];
 
-          // Pastikan status dan data sesuai dengan yang diharapkan
           if (status == 200 &&
               message == "Data berhasil diimpor" &&
               importedData != null &&
@@ -485,18 +520,28 @@ class ApiService {
 
             List<Map<String, dynamic>> importedCategories = [];
             for (var item in importedData) {
-              print(
-                  '- Nama: ${item['Nama']}, Jenis Kategori: ${item['Jenis Kategori']}, Deskripsi: ${item['Deskripsi']}');
-              importedCategories.add({
-                'Nama': item['Nama'],
-                'Jenis Kategori': item['Jenis Kategori'],
-                'Deskripsi': item['Deskripsi'],
-              });
+              // Filter data null dan kosong
+              if (item['Nama'] != null &&
+                  item['Jenis Kategori'] != null &&
+                  item['Deskripsi'] != null &&
+                  item['Nama'].toString().trim().isNotEmpty) {
+                print(
+                    '- Nama: ${item['Nama']}, Jenis Kategori: ${item['Jenis Kategori']}, Deskripsi: ${item['Deskripsi']}');
+                importedCategories.add({
+                  'Nama': item['Nama'],
+                  'Jenis Kategori': item['Jenis Kategori'],
+                  'Deskripsi': item['Deskripsi'],
+                });
+              }
             }
+
+            if (importedCategories.isEmpty) {
+              throw Exception('Tidak ada data valid untuk diimpor');
+            }
+
             return importedCategories;
           } else {
-            print(
-                'Tidak ada data kategori yang diimpor atau format data tidak sesuai.');
+            print('Format data tidak sesuai atau tidak ada data valid.');
             return [];
           }
         } else {
@@ -507,17 +552,21 @@ class ApiService {
       }
     } catch (e) {
       if (e is DioError) {
-        // Tangani kesalahan dari Dio (request ke server)
         final responseData = e.response?.data;
-        final errorMessage =
-            responseData != null && responseData is Map<String, dynamic>
-                ? responseData['message'] ?? 'Error tidak diketahui'
-                : 'Error tidak diketahui';
+        String errorMessage = 'Error tidak diketahui';
+
+        if (responseData != null && responseData is Map<String, dynamic>) {
+          final errorString = responseData['error']?.toString();
+          if (errorString != null && errorString.contains('Duplicate entry')) {
+            errorMessage = 'Nama kategori sudah ada di database';
+          } else {
+            errorMessage = responseData['message'] ?? 'Error tidak diketahui';
+          }
+        }
 
         print('DioError saat mengimpor kategori: $responseData');
         throw Exception('Gagal mengimpor kategori: $errorMessage');
       } else {
-        // Tangani kesalahan lainnya
         print('Error saat mengimpor kategori: $e');
         throw Exception('Gagal mengimpor kategori: $e');
       }

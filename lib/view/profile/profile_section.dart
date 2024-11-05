@@ -44,39 +44,43 @@ class _ProfileSectionState extends State<ProfileSection> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(10),
           ),
           title: Text(
             'Konfirmasi Logout',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Color(0xFFEB8153),
+              fontSize: 14,
             ),
           ),
-          content: Text('Apakah Anda yakin ingin keluar?'),
+          content: Text(
+            'Apakah Anda yakin ingin keluar?',
+            style: TextStyle(fontSize: 12),
+          ),
           actions: <Widget>[
             ElevatedButton(
               child: Text(
                 'Batal',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 12),
               ),
               style: ElevatedButton.styleFrom(
                 primary: Colors.grey,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(6),
                 ),
+                minimumSize: Size(60, 30),
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
-              child: Text('Logout'),
+              child: Text('Logout', style: TextStyle(fontSize: 12)),
               style: ElevatedButton.styleFrom(
                 primary: Color(0xFFEB8153),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(6),
                 ),
+                minimumSize: Size(60, 30),
               ),
               onPressed: () async {
                 await _prefsService.removeToken();
@@ -106,7 +110,7 @@ class _ProfileSectionState extends State<ProfileSection> {
           child: Column(
             children: [
               _buildProfileHeader(),
-              SizedBox(height: 30),
+              SizedBox(height: 16),
               _buildProfileOptions(),
             ],
           ),
@@ -125,52 +129,51 @@ class _ProfileSectionState extends State<ProfileSection> {
           colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(30.0),
-          bottomLeft: Radius.circular(30.0),
+          bottomRight: Radius.circular(20.0),
+          bottomLeft: Radius.circular(20.0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 7,
-            offset: Offset(0, 3),
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: Offset(0, 2),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
+        padding: const EdgeInsets.fromLTRB(12.0, 30.0, 12.0, 12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Profile',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.notifications, color: Colors.white),
-                  onPressed: () {
-                    // Implementasi notifikasi
-                  },
+                  icon:
+                      Icon(Icons.notifications, color: Colors.white, size: 18),
+                  onPressed: () {},
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
                 ),
               ],
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 16),
             Container(
-              width: 120,
-              height: 120,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 3,
-                ),
+                border: Border.all(color: Colors.white, width: 2),
               ),
               child: ClipOval(
                 child: FutureBuilder<String>(
@@ -180,38 +183,32 @@ class _ProfileSectionState extends State<ProfileSection> {
                       return CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       );
-                    } else if (snapshot.hasError) {
-                      print('Error menampilkan foto profil: ${snapshot.error}');
-                      return Image.asset(
-                        'assets/piticash_log.png',
-                        fit: BoxFit.cover,
-                      );
-                    } else if (snapshot.hasData && snapshot.data != null) {
+                    } else if (snapshot.hasError || !snapshot.hasData) {
+                      return Icon(Icons.person, size: 40, color: Colors.white);
+                    } else {
                       return Image.memory(
                         base64Decode(snapshot.data!.split(',').last),
                         fit: BoxFit.cover,
                       );
-                    } else {
-                      return Icon(Icons.person, size: 60, color: Colors.white);
                     }
                   },
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            SizedBox(height: 8),
             Text(
               isLoggedIn ? '$name' : 'Hi, Guest!',
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 5),
+            SizedBox(height: 2),
             Text(
               isLoggedIn ? '$email' : 'guest@gmail.com',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 12,
                 color: Colors.white.withOpacity(0.8),
               ),
             ),
@@ -223,12 +220,12 @@ class _ProfileSectionState extends State<ProfileSection> {
 
   Widget _buildProfileOptions() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Column(
         children: [
           Card(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(10),
             ),
             elevation: 0.25,
             child: Column(
@@ -243,8 +240,8 @@ class _ProfileSectionState extends State<ProfileSection> {
                   showTrailingIcon: true,
                   showBorder: false,
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(15),
-                    topRight: Radius.circular(15),
+                    topLeft: Radius.circular(10),
+                    topRight: Radius.circular(10),
                   ),
                 ),
                 Divider(height: 0.5, thickness: 0.5),
@@ -259,34 +256,48 @@ class _ProfileSectionState extends State<ProfileSection> {
                   showTrailingIcon: true,
                   showBorder: false,
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(15),
-                    bottomRight: Radius.circular(15),
+                    bottomLeft: Radius.circular(10),
+                    bottomRight: Radius.circular(10),
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 15),
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            elevation: 0.25,
-            child: _buildOptionButton(
-              icon: Icons.settings,
-              label: 'Pengaturan Saldo',
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SettingsSaldo()),
-              ).then((_) => _refreshProfile()),
-              showBorder: false,
-              borderRadius: BorderRadius.circular(15),
-            ),
+          FutureBuilder<Map<String, dynamic>?>(
+            future: _prefsService.getRoles(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData && snapshot.data != null) {
+                bool isReader = snapshot.data!['roles'][0]['name'] == 'Reader';
+                if (isReader) return Container();
+              }
+              return Column(
+                children: [
+                  SizedBox(height: 10),
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0.25,
+                    child: _buildOptionButton(
+                      icon: Icons.settings,
+                      label: 'Pengaturan Saldo',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SettingsSaldo()),
+                      ).then((_) => _refreshProfile()),
+                      showBorder: false,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
-          SizedBox(height: 15),
+          SizedBox(height: 10),
           Card(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(10),
             ),
             elevation: 0.25,
             child: _buildOptionButton(
@@ -295,7 +306,7 @@ class _ProfileSectionState extends State<ProfileSection> {
               onTap: () => logout(context),
               color: Colors.red,
               showBorder: false,
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
         ],
@@ -315,7 +326,7 @@ class _ProfileSectionState extends State<ProfileSection> {
     return Container(
       decoration: BoxDecoration(
         borderRadius:
-            borderRadius ?? (showBorder ? BorderRadius.circular(15) : null),
+            borderRadius ?? (showBorder ? BorderRadius.circular(10) : null),
         color: Colors.white,
         boxShadow: showBorder
             ? [
@@ -334,17 +345,21 @@ class _ProfileSectionState extends State<ProfileSection> {
         ),
         leading: CircleAvatar(
           backgroundColor: color.withOpacity(0.1),
-          child: Icon(icon, color: color),
+          radius: 14,
+          child: Icon(icon, color: color, size: 14),
         ),
         title: Text(
           label,
           style: TextStyle(
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
         ),
-        trailing: Icon(Icons.arrow_forward_ios, color: color, size: 18),
+        trailing: Icon(Icons.arrow_forward_ios, color: color, size: 14),
         onTap: onTap,
+        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+        dense: true,
       ),
     );
   }

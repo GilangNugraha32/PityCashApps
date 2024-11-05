@@ -25,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _userName;
   Map<String, dynamic>? _userRoles;
   final SharedPreferencesService _prefsService = SharedPreferencesService();
+  bool isReader = false;
 
   final List<Widget> _pages = [
     HomeSection(),
@@ -39,6 +40,16 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _selectedIndex = widget.initialIndex;
     _loadUserData();
+    _checkUserRole();
+  }
+
+  Future<void> _checkUserRole() async {
+    var roles = await _prefsService.getRoles();
+    if (roles != null && roles['roles'] is List && roles['roles'].isNotEmpty) {
+      setState(() {
+        isReader = roles['roles'][0]['name'] == 'Reader';
+      });
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -59,197 +70,37 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Tambahkan ini untuk mencegah resize
+      resizeToAvoidBottomInset: false,
       body: _pages[_selectedIndex],
-      floatingActionButton: Container(
-        height: 65,
-        width: 65,
-        child: FittedBox(
-          child: FloatingActionButton(
-            backgroundColor: Color(0xFFEB8153),
-            elevation: 8,
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                shape: RoundedRectangleBorder(
-                  borderRadius:
-                      BorderRadius.vertical(top: Radius.circular(25.0)),
-                ),
-                builder: (BuildContext context) {
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      double modalHeight = constraints.maxHeight * 0.28;
-                      double buttonWidth = constraints.maxWidth * 0.45;
-                      return Container(
-                        height: modalHeight,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.vertical(top: Radius.circular(25.0)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Handle bar
-                            Container(
-                              margin: EdgeInsets.only(top: 12, bottom: 8),
-                              width: 50.0,
-                              height: 4.0,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFEB8153).withOpacity(0.3),
-                                borderRadius: BorderRadius.circular(4.0),
-                              ),
-                            ),
-
-                            // Title
-                            Padding(
-                              padding: EdgeInsets.only(bottom: 8),
-                              child: Text(
-                                'Pilih Aksi Tambah',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFFEB8153),
-                                  letterSpacing: 0.5,
-                                ),
-                              ),
-                            ),
-
-                            // Divider
-                            Container(
-                              margin: EdgeInsets.symmetric(horizontal: 24.0),
-                              child: Divider(
-                                color: Color(0xFFEB8153).withOpacity(0.2),
-                                thickness: 1.0,
-                              ),
-                            ),
-
-                            // Action buttons
-                            Expanded(
-                              child: Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
-                                child: Column(
-                                  children: [
-                                    // Top row buttons
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          // Pemasukan button
-                                          Expanded(
-                                            child: _buildElevatedActionButton(
-                                              width: buttonWidth,
-                                              icon: Icons.add_card_sharp,
-                                              title: 'Pemasukan',
-                                              onTap: () async {
-                                                Navigator.pop(context);
-                                                await Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        TambahPemasukan(),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                          SizedBox(width: 12),
-                                          // Pengeluaran button
-                                          Expanded(
-                                            child: _buildElevatedActionButton(
-                                              width: buttonWidth,
-                                              icon: Icons
-                                                  .add_shopping_cart_outlined,
-                                              title: 'Pengeluaran',
-                                              onTap: () async {
-                                                Navigator.pop(context);
-                                                await Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        TambahPengeluaran(),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 12),
-
-                                    // Bottom kategori button
-                                    _buildElevatedActionButton(
-                                      width: double.infinity,
-                                      icon: Icons.add_chart,
-                                      title: 'Kategori',
-                                      onTap: () async {
-                                        Navigator.pop(context);
-                                        await Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                TambahCategories(),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
-            child: Icon(
-              Icons.post_add,
-              color: Colors.white,
-              size: 32,
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: !isReader ? _buildFloatingActionButton() : null,
+      floatingActionButtonLocation:
+          !isReader ? FloatingActionButtonLocation.centerDocked : null,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16.0),
-            topRight: Radius.circular(16.0),
+            topLeft: Radius.circular(12.0),
+            topRight: Radius.circular(12.0),
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              spreadRadius: 2,
-              blurRadius: 4,
-              offset: Offset(0, -2),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: Offset(0, -1),
             ),
           ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(16.0),
-            topRight: Radius.circular(16.0),
+            topLeft: Radius.circular(12.0),
+            topRight: Radius.circular(12.0),
           ),
           child: BottomAppBar(
-            notchMargin: 8.0,
-            shape: CircularNotchedRectangle(),
+            notchMargin: 6.0,
+            shape: !isReader ? CircularNotchedRectangle() : null,
             child: Container(
-              height: 60,
+              height: 55,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -261,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: _buildNavItem(1, Icons.analytics,
                         Icons.analytics_outlined, 'Category'),
                   ),
-                  Expanded(child: SizedBox()),
+                  if (!isReader) Expanded(child: SizedBox()),
                   Expanded(
                     child: _buildTransactionNavItem(),
                   ),
@@ -272,6 +123,161 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingActionButton() {
+    return Container(
+      height: 55,
+      width: 55,
+      child: FittedBox(
+        child: FloatingActionButton(
+          backgroundColor: Color(0xFFEB8153),
+          elevation: 6,
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+              ),
+              builder: (BuildContext context) {
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final size = MediaQuery.of(context).size;
+                    final modalHeight = size.height * 0.22;
+                    final buttonHeight = modalHeight * 0.25;
+                    final spacing = size.height * 0.006;
+
+                    return Container(
+                      height: modalHeight,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: size.width * 0.03,
+                        vertical: size.height * 0.01,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(16.0)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: size.width * 0.08,
+                            height: 3,
+                            margin: EdgeInsets.only(bottom: spacing),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFEB8153).withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(1.5),
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Pilih Aksi Tambah',
+                            style: TextStyle(
+                              fontSize: size.width * 0.038,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFEB8153),
+                            ),
+                          ),
+                          SizedBox(height: 12),
+                          Divider(
+                            color: Color(0xFFEB8153).withOpacity(0.2),
+                            thickness: 1,
+                            height: spacing * 2.5,
+                          ),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Expanded(
+                                  flex: 3,
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: _buildElevatedActionButton(
+                                          width: double.infinity,
+                                          icon: Icons.add_card_sharp,
+                                          title: 'Pemasukan',
+                                          onTap: () async {
+                                            Navigator.pop(context);
+                                            await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    TambahPemasukan(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      SizedBox(width: spacing),
+                                      Expanded(
+                                        child: _buildElevatedActionButton(
+                                          width: double.infinity,
+                                          icon:
+                                              Icons.add_shopping_cart_outlined,
+                                          title: 'Pengeluaran',
+                                          onTap: () async {
+                                            Navigator.pop(context);
+                                            await Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    TambahPengeluaran(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: spacing),
+                                Expanded(
+                                  flex: 2,
+                                  child: _buildElevatedActionButton(
+                                    width: double.infinity,
+                                    icon: Icons.add_chart,
+                                    title: 'Kategori',
+                                    onTap: () async {
+                                      Navigator.pop(context);
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              TambahCategories(),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+          child: Icon(
+            Icons.post_add,
+            color: Colors.white,
+            size: 28,
           ),
         ),
       ),
@@ -290,11 +296,11 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(12),
               color: Color(0xFFFFF4EE),
               border: Border.all(
                 color: Color(0xFFEB8153).withOpacity(0.3),
@@ -304,12 +310,12 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: Color(0xFFEB8153), size: 24),
-                SizedBox(width: 12),
+                Icon(icon, color: Color(0xFFEB8153), size: 20),
+                SizedBox(width: 8),
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFFEB8153),
                   ),
@@ -335,14 +341,15 @@ class _HomeScreenState extends State<HomeScreen> {
             Icon(
               _selectedIndex == index ? selectedIcon : unselectedIcon,
               color: _selectedIndex == index ? Color(0xFFEB8153) : Colors.grey,
+              size: 22,
             ),
-            SizedBox(height: 4),
+            SizedBox(height: 3),
             Text(
               label,
               style: TextStyle(
                 color:
                     _selectedIndex == index ? Color(0xFFEB8153) : Colors.grey,
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: _selectedIndex == index
                     ? FontWeight.w600
                     : FontWeight.normal,
@@ -358,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isTransactionSelected = _selectedIndex == 2 || _selectedIndex == 3;
 
     return PopupMenuButton<int>(
-      offset: Offset(0, -120),
+      offset: Offset(0, -100),
       onSelected: (int index) {
         _onItemTapped(index);
       },
@@ -374,14 +381,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? Icons.receipt_long
                     : Icons.receipt_long_outlined,
                 color: isTransactionSelected ? Color(0xFFEB8153) : Colors.grey,
+                size: 22,
               ),
-              SizedBox(height: 4),
+              SizedBox(height: 3),
               Text(
                 'Transaction',
                 style: TextStyle(
                   color:
                       isTransactionSelected ? Color(0xFFEB8153) : Colors.grey,
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: isTransactionSelected
                       ? FontWeight.w600
                       : FontWeight.normal,

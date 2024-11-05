@@ -53,7 +53,7 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       );
@@ -67,7 +67,7 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       );
@@ -87,15 +87,12 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       );
       _clearFields();
-      // Kembali ke halaman sebelumnya
       Navigator.pop(context, true);
-
-      // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -109,7 +106,7 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       );
@@ -125,47 +122,48 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
   Widget _buildPasswordField(String label, TextEditingController controller,
       bool isVisible, VoidCallback toggleVisibility) {
     return Container(
-      margin: EdgeInsets.only(bottom: 24),
+      margin: EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               color: Color(0xFFEB8153),
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 4),
           TextFormField(
             controller: controller,
             obscureText: !isVisible,
+            style: TextStyle(fontSize: 12),
             decoration: InputDecoration(
               suffixIcon: IconButton(
                 icon: Icon(
                   isVisible ? Icons.visibility : Icons.visibility_off,
                   color: Color(0xFFEB8153),
+                  size: 18,
                 ),
                 onPressed: toggleVisibility,
               ),
               hintText: 'Masukkan $label',
-              hintStyle: TextStyle(color: Colors.grey[400]),
+              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 12),
               filled: true,
               fillColor: Colors.grey[100],
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,
               ),
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: Color(0xFFEB8153), width: 2),
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Color(0xFFEB8153), width: 1),
               ),
             ),
           ),
@@ -182,7 +180,7 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(24.0),
+                padding: EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -190,17 +188,9 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
                     colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
                   ),
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 7,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
                 ),
                 child: Column(
                   children: [
@@ -208,13 +198,14 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.arrow_back, color: Colors.white),
+                          icon: Icon(Icons.arrow_back,
+                              color: Colors.white, size: 18),
                           onPressed: () => Navigator.pop(context),
                         ),
                         Text(
                           'Ubah Password',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -222,21 +213,13 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
                         SizedBox(width: 40),
                       ],
                     ),
-                    SizedBox(height: 24),
+                    SizedBox(height: 16),
                     Container(
-                      width: 120,
-                      height: 120,
+                      width: 100,
+                      height: 100,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
+                        border: Border.all(color: Colors.white, width: 2),
                       ),
                       child: ClipOval(
                         child: FutureBuilder<String>(
@@ -245,45 +228,44 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
                               return CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white));
-                            } else if (snapshot.hasError) {
-                              print(
-                                  'Error menampilkan foto profil: ${snapshot.error}');
-                              return Image.asset('assets/piticash_log.png',
-                                  fit: BoxFit.cover);
-                            } else if (snapshot.hasData &&
-                                snapshot.data != null) {
-                              return Image.memory(
-                                  base64Decode(snapshot.data!.split(',').last),
-                                  fit: BoxFit.cover);
-                            } else {
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              );
+                            } else if (snapshot.hasError || !snapshot.hasData) {
                               return Icon(Icons.person,
-                                  size: 60, color: Colors.white);
+                                  size: 40, color: Colors.white);
+                            } else {
+                              return Image.memory(
+                                base64Decode(snapshot.data!.split(',').last),
+                                fit: BoxFit.cover,
+                              );
                             }
                           },
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    SizedBox(height: 8),
                     Text(
                       _usernameController.text,
                       style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: 2),
                     Text(
                       _emailController.text,
                       style: TextStyle(
-                          fontSize: 16, color: Colors.white.withOpacity(0.8)),
+                        fontSize: 12,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
                     ),
                   ],
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(24.0),
+                padding: EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -308,19 +290,21 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
                       () => setState(() => _isConfirmPasswordVisible =
                           !_isConfirmPasswordVisible),
                     ),
-                    SizedBox(height: 32),
+                    SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _updatePassword,
                       style: ElevatedButton.styleFrom(
                         primary: Color(0xFFEB8153),
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                        padding: EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        elevation: 5,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      child: Text('Perbarui Password',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      child: Text(
+                        'Perbarui Password',
+                        style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),

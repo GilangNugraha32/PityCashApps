@@ -38,21 +38,21 @@ class _EditCategoriesState extends State<EditCategories> {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40,
-                height: 4,
-                margin: EdgeInsets.only(bottom: 20),
+                width: 32,
+                height: 3,
+                margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(1.5),
                 ),
               ),
               Align(
@@ -60,18 +60,19 @@ class _EditCategoriesState extends State<EditCategories> {
                 child: Text(
                   'Pilih Jenis Kategori',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              SizedBox(height: 15),
+              SizedBox(height: 12),
               ...jenisKategoriOptions.map((option) {
                 final isLast = option == jenisKategoriOptions.last;
                 return Column(
                   children: [
                     ListTile(
-                      title: Text(option['label']),
+                      title:
+                          Text(option['label'], style: TextStyle(fontSize: 14)),
                       onTap: () {
                         setState(() {
                           _jenisKategori = option['value'];
@@ -101,7 +102,7 @@ class _EditCategoriesState extends State<EditCategories> {
                   ],
                 );
               }).toList(),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
             ],
           ),
         );
@@ -123,19 +124,20 @@ class _EditCategoriesState extends State<EditCategories> {
           SnackBar(
             content: Text(
               'Berhasil diperbarui!',
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13),
             ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
-            margin: EdgeInsets.all(10),
+            margin: EdgeInsets.all(8),
           ),
         );
-        widget.onUpdate(); // Call the refresh method after successful update
-
+        widget.onUpdate();
         Navigator.pop(context);
       } catch (e) {
         String errorMessage =
@@ -149,15 +151,17 @@ class _EditCategoriesState extends State<EditCategories> {
           SnackBar(
             content: Text(
               errorMessage,
-              style:
-                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13),
             ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
-            margin: EdgeInsets.all(10),
+            margin: EdgeInsets.all(8),
           ),
         );
       }
@@ -174,12 +178,12 @@ class _EditCategoriesState extends State<EditCategories> {
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(24.0),
-                bottomLeft: Radius.circular(24.0),
+                bottomRight: Radius.circular(20.0),
+                bottomLeft: Radius.circular(20.0),
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
+              padding: const EdgeInsets.fromLTRB(12.0, 35.0, 12.0, 12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -189,7 +193,7 @@ class _EditCategoriesState extends State<EditCategories> {
                     children: [
                       IconButton(
                         icon: Icon(Icons.arrow_back_outlined,
-                            color: Colors.white),
+                            color: Colors.white, size: 22),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -197,36 +201,36 @@ class _EditCategoriesState extends State<EditCategories> {
                       Icon(
                         Icons.notifications_outlined,
                         color: Colors.white,
-                        size: 24,
+                        size: 22,
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 16),
                   Center(
                     child: Text(
                       'Edit Kategori',
                       style: TextStyle(
-                        fontSize: 26,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 10),
                 ],
               ),
             ),
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: Card(
-                elevation: 4.0,
+                elevation: 3.0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
@@ -234,12 +238,12 @@ class _EditCategoriesState extends State<EditCategories> {
                       children: [
                         Text('Nama Kategori',
                             style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 6),
+                                fontSize: 13, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 5),
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(8),
                             color: Colors.white,
                             border: Border.all(
                               color: Colors.grey.shade300,
@@ -248,22 +252,22 @@ class _EditCategoriesState extends State<EditCategories> {
                           ),
                           child: TextFormField(
                             initialValue: _namaKategori,
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 13),
                             decoration: InputDecoration(
                               hintText: 'Masukkan nama kategori',
                               hintStyle: TextStyle(
                                 color: Colors.grey[400],
-                                fontSize: 14,
+                                fontSize: 13,
                               ),
                               suffixIcon: Icon(
                                 Icons.interests_outlined,
                                 color: Color(0xFFEB8153),
-                                size: 20,
+                                size: 18,
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
+                                horizontal: 12,
+                                vertical: 12,
                               ),
                             ),
                             validator: (value) {
@@ -277,19 +281,19 @@ class _EditCategoriesState extends State<EditCategories> {
                             },
                           ),
                         ),
-                        SizedBox(height: 12),
+                        SizedBox(height: 10),
                         Text('Jenis Kategori',
                             style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 6),
+                                fontSize: 13, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 5),
                         InkWell(
                           onTap: _showJenisKategoriModal,
                           child: Container(
-                            height: 50,
-                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            height: 45,
+                            padding: EdgeInsets.symmetric(horizontal: 10),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: Colors.grey.shade300,
                                 width: 1,
@@ -298,21 +302,22 @@ class _EditCategoriesState extends State<EditCategories> {
                                 BoxShadow(
                                   color: Colors.grey.withOpacity(0.1),
                                   spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: Offset(0, 2),
+                                  blurRadius: 2,
+                                  offset: Offset(0, 1),
                                 ),
                               ],
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.list, color: Color(0xFFEB8153)),
-                                SizedBox(width: 12),
+                                Icon(Icons.list,
+                                    color: Color(0xFFEB8153), size: 18),
+                                SizedBox(width: 10),
                                 Text(
                                   selectedJenisKategoriLabel.isEmpty
                                       ? 'Pilih jenis kategori'
                                       : selectedJenisKategoriLabel,
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 13,
                                     color: selectedJenisKategoriLabel.isEmpty
                                         ? Colors.grey[400]
                                         : Colors.black,
@@ -320,20 +325,20 @@ class _EditCategoriesState extends State<EditCategories> {
                                 ),
                                 Spacer(),
                                 Icon(Icons.arrow_drop_down,
-                                    color: Color(0xFFEB8153)),
+                                    color: Color(0xFFEB8153), size: 18),
                               ],
                             ),
                           ),
                         ),
-                        SizedBox(height: 12),
+                        SizedBox(height: 10),
                         Text('Deskripsi',
                             style: TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
-                        SizedBox(height: 6),
+                                fontSize: 13, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 5),
                         Container(
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(8),
                             color: Colors.white,
                             border: Border.all(
                               color: Colors.grey.shade300,
@@ -343,22 +348,22 @@ class _EditCategoriesState extends State<EditCategories> {
                           child: TextFormField(
                             initialValue: _deskripsi,
                             maxLines: 3,
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 13),
                             decoration: InputDecoration(
                               hintText: 'Masukkan deskripsi kategori',
                               hintStyle: TextStyle(
                                 color: Colors.grey[400],
-                                fontSize: 14,
+                                fontSize: 13,
                               ),
                               prefixIcon: Icon(
                                 Icons.notes,
                                 color: Color(0xFFEB8153),
-                                size: 20,
+                                size: 18,
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
+                                horizontal: 12,
+                                vertical: 12,
                               ),
                             ),
                             validator: (value) {
@@ -375,7 +380,7 @@ class _EditCategoriesState extends State<EditCategories> {
                             },
                           ),
                         ),
-                        SizedBox(height: 24),
+                        SizedBox(height: 20),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -383,28 +388,32 @@ class _EditCategoriesState extends State<EditCategories> {
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              child: Text('Batal'),
                               style: ElevatedButton.styleFrom(
                                 primary: Color(0xFFDA0000),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 padding: EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 12),
+                                    horizontal: 8, vertical: 4),
+                                minimumSize: Size(60, 28),
                               ),
+                              child:
+                                  Text('Batal', style: TextStyle(fontSize: 11)),
                             ),
-                            SizedBox(width: 16),
+                            SizedBox(width: 8),
                             ElevatedButton(
                               onPressed: _updateCategory,
-                              child: Text('Simpan'),
                               style: ElevatedButton.styleFrom(
                                 primary: Color(0xFFE85C0D),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
+                                  borderRadius: BorderRadius.circular(4),
                                 ),
                                 padding: EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 12),
+                                    horizontal: 8, vertical: 4),
+                                minimumSize: Size(60, 28),
                               ),
+                              child: Text('Simpan',
+                                  style: TextStyle(fontSize: 11)),
                             ),
                           ],
                         ),

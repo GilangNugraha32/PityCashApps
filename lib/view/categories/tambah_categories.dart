@@ -31,21 +31,21 @@ class _TambahCategoriesState extends State<TambahCategories> {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (BuildContext context) {
         return Container(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 40,
-                height: 4,
-                margin: EdgeInsets.only(bottom: 20),
+                width: 32,
+                height: 3,
+                margin: EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(1.5),
                 ),
               ),
               Align(
@@ -53,18 +53,19 @@ class _TambahCategoriesState extends State<TambahCategories> {
                 child: Text(
                   'Pilih Jenis Kategori',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              SizedBox(height: 15),
+              SizedBox(height: 12),
               ...jenisKategoriOptions.map((option) {
                 final isLast = option == jenisKategoriOptions.last;
                 return Column(
                   children: [
                     ListTile(
-                      title: Text(option['label']),
+                      title:
+                          Text(option['label'], style: TextStyle(fontSize: 14)),
                       onTap: () {
                         setState(() {
                           selectedJenisKategori = option['value'];
@@ -94,7 +95,7 @@ class _TambahCategoriesState extends State<TambahCategories> {
                   ],
                 );
               }).toList(),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
             ],
           ),
         );
@@ -112,12 +113,12 @@ class _TambahCategoriesState extends State<TambahCategories> {
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
               borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(24.0),
-                bottomLeft: Radius.circular(24.0),
+                bottomRight: Radius.circular(20.0),
+                bottomLeft: Radius.circular(20.0),
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
+              padding: const EdgeInsets.fromLTRB(12.0, 35.0, 12.0, 12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -126,7 +127,8 @@ class _TambahCategoriesState extends State<TambahCategories> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        icon: Icon(Icons.arrow_back,
+                            color: Colors.white, size: 20),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -134,47 +136,47 @@ class _TambahCategoriesState extends State<TambahCategories> {
                       Icon(
                         Icons.notifications,
                         color: Colors.white,
-                        size: 24,
+                        size: 20,
                       ),
                     ],
                   ),
-                  SizedBox(height: 24),
+                  SizedBox(height: 20),
                   Center(
                     child: Text(
                       'Tambah Kategori',
                       style: TextStyle(
-                        fontSize: 26,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
                   ),
-                  SizedBox(height: 12),
+                  SizedBox(height: 10),
                 ],
               ),
             ),
           ),
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: Card(
-                elevation: 4.0,
+                elevation: 3.0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Nama Kategori',
                           style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 6),
+                              fontSize: 13, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 5),
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           color: Colors.white,
                           border: Border.all(
                             color: Colors.grey.shade300,
@@ -183,39 +185,39 @@ class _TambahCategoriesState extends State<TambahCategories> {
                         ),
                         child: TextField(
                           controller: nameController,
-                          style: TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: 13),
                           decoration: InputDecoration(
                             hintText: 'Masukkan nama kategori',
                             hintStyle: TextStyle(
                               color: Colors.grey[400],
-                              fontSize: 14,
+                              fontSize: 13,
                             ),
                             suffixIcon: Icon(
                               Icons.interests_outlined,
                               color: Color(0xFFEB8153),
-                              size: 20,
+                              size: 18,
                             ),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
+                              horizontal: 12,
+                              vertical: 12,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 12),
+                      SizedBox(height: 10),
                       Text('Jenis Kategori',
                           style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 6),
+                              fontSize: 13, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 5),
                       InkWell(
                         onTap: _showJenisKategoriModal,
                         child: Container(
-                          height: 50,
-                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          height: 45,
+                          padding: EdgeInsets.symmetric(horizontal: 10),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: Colors.grey.shade300,
                               width: 1,
@@ -224,21 +226,22 @@ class _TambahCategoriesState extends State<TambahCategories> {
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.1),
                                 spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: Offset(0, 2),
+                                blurRadius: 2,
+                                offset: Offset(0, 1),
                               ),
                             ],
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.list, color: Color(0xFFEB8153)),
-                              SizedBox(width: 12),
+                              Icon(Icons.list,
+                                  color: Color(0xFFEB8153), size: 18),
+                              SizedBox(width: 10),
                               Text(
                                 selectedJenisKategoriLabel.isEmpty
                                     ? 'Pilih jenis kategori'
                                     : selectedJenisKategoriLabel,
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 13,
                                   color: selectedJenisKategoriLabel.isEmpty
                                       ? Colors.grey[400]
                                       : Colors.black,
@@ -246,20 +249,20 @@ class _TambahCategoriesState extends State<TambahCategories> {
                               ),
                               Spacer(),
                               Icon(Icons.arrow_drop_down,
-                                  color: Color(0xFFEB8153)),
+                                  color: Color(0xFFEB8153), size: 18),
                             ],
                           ),
                         ),
                       ),
-                      SizedBox(height: 12),
+                      SizedBox(height: 10),
                       Text('Deskripsi',
                           style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 6),
+                              fontSize: 13, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 5),
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                           color: Colors.white,
                           border: Border.all(
                             color: Colors.grey.shade300,
@@ -269,27 +272,27 @@ class _TambahCategoriesState extends State<TambahCategories> {
                         child: TextField(
                           controller: descriptionController,
                           maxLines: 3,
-                          style: TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: 13),
                           decoration: InputDecoration(
                             hintText: 'Masukkan deskripsi kategori',
                             hintStyle: TextStyle(
                               color: Colors.grey[400],
-                              fontSize: 14,
+                              fontSize: 13,
                             ),
                             prefixIcon: Icon(
                               Icons.notes,
                               color: Color(0xFFEB8153),
-                              size: 20,
+                              size: 18,
                             ),
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
+                              horizontal: 12,
+                              vertical: 12,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(height: 24),
+                      SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -297,15 +300,18 @@ class _TambahCategoriesState extends State<TambahCategories> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: Text('Batal'),
+                            child:
+                                Text('Batal', style: TextStyle(fontSize: 12)),
                             style: ElevatedButton.styleFrom(
                               primary: Color(0xFFDA0000),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: BorderRadius.circular(6.0),
                               ),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 6),
                             ),
                           ),
-                          SizedBox(width: 12),
+                          SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: () async {
                               String name = nameController.text;
@@ -325,24 +331,20 @@ class _TambahCategoriesState extends State<TambahCategories> {
                                         'Berhasil ditambahkan!',
                                         style: TextStyle(
                                             color: Colors.white,
-                                            fontWeight: FontWeight.bold),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12),
                                       ),
                                       backgroundColor: Colors.green,
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
-                                      margin: EdgeInsets.all(10),
+                                      margin: EdgeInsets.all(6),
                                     ),
                                   );
 
-                                  // Panggil callback untuk refresh
                                   widget.onUpdate?.call();
-
-                                  // Kembali ke halaman sebelumnya
                                   Navigator.pop(context);
-
-                                  // Refresh halaman yang dituju dengan mengganti route
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
@@ -352,10 +354,15 @@ class _TambahCategoriesState extends State<TambahCategories> {
                                   );
                                 } catch (e) {
                                   String errorMessage =
-                                      'Gagal menambahkan kategori';
+                                      'Gagal menambahkan kategori: Nama Kategori sudah digunakan';
+                                  print('DioError creating category: $e');
+
                                   if (e
-                                      .toString()
-                                      .contains('nama sudah digunakan')) {
+                                          .toString()
+                                          .contains('SQLSTATE[23000]') &&
+                                      e
+                                          .toString()
+                                          .contains('Duplicate entry')) {
                                     errorMessage =
                                         'Nama kategori sudah digunakan';
                                   } else if (description.length > 30) {
@@ -368,14 +375,15 @@ class _TambahCategoriesState extends State<TambahCategories> {
                                         errorMessage,
                                         style: TextStyle(
                                             color: Colors.white,
-                                            fontWeight: FontWeight.bold),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12),
                                       ),
                                       backgroundColor: Colors.red,
                                       behavior: SnackBarBehavior.floating,
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
-                                      margin: EdgeInsets.all(10),
+                                      margin: EdgeInsets.all(6),
                                     ),
                                   );
                                 }
@@ -386,25 +394,30 @@ class _TambahCategoriesState extends State<TambahCategories> {
                                       'Harap isi semua kolom',
                                       style: TextStyle(
                                           color: Colors.white,
-                                          fontWeight: FontWeight.bold),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12),
                                     ),
                                     backgroundColor: Colors.red,
                                     behavior: SnackBarBehavior.floating,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(6),
                                     ),
-                                    margin: EdgeInsets.all(10),
+                                    margin: EdgeInsets.all(6),
                                   ),
                                 );
                               }
                             },
-                            child: Text('Simpan'),
                             style: ElevatedButton.styleFrom(
                               primary: Color(0xFFE85C0D),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
+                                borderRadius: BorderRadius.circular(4),
                               ),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              minimumSize: Size(60, 28),
                             ),
+                            child:
+                                Text('Simpan', style: TextStyle(fontSize: 11)),
                           ),
                         ],
                       ),

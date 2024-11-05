@@ -10,7 +10,6 @@ import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/view/home/home.dart';
-import 'package:pity_cash/view/pemasukan/detail_pemasukan.dart';
 import 'package:pity_cash/view/pemasukan/tambah_pemasukan.dart';
 import 'package:pity_cash/view/pengeluaran/detail_pengeluaran.dart';
 import 'package:pity_cash/view/pengeluaran/tambah_pengeluaran.dart';
@@ -214,9 +213,9 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       body: Column(
         children: [
           _buildOrangeBackgroundSection(),
-          SizedBox(height: 10),
+          SizedBox(height: 8),
           _buildSearchForm(),
-          SizedBox(height: 20),
+          SizedBox(height: 16),
           _buildCategoriesList(groupedFilteredExpenses),
           if (isLoading) Center(child: CircularProgressIndicator())
         ],
@@ -227,7 +226,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   Widget _buildOrangeBackgroundSection() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.only(bottom: 12.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -235,27 +234,28 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(30.0),
-          bottomLeft: Radius.circular(30.0),
+          bottomRight: Radius.circular(25.0),
+          bottomLeft: Radius.circular(25.0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 7,
-            offset: Offset(0, 3),
+            color: Colors.grey.withOpacity(0.4),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: Offset(0, 2),
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16.0, 40.0, 16.0, 16.0),
+        padding: const EdgeInsets.fromLTRB(12.0, 35.0, 12.0, 12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 20),
             _buildHeaderRow(),
-            SizedBox(height: 15),
-            _buildSaldoSection(),
             SizedBox(height: 12),
+            _buildSaldoSection(),
+            SizedBox(height: 10),
             _buildToggleButton(),
           ],
         ),
@@ -271,14 +271,14 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           'Outflow',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
         Icon(
           Icons.notifications,
           color: Colors.white,
-          size: 24,
+          size: 22,
         ),
       ],
     );
@@ -291,12 +291,12 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           Text(
             'Saldo Pity Cash',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               color: Colors.white.withOpacity(0.9),
             ),
           ),
-          SizedBox(height: 5),
+          SizedBox(height: 4),
           FutureBuilder<double>(
             future: ApiService().fetchMinimalSaldo(),
             builder: (context, snapshot) {
@@ -310,7 +310,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(width: 40),
+                        SizedBox(width: 30),
                         Expanded(
                           child: Text(
                             isBalanceVisible
@@ -321,7 +321,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                   ).format(saldo)
                                 : 'Rp' + _formatHiddenBalance(saldo),
                             style: TextStyle(
-                              fontSize: 32,
+                              fontSize: 28,
                               fontWeight: FontWeight.bold,
                               color: isLowBalance
                                   ? Color(0xFFF54D42)
@@ -336,7 +336,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                 ? Icons.visibility
                                 : Icons.visibility_off,
                             color: Colors.white,
-                            size: 24,
+                            size: 20,
                           ),
                           onPressed: () {
                             setState(() {
@@ -349,28 +349,27 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                   ),
                   if (isLowBalance)
                     Container(
-                      margin: EdgeInsets.only(top: 8),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      margin: EdgeInsets.only(top: 6),
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.yellow.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.info_outline,
-                              color: Colors.yellow, size: 16),
-                          SizedBox(width: 4),
+                              color: Colors.yellow, size: 14),
+                          SizedBox(width: 3),
                           Text(
                             'Saldo di bawah batas minimal',
                             style: TextStyle(
                               color: Colors.yellow,
                               fontWeight: FontWeight.w500,
-                              fontSize: 12,
+                              fontSize: 11,
                             ),
                           ),
-                          SizedBox(width: 4),
+                          SizedBox(width: 3),
                           Text(
                             '(${NumberFormat.currency(
                               locale: 'id_ID',
@@ -379,7 +378,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                             ).format(minimalSaldo)})',
                             style: TextStyle(
                               color: Colors.yellow.withOpacity(0.8),
-                              fontSize: 12,
+                              fontSize: 11,
                             ),
                           ),
                         ],
@@ -407,12 +406,12 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
 
   Widget _buildToggleButton() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 60),
+      margin: EdgeInsets.symmetric(horizontal: 50),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
-      padding: EdgeInsets.all(6),
+      padding: EdgeInsets.all(5),
       child: Row(
         children: [
           _buildToggleOption('Inflow', !isOutcomeSelected),
@@ -435,17 +434,17 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           );
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 14),
+          padding: EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? Color(0xFFEB8153) : Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.circular(10.0),
           ),
           child: Center(
             child: Text(
               text,
               style: TextStyle(
                 color: isSelected ? Colors.white : Color(0xFFB8B8B8),
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -457,17 +456,18 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
 
   Widget _buildSearchForm() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Container(
+        height: 40,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(8.0),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
+              color: Colors.grey.withOpacity(0.2),
               spreadRadius: 1,
-              blurRadius: 5,
-              offset: Offset(0, 6),
+              blurRadius: 3,
+              offset: Offset(0, 3),
             ),
           ],
         ),
@@ -475,12 +475,14 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           controller: _searchController,
           decoration: InputDecoration(
             hintText: 'Cari...',
-            prefixIcon: Icon(Icons.search),
+            hintStyle: TextStyle(fontSize: 12),
+            prefixIcon: Icon(Icons.search, size: 18),
             filled: true,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14.0),
+              borderRadius: BorderRadius.circular(8.0),
               borderSide: BorderSide.none,
             ),
+            contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 8),
           ),
           onChanged: (value) {
             _filterExpenses();
@@ -494,23 +496,23 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       Map<int, List<Pengeluaran>> groupedFilteredExpenses) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(12.0)),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(0, 3),
+              color: Colors.grey.withOpacity(0.15),
+              spreadRadius: 1,
+              blurRadius: 2,
+              offset: Offset(0, 1),
             ),
           ],
         ),
         child: Column(
           children: [
             _buildDateRangeAndActionButtons(),
-            SizedBox(height: 10),
+            SizedBox(height: 6),
             Expanded(
               child: _buildExpensesList(groupedFilteredExpenses),
             ),
@@ -526,8 +528,19 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         Expanded(
           child: _buildDateRangeSelector(),
         ),
-        SizedBox(width: 8),
-        _buildActionButtons(),
+        SizedBox(width: 4),
+        FutureBuilder<Map<String, dynamic>?>(
+          future: SharedPreferencesService().getRoles(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data != null) {
+              bool isReader = snapshot.data!['roles'][0]['name'] == 'Reader';
+              if (isReader) {
+                return Container();
+              }
+            }
+            return _buildActionButtons();
+          },
+        ),
       ],
     );
   }
@@ -536,10 +549,10 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     return GestureDetector(
       onTap: () => _selectDateRange(context),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
           color: Color(0xFFEB8153).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(8),
           border:
               Border.all(color: Color(0xFFEB8153).withOpacity(0.2), width: 0.5),
         ),
@@ -548,9 +561,9 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             Icon(
               Icons.date_range,
               color: Color(0xFFEB8153),
-              size: 16,
+              size: 12,
             ),
-            SizedBox(width: 5),
+            SizedBox(width: 3),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -561,19 +574,19 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                         : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
                     style: TextStyle(
                       color: Color(0xFFEB8153),
-                      fontSize: 14,
+                      fontSize: 10,
                       fontWeight: FontWeight.w500,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 1),
                   Text(
                     selectedDateRange == null
                         ? 'Pilih rentang tanggal sesuai kebutuhan Anda'
                         : 'Rentang tanggal yang dipilih',
                     style: TextStyle(
                       color: Color(0xFFFF9D6C),
-                      fontSize: 11,
+                      fontSize: 8,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -583,7 +596,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             Icon(
               Icons.arrow_forward_ios,
               color: Color(0xFFEB8153),
-              size: 14,
+              size: 10,
             ),
           ],
         ),
@@ -601,7 +614,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             _showPrintDialog(context);
           },
         ),
-        SizedBox(width: 8),
+        SizedBox(width: 4),
         _buildCircularButton(
           color: Color(0xFF68CF29),
           icon: Icons.file_upload_outlined,
@@ -620,24 +633,37 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
+            borderRadius: BorderRadius.circular(12.0),
           ),
-          title: Text(
-            'Cetak Laporan',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Color(0xFFEB8153),
-              fontSize: 22,
-            ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Cetak Laporan',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                  fontSize: 14,
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.close, color: Colors.grey[400], size: 20),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                padding: EdgeInsets.zero,
+                constraints: BoxConstraints(),
+              ),
+            ],
           ),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return Container(
-                width: MediaQuery.of(context).size.width * 0.8,
-                padding: EdgeInsets.all(20),
+                width: MediaQuery.of(context).size.width * 0.6,
+                padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(15),
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -646,16 +672,16 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                     Text(
                       'Pilih format laporan:',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
                       ),
                     ),
-                    SizedBox(height: 15),
+                    SizedBox(height: 8),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 15),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: Colors.grey[300]!),
                       ),
                       child: Theme(
@@ -666,7 +692,8 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                           child: DropdownButton<String>(
                             isExpanded: true,
                             value: selectedFormat,
-                            hint: Text('Pilih format'),
+                            hint: Text('Pilih format',
+                                style: TextStyle(fontSize: 12)),
                             onChanged: (String? newValue) {
                               setState(() {
                                 selectedFormat = newValue;
@@ -677,23 +704,16 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                               return DropdownMenuItem<String>(
                                 value: value,
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 10),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: 6),
                                   child: Text(
                                     value,
-                                    style: TextStyle(fontSize: 16),
+                                    style: TextStyle(fontSize: 12),
                                   ),
                                 ),
                               );
                             }).toList(),
-                            dropdownColor: Colors.white,
-                            elevation: 8,
-                            style: TextStyle(color: Colors.black, fontSize: 16),
                             icon: Icon(Icons.arrow_drop_down,
-                                color: Color(0xFFEB8153)),
-                            menuMaxHeight: 300,
+                                color: Color(0xFFEB8153), size: 20),
                           ),
                         ),
                       ),
@@ -703,17 +723,19 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
               );
             },
           ),
+          
           actions: [
             ElevatedButton(
               child: Text(
                 'Batal',
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(color: Colors.white, fontSize: 11),
               ),
               style: ElevatedButton.styleFrom(
-                primary: Colors.red,
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                primary: Colors.red[400],
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                minimumSize: Size(60, 28),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(5),
                 ),
               ),
               onPressed: () {
@@ -721,12 +743,13 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
               },
             ),
             ElevatedButton(
-              child: Text('Cetak', style: TextStyle(fontSize: 16)),
+              child: Text('Cetak', style: TextStyle(fontSize: 11)),
               style: ElevatedButton.styleFrom(
                 primary: Color(0xFFEB8153),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                minimumSize: Size(60, 28),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(5),
                 ),
               ),
               onPressed: () async {
@@ -751,8 +774,10 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                       Navigator.of(context).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                            content:
-                                Text('File berhasil diekspor ke: $newPath')),
+                          content: Text('File berhasil diekspor ke: $newPath',
+                              style: TextStyle(fontSize: 11)),
+                          behavior: SnackBarBehavior.floating,
+                        ),
                       );
                     } else {
                       throw Exception(
@@ -761,15 +786,20 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                   } catch (e) {
                     Navigator.of(context).pop();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Gagal mengekspor file: $e')),
+                      SnackBar(
+                        content: Text('Gagal mengekspor file: $e',
+                            style: TextStyle(fontSize: 11)),
+                        behavior: SnackBarBehavior.floating,
+                      ),
                     );
                   }
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Pilih format terlebih dahulu',
-                          style: TextStyle(fontSize: 16)),
+                          style: TextStyle(fontSize: 11)),
                       backgroundColor: Colors.red,
+                      behavior: SnackBarBehavior.floating,
                     ),
                   );
                 }
@@ -789,14 +819,14 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(16.0),
+          top: Radius.circular(12.0),
         ),
       ),
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -807,27 +837,24 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                       Text(
                         'Import Data Pengeluaran',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close, color: Colors.grey),
+                        icon: Icon(Icons.close, color: Colors.grey, size: 20),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'File Excel yang diunggah',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
+                  SizedBox(height: 12),
+                  Text(
+                    'File Excel yang diunggah',
+                    style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8),
                   Center(
                     child: _buildDragAndDropZone(
                       context,
@@ -839,56 +866,51 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                       },
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: TextButton(
-                      onPressed: () async {
-                        try {
-                          String filePath =
-                              await ApiService().downloadOutcomeTemplate();
-                          Directory? downloadsDirectory =
-                              await getExternalStorageDirectory();
-                          if (downloadsDirectory != null) {
-                            String fileName = 'template_pengeluaran.xlsx';
-                            String savePath =
-                                '${downloadsDirectory.path}/Download/$fileName';
-                            await Directory(
-                                    '${downloadsDirectory.path}/Download')
-                                .create(recursive: true);
-                            await File(filePath).copy(savePath);
-                            await File(filePath).delete();
-                            if (mounted) {
-                              Navigator.of(context).pop();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Template berhasil diunduh: $savePath')),
-                              );
-                            }
-                          } else {
-                            throw Exception(
-                                'Tidak dapat menemukan folder Download');
-                          }
-                        } catch (e) {
-                          print('Error saat mengunduh template: $e');
+                  SizedBox(height: 15),
+                  TextButton(
+                    onPressed: () async {
+                      try {
+                        String filePath =
+                            await ApiService().downloadOutcomeTemplate();
+                        Directory? downloadsDirectory =
+                            await getExternalStorageDirectory();
+                        if (downloadsDirectory != null) {
+                          String fileName = 'template_pengeluaran.xlsx';
+                          String savePath =
+                              '${downloadsDirectory.path}/Download/$fileName';
+                          await Directory('${downloadsDirectory.path}/Download')
+                              .create(recursive: true);
+                          await File(filePath).copy(savePath);
+                          await File(filePath).delete();
                           if (mounted) {
                             Navigator.of(context).pop();
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                  content:
-                                      Text('Gagal mengunduh template: $e')),
+                                  content: Text(
+                                      'Template berhasil diunduh: $savePath')),
                             );
                           }
+                        } else {
+                          throw Exception(
+                              'Tidak dapat menemukan folder Download');
                         }
-                      },
-                      child: Text(
-                        'Download Template Excel',
-                        style: TextStyle(color: Color(0xFFEB8153)),
-                      ),
+                      } catch (e) {
+                        print('Error saat mengunduh template: $e');
+                        if (mounted) {
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Gagal mengunduh template: $e')),
+                          );
+                        }
+                      }
+                    },
+                    child: Text(
+                      'Download Template Excel',
+                      style: TextStyle(color: Color(0xFFEB8153), fontSize: 12),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8),
                   ElevatedButton(
                     onPressed: selectedFilePath != null
                         ? () async {
@@ -913,20 +935,20 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                             }
                           }
                         : null,
-                    child: Text('Upload'),
+                    child: Text('Upload', style: TextStyle(fontSize: 12)),
                     style: ElevatedButton.styleFrom(
                       primary: Color(0xFFEB8153),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(6),
                       ),
                       padding: EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: MediaQuery.of(context).size.width * 0.2,
+                        vertical: 12,
+                        horizontal: MediaQuery.of(context).size.width * 0.15,
                       ),
                       minimumSize: Size(double.infinity, 0),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8),
                 ],
               ),
             );
@@ -944,11 +966,11 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     return GestureDetector(
       onTap: () => _pickFile(context, onFileSelected),
       child: Container(
-        height: 175,
+        height: 140,
         width: double.infinity,
         decoration: BoxDecoration(
           border: Border.all(color: Color(0xFFEB8153)),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(6.0),
           color: Colors.grey[200],
         ),
         child: Center(
@@ -956,13 +978,13 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.cloud_upload_outlined,
-                  size: 40, color: Color(0xFFEB8153)),
-              SizedBox(height: 10),
+                  size: 32, color: Color(0xFFEB8153)),
+              SizedBox(height: 8),
               Text(
                 selectedFilePath != null
                     ? 'File terpilih: ${selectedFilePath.split('/').last}'
                     : 'Tap to upload, xlsx or xls',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: TextStyle(fontSize: 13, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -1009,13 +1031,12 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         return Transform.scale(
           scale: scale,
           child: Container(
-            width: 52,
-            height: 52,
+            width: 42,
+            height: 42,
             decoration: BoxDecoration(
               color: color.withOpacity(0.2),
               shape: BoxShape.circle,
-              border: Border.all(
-                  color: color, width: 0.5), // Garis pembatas yang lebih tipis
+              border: Border.all(color: color, width: 0.5),
             ),
             child: Material(
               color: Colors.transparent,
@@ -1027,7 +1048,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                 child: Icon(
                   icon,
                   color: color,
-                  size: 28,
+                  size: 22,
                 ),
               ),
             ),
@@ -1095,9 +1116,9 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   Widget _buildExpenseGroup(List<Pengeluaran> groupItems, double totalJumlah) {
     return Card(
       elevation: 0,
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      margin: EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey[300]!, width: 1),
       ),
       child: InkWell(
@@ -1114,14 +1135,14 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           }
         },
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildExpenseGroupHeader(groupItems),
-              Divider(color: Colors.grey[300], thickness: 0.5, height: 15),
+              Divider(color: Colors.grey[300], thickness: 0.5, height: 12),
               _buildExpenseItems(groupItems),
-              Divider(color: Colors.grey[300], thickness: 0.5, height: 15),
+              Divider(color: Colors.grey[300], thickness: 0.5, height: 12),
               _buildExpenseGroupTotal(totalJumlah),
             ],
           ),
@@ -1156,7 +1177,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           ? '${groupItems.first.tanggal!.day} ${_getMonthName(groupItems.first.tanggal!.month)} ${groupItems.first.tanggal!.year}'
           : 'Tidak ada tanggal',
       style: TextStyle(
-        fontSize: 14,
+        fontSize: 11,
         fontWeight: FontWeight.bold,
         color: Colors.black87,
       ),
@@ -1173,19 +1194,19 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
 
   Widget _buildExpenseItem(Pengeluaran pengeluaran) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: Color(0xFFFFF5EE),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.description_outlined,
-                color: Color(0xFFEB8153), size: 20),
+                color: Color(0xFFEB8153), size: 14),
           ),
-          SizedBox(width: 12),
+          SizedBox(width: 6),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1195,21 +1216,21 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                       ? pengeluaran.name
                       : 'Tidak ada nama',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 4),
+                SizedBox(height: 1),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                   decoration: BoxDecoration(
                     color: Color(0xFFFFF5EE),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     pengeluaran.category?.name ?? 'Tidak ada kategori',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 9,
                       color: Color(0xFFEB8153),
                     ),
                   ),
@@ -1224,7 +1245,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
               decimalDigits: 0,
             ).format(pengeluaran.jumlah),
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1240,19 +1261,19 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         Row(
           children: [
             Container(
-              padding: EdgeInsets.all(8),
+              padding: EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: Color(0xFFFFF5EE),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.calculate_outlined,
-                  color: Color(0xFFEB8153), size: 20),
+                  color: Color(0xFFEB8153), size: 14),
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 6),
             Text(
               'Total: ',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1265,7 +1286,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             decimalDigits: 0,
           ).format(totalJumlah),
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Colors.red,
           ),
@@ -1281,21 +1302,21 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(14),
           ),
           elevation: 0,
           backgroundColor: Colors.transparent,
           child: Container(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(14),
             decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black26,
-                  blurRadius: 10.0,
-                  offset: Offset(0.0, 10.0),
+                  blurRadius: 6.0,
+                  offset: Offset(0.0, 6.0),
                 ),
               ],
             ),
@@ -1303,7 +1324,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: EdgeInsets.all(15),
+                  padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Color(0xFFFFF5EE),
                     shape: BoxShape.circle,
@@ -1311,35 +1332,35 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                   child: Icon(
                     Icons.check,
                     color: Color(0xFFEB8153),
-                    size: 50,
+                    size: 32,
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 14),
                 Text(
                   'Impor Berhasil!',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFFEB8153),
                   ),
                 ),
-                SizedBox(height: 15),
+                SizedBox(height: 10),
                 Text(
                   'Data pengeluaran telah berhasil diimpor ke dalam sistem.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                 ),
-                SizedBox(height: 25),
+                SizedBox(height: 16),
                 TextButton(
                   child: Text(
                     'Tutup',
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                    style: TextStyle(fontSize: 12, color: Colors.white),
                   ),
                   style: TextButton.styleFrom(
                     backgroundColor: Color(0xFFEB8153),
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   onPressed: () => Navigator.of(context).pop(),

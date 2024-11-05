@@ -19,13 +19,11 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String? _errorMessage;
   bool _obscureText = true;
+
   Future<void> _login() async {
-    // final String apiUrl = "http://192.168.0.211:8000/api/login";
     final String apiUrl = "http://pitycash.mamorasoft.com/api/login";
 
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -39,11 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
           "email": _emailController.text,
           "password": _passwordController.text,
         },
-        options: Options(
-          headers: {
-            "Content-Type": "application/json",
-          },
-        ),
+        options: Options(headers: {"Content-Type": "application/json"}),
       );
 
       var jsonResponse = response.data;
@@ -52,8 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (jsonResponse['status'] == 200 && jsonResponse['user'] != null) {
         final token = jsonResponse['token'];
         final user = jsonResponse['user'];
-
-        // Ambil roles dari user data
         final userRoles = user['roles'];
         Map<String, dynamic> roles = {};
 
@@ -75,29 +67,20 @@ class _LoginScreenState extends State<LoginScreen> {
         }
 
         if (token != null) {
-          log("Token saved: $token");
           await _prefsService.saveToken(token);
           await _prefsService.saveUser(user);
           await _prefsService.saveRoles(roles);
-          log("Roles saved successfully: $roles");
-
           Navigator.pushReplacementNamed(context, '/home');
         }
       } else {
         setState(() {
           _errorMessage = jsonResponse['message'] ?? 'Login gagal';
         });
-        log(_errorMessage ?? 'Terjadi kesalahan yang tidak diketahui');
       }
     } catch (e) {
-      log('Error: $e');
-      setState(() {
-        _errorMessage = 'Email dan Password anda salah!';
-      });
+      setState(() => _errorMessage = 'Email dan Password anda salah!');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -116,51 +99,51 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               Expanded(
-                flex: 2,
+                flex: 1,
                 child: Center(
                   child: Hero(
                     tag: 'logo',
                     child: Container(
-                      height: 120,
+                      height: 80,
                       child: Image.asset("assets/piticash_log.png"),
                     ),
                   ),
                 ),
               ),
               Expanded(
-                flex: 5,
+                flex: 3,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
                     ),
                   ),
                   child: SingleChildScrollView(
                     child: Padding(
-                      padding: const EdgeInsets.all(24.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(height: 20),
+                          SizedBox(height: 10),
                           Text(
                             "Selamat Datang !",
                             style: TextStyle(
                               color: Color(0xFFEB8153),
-                              fontSize: 28,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: 4),
                           Text(
                             "Silakan masuk ke akun Anda",
                             style: TextStyle(
                               color: Colors.grey[600],
-                              fontSize: 16,
+                              fontSize: 14,
                             ),
                           ),
-                          SizedBox(height: 40),
+                          SizedBox(height: 20),
                           Form(
                             key: _formKey,
                             child: Column(
@@ -170,85 +153,95 @@ class _LoginScreenState extends State<LoginScreen> {
                                   'Email',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                    fontSize: 12,
                                   ),
                                 ),
-                                SizedBox(height: 8),
+                                SizedBox(height: 4),
                                 TextFormField(
                                   controller: _emailController,
+                                  style: TextStyle(fontSize: 14),
                                   decoration: InputDecoration(
-                                    hintText: 'Masukkan alamat email Anda',
-                                    prefixIcon: Icon(Icons.email,
-                                        color: Color(0xFFEB8153)),
+                                    hintText: 'Masukkan email',
+                                    hintStyle: TextStyle(fontSize: 12),
+                                    prefixIcon: Icon(
+                                      Icons.email,
+                                      color: Color(0xFFEB8153),
+                                      size: 18,
+                                    ),
                                     filled: true,
                                     fillColor: Colors.grey[200],
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: 12,
+                                      horizontal: 16,
+                                    ),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
+                                      borderRadius: BorderRadius.circular(10),
                                       borderSide: BorderSide.none,
                                     ),
                                   ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Masukkan email';
-                                    }
-                                    return null;
-                                  },
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Masukkan email'
+                                      : null,
                                 ),
-                                SizedBox(height: 16),
+                                SizedBox(height: 10),
                                 Text(
                                   'Password',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                                    fontSize: 12,
                                   ),
                                 ),
-                                SizedBox(height: 8),
+                                SizedBox(height: 4),
                                 TextFormField(
                                   controller: _passwordController,
+                                  style: TextStyle(fontSize: 14),
                                   obscureText: _obscureText,
                                   decoration: InputDecoration(
-                                    hintText: 'Masukkan kata sandi Anda',
-                                    prefixIcon: Icon(Icons.lock,
-                                        color: Color(0xFFEB8153)),
+                                    hintText: 'Masukkan kata sandi',
+                                    hintStyle: TextStyle(fontSize: 12),
+                                    prefixIcon: Icon(
+                                      Icons.lock,
+                                      color: Color(0xFFEB8153),
+                                      size: 18,
+                                    ),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _obscureText
                                             ? Icons.visibility
                                             : Icons.visibility_off,
                                         color: Color(0xFFEB8153),
+                                        size: 18,
                                       ),
-                                      onPressed: () {
-                                        setState(() {
-                                          _obscureText = !_obscureText;
-                                        });
-                                      },
+                                      onPressed: () => setState(
+                                          () => _obscureText = !_obscureText),
                                     ),
                                     filled: true,
                                     fillColor: Colors.grey[200],
+                                    contentPadding: EdgeInsets.symmetric(
+                                      vertical: 12,
+                                      horizontal: 16,
+                                    ),
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
+                                      borderRadius: BorderRadius.circular(10),
                                       borderSide: BorderSide.none,
                                     ),
                                   ),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'Masukkan password';
-                                    }
-                                    return null;
-                                  },
+                                  validator: (value) => value?.isEmpty ?? true
+                                      ? 'Masukkan password'
+                                      : null,
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(height: 24),
+                          SizedBox(height: 16),
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: _isLoading ? null : _login,
                               child: _isLoading
                                   ? SizedBox(
-                                      width: 20,
-                                      height: 20,
+                                      width: 16,
+                                      height: 16,
                                       child: CircularProgressIndicator(
                                         color: Colors.white,
                                         strokeWidth: 2,
@@ -257,28 +250,29 @@ class _LoginScreenState extends State<LoginScreen> {
                                   : Text(
                                       'MASUK',
                                       style: TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 13,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                               style: ElevatedButton.styleFrom(
                                 primary: Color(0xFFEB8153),
                                 onPrimary: Colors.white,
-                                padding: EdgeInsets.symmetric(vertical: 15),
+                                padding: EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
                             ),
                           ),
                           if (_errorMessage != null)
                             Padding(
-                              padding: const EdgeInsets.only(top: 16.0),
+                              padding: const EdgeInsets.only(top: 12.0),
                               child: Text(
                                 _errorMessage!,
                                 style: TextStyle(
                                   color: Colors.red,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 12,
                                 ),
                                 textAlign: TextAlign.center,
                               ),

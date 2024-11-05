@@ -81,14 +81,11 @@ class _EditProfileState extends State<EditProfile> {
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
         );
-        // Kembali ke halaman sebelumnya
         Navigator.pop(context, true);
-
-        // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -102,7 +99,7 @@ class _EditProfileState extends State<EditProfile> {
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
         );
@@ -114,7 +111,7 @@ class _EditProfileState extends State<EditProfile> {
           backgroundColor: Colors.orange,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
           ),
         ),
       );
@@ -129,35 +126,34 @@ class _EditProfileState extends State<EditProfile> {
         Text(
           label,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Color(0xFFEB8153),
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         Container(
-          margin: EdgeInsets.only(bottom: 20),
+          margin: EdgeInsets.only(bottom: 12),
           child: TextFormField(
             controller: controller,
-            style: TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 12),
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: Color(0xFFEB8153)),
+              prefixIcon: Icon(icon, color: Color(0xFFEB8153), size: 16),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Color(0xFFEB8153), width: 1),
               ),
               filled: true,
               fillColor: Colors.grey[200],
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             ),
           ),
         ),
@@ -172,19 +168,23 @@ class _EditProfileState extends State<EditProfile> {
         Text(
           'Jenis Kelamin',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 12,
             fontWeight: FontWeight.bold,
             color: Color(0xFFEB8153),
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         Container(
-          margin: EdgeInsets.only(bottom: 20),
+          margin: EdgeInsets.only(bottom: 12),
           child: DropdownButtonFormField<String>(
             value: _selectedGender,
             items: [
-              DropdownMenuItem(value: 'Laki-Laki', child: Text('Laki-Laki')),
-              DropdownMenuItem(value: 'Perempuan', child: Text('Perempuan')),
+              DropdownMenuItem(
+                  value: 'Laki-Laki',
+                  child: Text('Laki-Laki', style: TextStyle(fontSize: 12))),
+              DropdownMenuItem(
+                  value: 'Perempuan',
+                  child: Text('Perempuan', style: TextStyle(fontSize: 12))),
             ],
             onChanged: (value) {
               setState(() {
@@ -192,23 +192,23 @@ class _EditProfileState extends State<EditProfile> {
               });
             },
             decoration: InputDecoration(
-              prefixIcon: Icon(Icons.person, color: Color(0xFFEB8153)),
+              prefixIcon:
+                  Icon(Icons.person, color: Color(0xFFEB8153), size: 16),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(color: Color(0xFFEB8153), width: 1),
               ),
               filled: true,
               fillColor: Colors.grey[200],
-              contentPadding:
-                  EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             ),
           ),
         ),
@@ -233,12 +233,12 @@ class _EditProfileState extends State<EditProfile> {
                     colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
                   ),
                   borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(50.0),
-                    bottomLeft: Radius.circular(50.0),
+                    bottomRight: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 40.0),
+                  padding: const EdgeInsets.fromLTRB(12.0, 16.0, 12.0, 24.0),
                   child: Column(
                     children: [
                       Row(
@@ -246,7 +246,7 @@ class _EditProfileState extends State<EditProfile> {
                         children: [
                           IconButton(
                             icon: Icon(Icons.arrow_back,
-                                color: Colors.white, size: 28),
+                                color: Colors.white, size: 20),
                             onPressed: () {
                               Navigator.of(context).pop();
                               if (Navigator.of(context).canPop()) {
@@ -257,21 +257,21 @@ class _EditProfileState extends State<EditProfile> {
                           Text(
                             'Edit Profil',
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
                           IconButton(
                             icon: Icon(Icons.notifications,
-                                color: Colors.white, size: 28),
+                                color: Colors.white, size: 20),
                             onPressed: () {
                               // Implementasi notifikasi
                             },
                           ),
                         ],
                       ),
-                      SizedBox(height: 30),
+                      SizedBox(height: 20),
                       GestureDetector(
                         onTap: () async {
                           FilePickerResult? result =
@@ -288,18 +288,18 @@ class _EditProfileState extends State<EditProfile> {
                           alignment: Alignment.bottomRight,
                           children: [
                             Container(
-                              width: 120,
-                              height: 120,
+                              width: 100,
+                              height: 100,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border:
-                                    Border.all(color: Colors.white, width: 3),
+                                    Border.all(color: Colors.white, width: 2),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.2),
-                                    spreadRadius: 2,
-                                    blurRadius: 5,
-                                    offset: Offset(0, 3),
+                                    spreadRadius: 1,
+                                    blurRadius: 3,
+                                    offset: Offset(0, 2),
                                   ),
                                 ],
                               ),
@@ -327,38 +327,38 @@ class _EditProfileState extends State<EditProfile> {
                                           fit: BoxFit.cover);
                                     } else {
                                       return Icon(Icons.person,
-                                          size: 60, color: Colors.white);
+                                          size: 40, color: Colors.white);
                                     }
                                   },
                                 ),
                               ),
                             ),
                             Container(
-                              padding: EdgeInsets.all(6),
+                              padding: EdgeInsets.all(4),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(Icons.camera_alt,
-                                  color: Color(0xFFEB8153), size: 20),
+                                  color: Color(0xFFEB8153), size: 14),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 12),
                       Text(
                         _usernameController.text,
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: 4),
                       Text(
                         _emailController.text,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 12,
                           color: Colors.white.withOpacity(0.8),
                         ),
                       ),
@@ -371,12 +371,12 @@ class _EditProfileState extends State<EditProfile> {
                 decoration: BoxDecoration(
                   color: Colors.grey[50],
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30.0),
-                    topRight: Radius.circular(30.0),
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0),
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(30.0),
+                  padding: const EdgeInsets.all(20.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -387,20 +387,20 @@ class _EditProfileState extends State<EditProfile> {
                       _buildTextField(
                           'Alamat', _alamatController, Icons.home_outlined),
                       _buildGenderDropdown(),
-                      SizedBox(height: 30),
+                      SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _updateProfile,
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          padding: EdgeInsets.symmetric(vertical: 12.0),
                           backgroundColor: Color(0xFFEB8153),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
+                            borderRadius: BorderRadius.circular(8.0),
                           ),
                           elevation: 0,
                         ),
                         child: Text('Perbarui Profil',
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
+                                fontSize: 14, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
