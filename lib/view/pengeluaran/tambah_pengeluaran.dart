@@ -37,8 +37,17 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
       final formKey = GlobalKey<_PengeluaranFormState>();
       formKeys.add(formKey);
     });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    });
+  }
+
+  void _removeForm(int index) {
+    setState(() {
+      if (formKeys.length > 1) {
+        formKeys.removeAt(index);
+      }
     });
   }
 
@@ -165,27 +174,6 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
     }
   }
 
-  void _removeForm(int index) {
-    setState(() {
-      if (formKeys.length > 1) {
-        formKeys.removeAt(index);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Form berhasil dihapus!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Minimal satu form harus ada!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    });
-  }
-
   Future<void> fetchCategories() async {
     try {
       ApiService apiService = ApiService();
@@ -211,31 +199,105 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
           // Header Section with Orange Background
           Container(
             width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.2,
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFFEB8153).withOpacity(0.3),
+                  spreadRadius: 3,
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20.0),
-                bottomRight: Radius.circular(20.0),
+                bottomRight: Radius.circular(30.0),
+                bottomLeft: Radius.circular(30.0),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 30.0, 16.0, 12.0),
-              child: Column(
-                children: [
-                  SizedBox(height: 10),
-                  _buildHeader(),
-                  SizedBox(height: 16),
-                  Text(
-                    'Tambah Pengeluaran',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+            child: Stack(
+              children: [
+                // Background pattern
+                Positioned(
+                  right: -30,
+                  bottom: -20,
+                  child: Icon(
+                    Icons.trending_down_rounded,
+                    size: MediaQuery.of(context).size.width * 0.45,
+                    color: Colors.white.withOpacity(0.15),
                   ),
-                  SizedBox(height: 12),
-                ],
-              ),
+                ),
+                Positioned(
+                  left: -20,
+                  top: 20,
+                  child: Icon(
+                    Icons.money_off_rounded,
+                    size: MediaQuery.of(context).size.width * 0.25,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+                // Content
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 40, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Tambah Pengeluaran',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(1, 1),
+                                    blurRadius: 3,
+                                    color: Colors.black.withOpacity(0.2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Container(
+                              width: 50,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -454,11 +516,6 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
           onPressed: () {
             Navigator.pop(context);
           },
-        ),
-        Icon(
-          Icons.notifications,
-          color: Colors.white,
-          size: 24,
         ),
       ],
     );

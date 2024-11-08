@@ -110,50 +110,105 @@ class _TambahCategoriesState extends State<TambahCategories> {
         children: [
           Container(
             width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.2,
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFFEB8153).withOpacity(0.3),
+                  spreadRadius: 3,
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
               borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(20.0),
-                bottomLeft: Radius.circular(20.0),
+                bottomRight: Radius.circular(30.0),
+                bottomLeft: Radius.circular(30.0),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(12.0, 35.0, 12.0, 12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Stack(
+              children: [
+                // Background pattern
+                Positioned(
+                  right: -30,
+                  bottom: -20,
+                  child: Icon(
+                    Icons.insert_chart_outlined_rounded,
+                    size: MediaQuery.of(context).size.width * 0.45,
+                    color: Colors.white.withOpacity(0.15),
+                  ),
+                ),
+                Positioned(
+                  left: -20,
+                  top: 20,
+                  child: Icon(
+                    Icons.category_outlined,
+                    size: MediaQuery.of(context).size.width * 0.25,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+                // Content
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 40, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back,
-                            color: Colors.white, size: 20),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      Icon(
-                        Icons.notifications,
-                        color: Colors.white,
-                        size: 20,
+                      SizedBox(height: 16),
+                      Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Tambah Kategori',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(1, 1),
+                                    blurRadius: 3,
+                                    color: Colors.black.withOpacity(0.2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Container(
+                              width: 50,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
-                  Center(
-                    child: Text(
-                      'Tambah Kategori',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -301,14 +356,15 @@ class _TambahCategoriesState extends State<TambahCategories> {
                               Navigator.pop(context);
                             },
                             child:
-                                Text('Batal', style: TextStyle(fontSize: 12)),
+                                Text('Batal', style: TextStyle(fontSize: 11)),
                             style: ElevatedButton.styleFrom(
                               primary: Color(0xFFDA0000),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6.0),
+                                borderRadius: BorderRadius.circular(4.0),
                               ),
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
+                                  horizontal: 8, vertical: 4),
+                              minimumSize: Size(60, 28),
                             ),
                           ),
                           SizedBox(width: 8),

@@ -74,9 +74,9 @@ class DetailPengeluaran extends StatelessWidget {
                       padding: EdgeInsets.zero,
                       constraints: BoxConstraints(),
                       icon: Icon(
-                        Icons.arrow_back_ios,
+                        Icons.arrow_back,
                         color: Colors.white,
-                        size: 13,
+                        size: 18,
                       ),
                       onPressed: () {
                         Navigator.pop(context);

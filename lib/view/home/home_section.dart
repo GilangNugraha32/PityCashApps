@@ -19,6 +19,7 @@ class HomeSection extends StatefulWidget {
 class _HomeSectionState extends State<HomeSection>
     with SingleTickerProviderStateMixin {
   double saldo = 0.0;
+  double scrollOffset = 0.0;
   bool isLoading = true;
   bool isLoadingMore = false;
   bool isIncomeSelected = true;
@@ -141,6 +142,7 @@ class _HomeSectionState extends State<HomeSection>
     return Scaffold(
       body: Column(
         children: [
+          SizedBox(height: 10),
           _buildHeader(),
           Expanded(
             child: SingleChildScrollView(
@@ -170,153 +172,200 @@ class _HomeSectionState extends State<HomeSection>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
+          stops: [0.3, 0.9],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(30.0),
-          bottomLeft: Radius.circular(30.0),
+          bottomRight: Radius.circular(35.0),
+          bottomLeft: Radius.circular(35.0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 10,
-            offset: Offset(0, 3),
+            color: Color(0xFFEB8153).withOpacity(0.25),
+            spreadRadius: 3,
+            blurRadius: 12,
+            offset: Offset(0, 4),
           ),
         ],
       ),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Stack(
+          children: [
+            // Background pattern
+            Positioned(
+              right: -30,
+              bottom: -20,
+              child: Icon(
+                Icons.account_balance_wallet_outlined,
+                size: MediaQuery.of(context).size.width * 0.45,
+                color: Colors.white.withOpacity(0.1),
+              ),
+            ),
+
+            // Main content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    isLoggedIn ? 'Hi, $name' : 'Hi, Guest',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.person,
+                                color: Colors.white.withOpacity(0.9), size: 18),
+                            SizedBox(width: 8),
+                            Text(
+                              isLoggedIn ? 'Hi, $name' : 'Hi, Guest',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(Icons.notifications_outlined,
+                            color: Colors.white, size: 20),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 30),
+                  Center(
+                    child: Text(
+                      'Saldo Pity Cash',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withOpacity(0.9),
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ),
-                  Icon(Icons.notifications, color: Colors.white, size: 20),
-                ],
-              ),
-              SizedBox(height: 30),
-              Center(
-                child: Text(
-                  'Saldo Pity Cash',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-              ),
-              SizedBox(height: 5),
-              Center(
-                child: FutureBuilder<double>(
-                  future: ApiService().fetchMinimalSaldo(),
-                  builder: (context, snapshot) {
-                    double minimalSaldo = snapshot.data ?? 0;
-                    bool isLowBalance = saldo <= minimalSaldo;
-                    return Column(
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.8,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(width: 40),
-                              Expanded(
-                                child: Text(
-                                  isBalanceVisible
-                                      ? NumberFormat.currency(
-                                          locale: 'id_ID',
-                                          symbol: 'Rp',
-                                          decimalDigits: 0,
-                                        ).format(saldo)
-                                      : 'Rp' + _formatHiddenBalance(saldo),
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: isLowBalance
-                                        ? Color(0xFFF54D42)
-                                        : Colors.white,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  isBalanceVisible
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    isBalanceVisible = !isBalanceVisible;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (isLowBalance)
-                          Container(
-                            margin: EdgeInsets.only(top: 8),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.yellow.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                  SizedBox(height: 2),
+                  Center(
+                    child: FutureBuilder<double>(
+                      future: ApiService().fetchMinimalSaldo(),
+                      builder: (context, snapshot) {
+                        double minimalSaldo = snapshot.data ?? 0;
+                        bool isLowBalance = saldo <= minimalSaldo;
+                        return Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  color: Colors.yellow,
-                                  size: 14,
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Saldo di bawah batas minimal',
-                                  style: TextStyle(
-                                    color: Colors.yellow,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 12,
+                                SizedBox(width: 40),
+                                Expanded(
+                                  child: Text(
+                                    isBalanceVisible
+                                        ? NumberFormat.currency(
+                                            locale: 'id_ID',
+                                            symbol: 'Rp',
+                                            decimalDigits: 0,
+                                          ).format(saldo)
+                                        : 'Rp' + _formatHiddenBalance(saldo),
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: isLowBalance
+                                          ? Color(0xFFF54D42)
+                                          : Colors.white,
+                                      letterSpacing: 1,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
                                 ),
-                                SizedBox(width: 4),
-                                Text(
-                                  '(${NumberFormat.currency(
-                                    locale: 'id_ID',
-                                    symbol: 'Rp',
-                                    decimalDigits: 0,
-                                  ).format(minimalSaldo)})',
-                                  style: TextStyle(
-                                    color: Colors.yellow.withOpacity(0.8),
-                                    fontSize: 12,
+                                IconButton(
+                                  icon: Icon(
+                                    isBalanceVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.white.withOpacity(0.9),
+                                    size: 20,
                                   ),
+                                  onPressed: () {
+                                    setState(() {
+                                      isBalanceVisible = !isBalanceVisible;
+                                    });
+                                  },
                                 ),
                               ],
                             ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
+                            if (isLowBalance)
+                              Container(
+                                margin: EdgeInsets.only(top: 12),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.yellow.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: Colors.yellow.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: Colors.yellow[100],
+                                      size: 16,
+                                    ),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'Saldo di bawah batas minimal',
+                                      style: TextStyle(
+                                        color: Colors.yellow[100],
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 12,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '(${NumberFormat.currency(
+                                        locale: 'id_ID',
+                                        symbol: 'Rp',
+                                        decimalDigits: 0,
+                                      ).format(minimalSaldo)})',
+                                      style: TextStyle(
+                                        color: Colors.yellow[100]
+                                            ?.withOpacity(0.8),
+                                        fontSize: 12,
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  _buildIncomeExpenseToggle(),
+                ],
               ),
-              SizedBox(height: 15),
-              _buildIncomeExpenseToggle(),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -335,74 +384,54 @@ class _HomeSectionState extends State<HomeSection>
 
   Widget _buildIncomeExpenseToggle() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 70),
+      margin: EdgeInsets.symmetric(horizontal: 50),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
-        ],
       ),
       padding: EdgeInsets.all(5),
       child: Row(
         children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                _handleSectionClick(true);
-              },
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                padding: EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: isIncomeSelected ? Color(0xFFEB8153) : Colors.white,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Center(
-                  child: Text(
-                    'Inflow',
-                    style: TextStyle(
-                      color:
-                          isIncomeSelected ? Colors.white : Color(0xFFB8B8B8),
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () {
-                _handleSectionClick(false);
-              },
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 300),
-                padding: EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: !isIncomeSelected ? Color(0xFFEB8153) : Colors.white,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Center(
-                  child: Text(
-                    'Outflow',
-                    style: TextStyle(
-                      color:
-                          !isIncomeSelected ? Colors.white : Color(0xFFB8B8B8),
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          _buildToggleOption('Inflow', isIncomeSelected, Icons.arrow_upward),
+          _buildToggleOption(
+              'Outflow', !isIncomeSelected, Icons.arrow_downward),
         ],
+      ),
+    );
+  }
+
+  Widget _buildToggleOption(String text, bool isSelected, IconData icon) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          _handleSectionClick(text == 'Inflow');
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Color(0xFFEB8153) : Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? Colors.white : Color(0xFFB8B8B8),
+              ),
+              SizedBox(width: 4),
+              Text(
+                text,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Color(0xFFB8B8B8),
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -109,6 +109,7 @@ class _ProfileSectionState extends State<ProfileSection> {
           physics: AlwaysScrollableScrollPhysics(),
           child: Column(
             children: [
+              SizedBox(height: 10),
               _buildProfileHeader(),
               SizedBox(height: 16),
               _buildProfileOptions(),
@@ -127,93 +128,161 @@ class _ProfileSectionState extends State<ProfileSection> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
+          stops: [0.3, 0.9],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(20.0),
-          bottomLeft: Radius.circular(20.0),
+          bottomRight: Radius.circular(35.0),
+          bottomLeft: Radius.circular(35.0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: Offset(0, 2),
+            color: Color(0xFFEB8153).withOpacity(0.25),
+            spreadRadius: 3,
+            blurRadius: 12,
+            offset: Offset(0, 4),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12.0, 30.0, 12.0, 12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Stack(
+        children: [
+          // Background pattern
+          Positioned(
+            right: -30,
+            bottom: -20,
+            child: Icon(
+              Icons.co_present,
+              size: MediaQuery.of(context).size.width * 0.45,
+              color: Colors.white.withOpacity(0.1),
+            ),
+          ),
+
+          // Main content
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20.0, 50.0, 20.0, 30.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.person_outline_rounded,
+                            color: Colors.white.withOpacity(0.9),
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Profile',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 24),
+                Stack(
+                  children: [
+                    Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: FutureBuilder<String>(
+                          future: ApiService().showProfilePicture(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                  strokeWidth: 2,
+                                ),
+                              );
+                            } else if (snapshot.hasError || !snapshot.hasData) {
+                              return Container(
+                                color: Colors.white.withOpacity(0.2),
+                                child: Icon(
+                                  Icons.person_rounded,
+                                  size: 50,
+                                  color: Colors.white,
+                                ),
+                              );
+                            } else {
+                              return Image.memory(
+                                base64Decode(snapshot.data!.split(',').last),
+                                fit: BoxFit.cover,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
                 Text(
-                  'Profile',
+                  isLoggedIn ? '$name' : 'Hi, Guest!',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
+                    letterSpacing: 0.5,
+                    shadows: [
+                      Shadow(
+                        offset: Offset(0, 1),
+                        blurRadius: 3,
+                        color: Colors.black.withOpacity(0.2),
+                      ),
+                    ],
                   ),
                 ),
-                IconButton(
-                  icon:
-                      Icon(Icons.notifications, color: Colors.white, size: 18),
-                  onPressed: () {},
-                  padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
+                SizedBox(height: 4),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Text(
+                    isLoggedIn ? '$email' : 'guest@gmail.com',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.9),
+                      letterSpacing: 0.3,
+                    ),
+                  ),
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.white, width: 2),
-              ),
-              child: ClipOval(
-                child: FutureBuilder<String>(
-                  future: ApiService().showProfilePicture(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      );
-                    } else if (snapshot.hasError || !snapshot.hasData) {
-                      return Icon(Icons.person, size: 40, color: Colors.white);
-                    } else {
-                      return Image.memory(
-                        base64Decode(snapshot.data!.split(',').last),
-                        fit: BoxFit.cover,
-                      );
-                    }
-                  },
-                ),
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              isLoggedIn ? '$name' : 'Hi, Guest!',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 2),
-            Text(
-              isLoggedIn ? '$email' : 'guest@gmail.com',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white.withOpacity(0.8),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

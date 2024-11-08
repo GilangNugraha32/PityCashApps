@@ -105,7 +105,8 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
     List<int> categoryIds = [];
     List<int> dataIds = [];
     List<String> tanggalList = [];
-    List<File> images = [];
+    List<File?> images =
+        List.filled(allFormData.length, null); // Initialize dengan null
 
     // Dapatkan parent ID dari pengeluaran pertama
     int parentId = widget.pengeluaranList.isNotEmpty
@@ -113,7 +114,8 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         : 0;
 
     // Format data sesuai dengan response yang diharapkan
-    for (var entry in allFormData) {
+    for (int i = 0; i < allFormData.length; i++) {
+      var entry = allFormData[i];
       dataIds.add(entry['id_data'] ?? 0);
       names.add(entry['name']);
       descriptions.add(entry['description'] ?? '');
@@ -135,21 +137,14 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         print('Error saat parsing tanggal: $tanggal. Error: $e');
       }
 
-      // Tambahkan gambar jika ada
-      if (entry['image'] != null && entry['image'] is File) {
-        images.add(entry['image'] as File);
+      // Hanya update gambar jika ada perubahan
+      if (selectedImages[i] != null) {
+        images[i] = selectedImages[i];
       }
     }
 
     try {
-      // Siapkan list gambar final
-      List<File> finalImages = [];
-      finalImages.addAll(images);
-      finalImages.addAll(selectedImages
-          .where((image) => image != null)
-          .map((image) => image!));
-
-      // Kirim request ke API
+      // Kirim request ke API dengan gambar yang sudah difilter
       await ApiService().editPengeluaran(
         parentId,
         tanggalList,
@@ -161,7 +156,7 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         nominals,
         dls,
         categoryIds,
-        finalImages,
+        images.whereType<File>().toList(), // Hanya kirim gambar yang tidak null
       );
 
       // Tampilkan pesan sukses
@@ -318,31 +313,105 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
           // Header Section with Orange Background
           Container(
             width: double.infinity,
+            height: MediaQuery.of(context).size.height * 0.2,
             decoration: BoxDecoration(
               color: Color(0xFFEB8153),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0xFFEB8153).withOpacity(0.3),
+                  spreadRadius: 3,
+                  blurRadius: 10,
+                  offset: Offset(0, 3),
+                ),
+              ],
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20.0),
-                bottomRight: Radius.circular(20.0),
+                bottomRight: Radius.circular(30.0),
+                bottomLeft: Radius.circular(30.0),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 30.0, 16.0, 12.0),
-              child: Column(
-                children: [
-                  SizedBox(height: 10),
-                  _buildHeader(),
-                  SizedBox(height: 16),
-                  Text(
-                    'Edit Pengeluaran',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+            child: Stack(
+              children: [
+                // Background pattern
+                Positioned(
+                  right: -30,
+                  bottom: -20,
+                  child: Icon(
+                    Icons.trending_down_rounded,
+                    size: MediaQuery.of(context).size.width * 0.45,
+                    color: Colors.white.withOpacity(0.15),
                   ),
-                  SizedBox(height: 12),
-                ],
-              ),
+                ),
+                Positioned(
+                  left: -20,
+                  top: 20,
+                  child: Icon(
+                    Icons.attach_money_rounded,
+                    size: MediaQuery.of(context).size.width * 0.25,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
+                ),
+                // Content
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16, 40, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 16),
+                      Center(
+                        child: Column(
+                          children: [
+                            Text(
+                              'Edit Pengeluaran',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(1, 1),
+                                    blurRadius: 3,
+                                    color: Colors.black.withOpacity(0.2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Container(
+                              width: 50,
+                              height: 3,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
@@ -538,11 +607,6 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
           onPressed: () {
             Navigator.pop(context);
           },
-        ),
-        Icon(
-          Icons.notifications,
-          color: Colors.white,
-          size: 24,
         ),
       ],
     );

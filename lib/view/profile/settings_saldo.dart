@@ -202,9 +202,24 @@ class _SettingsSaldoState extends State<SettingsSaldo>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 16),
-            onPressed: () => Navigator.pop(context),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (Navigator.of(context).canPop()) {
+                  Navigator.of(context).pop(true);
+                }
+              },
+            ),
           ),
           Text(
             'Pengaturan Saldo',

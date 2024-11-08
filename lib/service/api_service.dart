@@ -1021,7 +1021,11 @@ class ApiService {
     try {
       await _setAuthToken();
 
-      final Map<String, dynamic> queryParams = {'page': page};
+      final Map<String, dynamic> queryParams = {
+        'page': page,
+        'per_page': 5, // Meningkatkan jumlah item per halaman
+        'all': true // Parameter untuk mendapatkan semua data
+      };
 
       if (dateRange != null) {
         queryParams['start_date'] =
@@ -1036,10 +1040,36 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> expenseData = response.data['data']['data'];
-        print('Data pengeluaran berhasil diambil: ${expenseData.length} item');
+        final Map<String, dynamic> responseData = response.data['data'];
+        List<dynamic> expenseData = [];
 
-        return expenseData.map((json) => Pengeluaran.fromJson(json)).toList();
+        // Mengambil semua data dari semua halaman
+        if (page == 1) {
+          final int lastPage = responseData['last_page'];
+          expenseData.addAll(responseData['data']);
+
+          // Mengambil data dari halaman selanjutnya secara berurutan
+          for (int i = 2; i <= lastPage; i++) {
+            queryParams['page'] = i;
+            final nextResponse = await _dio.get(
+              '$baseUrl/outcome/all',
+              queryParameters: queryParams,
+            );
+            if (nextResponse.statusCode == 200) {
+              expenseData.addAll(nextResponse.data['data']['data']);
+            }
+          }
+        } else {
+          expenseData = responseData['data'];
+        }
+
+        print(
+            'Total data pengeluaran yang diambil: ${expenseData.length} item');
+
+        List<Pengeluaran> expenses =
+            expenseData.map((json) => Pengeluaran.fromJson(json)).toList();
+
+        return expenses;
       } else {
         throw Exception(
             'Gagal mengambil data pengeluaran: ${response.statusCode}');
@@ -1253,23 +1283,26 @@ class ApiService {
           MapEntry('dll[]', dls[i].toString()),
           MapEntry('category_id[]', categoryIds[i].toString()),
         ]);
-      }
 
-      // Add files if they exist
-      if (files.isNotEmpty) {
-        for (int i = 0; i < files.length; i++) {
-          if (files[i].path.isNotEmpty) {
-            String fileName = files[i].path.split('/').last;
-            formData.files.add(
-              MapEntry(
-                'image[]',
-                await MultipartFile.fromFile(
-                  files[i].path,
-                  filename: fileName,
-                ),
+        // Tambahkan flag untuk menandai apakah gambar diubah
+        formData.fields.add(MapEntry('image_changed[]',
+            i < files.length && files[i].path.isNotEmpty ? '1' : '0'));
+
+        // Tambahkan file gambar jika ada perubahan
+        if (i < files.length && files[i].path.isNotEmpty) {
+          String fileName = files[i].path.split('/').last;
+          formData.files.add(
+            MapEntry(
+              'image[]',
+              await MultipartFile.fromFile(
+                files[i].path,
+                filename: fileName,
               ),
-            );
-          }
+            ),
+          );
+        } else {
+          // Tambahkan placeholder untuk form yang tidak mengubah gambar
+          formData.fields.add(MapEntry('image[]', ''));
         }
       }
 

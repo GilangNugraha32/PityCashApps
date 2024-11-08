@@ -286,35 +286,42 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(10),
           ),
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          titlePadding:
+              EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 4),
           title: Text(
             'Konfirmasi Hapus',
-            style: TextStyle(color: Colors.red),
+            style: TextStyle(
+                color: Colors.red, fontSize: 14, fontWeight: FontWeight.bold),
           ),
-          content: Text('Apakah Anda yakin ingin menghapus data ini?'),
+          content: Text(
+            'Apakah Anda yakin ingin menghapus data ini?',
+            style: TextStyle(fontSize: 12),
+          ),
           actions: [
-            ElevatedButton(
+            TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
               child: Text(
                 'Batal',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 12),
               ),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.grey,
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey[400],
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () async {
                 try {
                   await _apiService.deleteIncome(pemasukan.idData);
 
-                  // Hapus item dari list lokal
                   setState(() {
                     incomes
                         .removeWhere((item) => item.idData == pemasukan.idData);
@@ -328,20 +335,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     SnackBar(
                       content: Text(
                         'Berhasil dihapus!',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 12),
                       ),
                       backgroundColor: Colors.green,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      margin: EdgeInsets.all(10),
+                      margin: EdgeInsets.all(8),
                       duration: Duration(seconds: 2),
                     ),
                   );
 
-                  // Refresh saldo setelah menghapus
                   _getSaldo();
                 } catch (e) {
                   Navigator.of(context).pop();
@@ -349,25 +354,28 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     SnackBar(
                       content: Text(
                         'Gagal menghapus data',
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(fontSize: 12),
                       ),
                       backgroundColor: Colors.red,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      margin: EdgeInsets.all(10),
+                      margin: EdgeInsets.all(8),
                       duration: Duration(seconds: 2),
                     ),
                   );
                 }
               },
-              child: Text('Hapus'),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.red,
+              child: Text(
+                'Hapus',
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(6),
                 ),
               ),
             ),
@@ -549,37 +557,56 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   Widget _buildHeaderSection() {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(bottom: 12.0),
+      padding: EdgeInsets.only(bottom: 20.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
+          stops: [0.3, 0.9],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(25.0),
-          bottomLeft: Radius.circular(25.0),
+          bottomRight: Radius.circular(35.0),
+          bottomLeft: Radius.circular(35.0),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.4),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 2),
+            color: Color(0xFFEB8153).withOpacity(0.25),
+            spreadRadius: 3,
+            blurRadius: 12,
+            offset: Offset(0, 4),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12.0, 45.0, 12.0, 12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: SafeArea(
+        child: Stack(
           children: [
-            SizedBox(height: 10),
-            _buildHeaderTopRow(),
-            SizedBox(height: 12),
-            _buildSaldoSection(),
-            SizedBox(height: 10),
-            _buildToggleButton(),
+            // Background pattern
+            Positioned(
+              right: -30,
+              bottom: -20,
+              child: Icon(
+                Icons.trending_up,
+                size: MediaQuery.of(context).size.width * 0.45,
+                color: Colors.white.withOpacity(0.1),
+              ),
+            ),
+
+            // Main content
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 20),
+                  _buildHeaderTopRow(),
+                  SizedBox(height: 10),
+                  _buildSaldoSection(),
+                  SizedBox(height: 10),
+                  _buildToggleButton(),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -590,18 +617,31 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Inflow',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        Icon(
-          Icons.notifications,
-          color: Colors.white,
-          size: 22,
+          child: Row(
+            children: [
+              Icon(
+                Icons.arrow_upward_rounded,
+                color: Colors.white.withOpacity(0.9),
+                size: 18,
+              ),
+              SizedBox(width: 8),
+              Text(
+                'Inflow',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -615,11 +655,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
             'Saldo Pity Cash',
             style: TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               color: Colors.white.withOpacity(0.9),
+              letterSpacing: 0.5,
             ),
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 2),
           FutureBuilder<double>(
             future: ApiService().fetchMinimalSaldo(),
             builder: (context, snapshot) {
@@ -631,75 +672,78 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                 bool isLowBalance = saldo <= minimalSaldo;
                 return Column(
                   children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(width: 35),
-                          Expanded(
-                            child: Text(
-                              isBalanceVisible
-                                  ? NumberFormat.currency(
-                                      locale: 'id_ID',
-                                      symbol: 'Rp',
-                                      decimalDigits: 0,
-                                    ).format(saldo)
-                                  : 'Rp' + _formatHiddenBalance(saldo),
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: isLowBalance
-                                    ? Color(0xFFF54D42)
-                                    : Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(width: 40),
+                        Expanded(
+                          child: Text(
+                            isBalanceVisible
+                                ? NumberFormat.currency(
+                                    locale: 'id_ID',
+                                    symbol: 'Rp',
+                                    decimalDigits: 0,
+                                  ).format(saldo)
+                                : 'Rp' + _formatHiddenBalance(saldo),
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: isLowBalance
+                                  ? Color(0xFFF54D42)
+                                  : Colors.white,
+                              letterSpacing: 1,
                             ),
+                            textAlign: TextAlign.center,
                           ),
-                          IconButton(
-                            icon: Icon(
-                              isBalanceVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Colors.white,
-                              size: 22,
-                            ),
-                            onPressed: () {
-                              setState(() {
-                                isBalanceVisible = !isBalanceVisible;
-                              });
-                            },
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            isBalanceVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.white.withOpacity(0.9),
+                            size: 20,
                           ),
-                        ],
-                      ),
+                          onPressed: () {
+                            setState(() {
+                              isBalanceVisible = !isBalanceVisible;
+                            });
+                          },
+                        ),
+                      ],
                     ),
                     if (isLowBalance)
                       Container(
-                        margin: EdgeInsets.only(top: 6),
+                        margin: EdgeInsets.only(top: 12),
                         padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.yellow.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.yellow.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.yellow.withOpacity(0.3),
+                            width: 1,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              Icons.info_outline,
-                              color: Colors.yellow,
-                              size: 14,
+                              Icons.warning_amber_rounded,
+                              color: Colors.yellow[100],
+                              size: 16,
                             ),
-                            SizedBox(width: 3),
+                            SizedBox(width: 6),
                             Text(
                               'Saldo di bawah batas minimal',
                               style: TextStyle(
-                                color: Colors.yellow,
+                                color: Colors.yellow[100],
                                 fontWeight: FontWeight.w500,
-                                fontSize: 11,
+                                fontSize: 12,
+                                letterSpacing: 0.3,
                               ),
                             ),
-                            SizedBox(width: 3),
+                            SizedBox(width: 4),
                             Text(
                               '(${NumberFormat.currency(
                                 locale: 'id_ID',
@@ -707,8 +751,9 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                 decimalDigits: 0,
                               ).format(minimalSaldo)})',
                               style: TextStyle(
-                                color: Colors.yellow.withOpacity(0.8),
-                                fontSize: 11,
+                                color: Colors.yellow[100]?.withOpacity(0.8),
+                                fontSize: 12,
+                                letterSpacing: 0.3,
                               ),
                             ),
                           ],
@@ -737,10 +782,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
 
   Widget _buildToggleButton() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 50),
+      margin: EdgeInsets.symmetric(horizontal: 40),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       padding: EdgeInsets.all(5),
       child: Row(
@@ -768,17 +821,26 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           padding: EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: isSelected ? Color(0xFFEB8153) : Colors.white,
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(12.0),
           ),
-          child: Center(
-            child: Text(
-              text,
-              style: TextStyle(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                text == 'Inflow' ? Icons.arrow_upward : Icons.arrow_downward,
                 color: isSelected ? Colors.white : Color(0xFFB8B8B8),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+                size: 16,
               ),
-            ),
+              SizedBox(width: 4),
+              Text(
+                text,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Color(0xFFB8B8B8),
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ),
       ),

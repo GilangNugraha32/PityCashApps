@@ -180,7 +180,7 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(16.0),
+                width: double.infinity,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -188,80 +188,108 @@ class _ChangePasswordProfileState extends State<ChangePasswordProfile> {
                     colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
                   ),
                   borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
+                    bottomRight: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.arrow_back,
-                              color: Colors.white, size: 18),
-                          onPressed: () => Navigator.pop(context),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12.0, 16.0, 12.0, 24.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                if (Navigator.of(context).canPop()) {
+                                  Navigator.of(context).pop(true);
+                                }
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                'Ubah Password',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 48),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
                         ),
-                        Text(
-                          'Ubah Password',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                        child: ClipOval(
+                          child: FutureBuilder<String>(
+                            future: ApiService().showProfilePicture(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white));
+                              } else if (snapshot.hasError ||
+                                  !snapshot.hasData) {
+                                return Icon(Icons.person,
+                                    size: 50, color: Colors.white);
+                              } else {
+                                return Image.memory(
+                                    base64Decode(
+                                        snapshot.data!.split(',').last),
+                                    fit: BoxFit.cover);
+                              }
+                            },
                           ),
                         ),
-                        SizedBox(width: 40),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
                       ),
-                      child: ClipOval(
-                        child: FutureBuilder<String>(
-                          future: ApiService().showProfilePicture(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return CircularProgressIndicator(
-                                valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
-                              );
-                            } else if (snapshot.hasError || !snapshot.hasData) {
-                              return Icon(Icons.person,
-                                  size: 40, color: Colors.white);
-                            } else {
-                              return Image.memory(
-                                base64Decode(snapshot.data!.split(',').last),
-                                fit: BoxFit.cover,
-                              );
-                            }
-                          },
+                      SizedBox(height: 16),
+                      Text(
+                        _usernameController.text,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      _usernameController.text,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                      SizedBox(height: 6),
+                      Text(
+                        _emailController.text,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.9),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      _emailController.text,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Padding(

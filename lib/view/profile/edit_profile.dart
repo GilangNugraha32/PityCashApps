@@ -242,33 +242,39 @@ class _EditProfileState extends State<EditProfile> {
                   child: Column(
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          IconButton(
-                            icon: Icon(Icons.arrow_back,
-                                color: Colors.white, size: 20),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              if (Navigator.of(context).canPop()) {
-                                Navigator.of(context).pop(true);
-                              }
-                            },
-                          ),
-                          Text(
-                            'Edit Profil',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                if (Navigator.of(context).canPop()) {
+                                  Navigator.of(context).pop(true);
+                                }
+                              },
                             ),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.notifications,
-                                color: Colors.white, size: 20),
-                            onPressed: () {
-                              // Implementasi notifikasi
-                            },
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                'Edit Profil',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
                           ),
+                          SizedBox(width: 48),
                         ],
                       ),
                       SizedBox(height: 20),
@@ -288,78 +294,87 @@ class _EditProfileState extends State<EditProfile> {
                           alignment: Alignment.bottomRight,
                           children: [
                             Container(
-                              width: 100,
-                              height: 100,
+                              width: 120,
+                              height: 120,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border:
-                                    Border.all(color: Colors.white, width: 2),
+                                    Border.all(color: Colors.white, width: 3),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.2),
-                                    spreadRadius: 1,
-                                    blurRadius: 3,
-                                    offset: Offset(0, 2),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: Offset(0, 3),
                                   ),
                                 ],
                               ),
                               child: ClipOval(
-                                child: FutureBuilder<String>(
-                                  future: ApiService().showProfilePicture(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  Colors.white));
-                                    } else if (snapshot.hasError) {
-                                      print(
-                                          'Error menampilkan foto profil: ${snapshot.error}');
-                                      return Image.asset(
-                                          'assets/piticash_log.png',
-                                          fit: BoxFit.cover);
-                                    } else if (snapshot.hasData &&
-                                        snapshot.data != null) {
-                                      return Image.memory(
-                                          base64Decode(
-                                              snapshot.data!.split(',').last),
-                                          fit: BoxFit.cover);
-                                    } else {
-                                      return Icon(Icons.person,
-                                          size: 40, color: Colors.white);
-                                    }
-                                  },
-                                ),
+                                child: _profileImage != null
+                                    ? Image.file(
+                                        _profileImage!,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : FutureBuilder<String>(
+                                        future:
+                                            ApiService().showProfilePicture(),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting) {
+                                            return CircularProgressIndicator(
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Colors.white));
+                                          } else if (snapshot.hasError) {
+                                            print(
+                                                'Error menampilkan foto profil: ${snapshot.error}');
+                                            return Image.asset(
+                                                'assets/piticash_log.png',
+                                                fit: BoxFit.cover);
+                                          } else if (snapshot.hasData &&
+                                              snapshot.data != null) {
+                                            return Image.memory(
+                                                base64Decode(snapshot.data!
+                                                    .split(',')
+                                                    .last),
+                                                fit: BoxFit.cover);
+                                          } else {
+                                            return Icon(Icons.person,
+                                                size: 50, color: Colors.white);
+                                          }
+                                        },
+                                      ),
                               ),
                             ),
                             Container(
-                              padding: EdgeInsets.all(4),
+                              padding: EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Color(0xFFEB8153),
                                 shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
                               ),
                               child: Icon(Icons.camera_alt,
-                                  color: Color(0xFFEB8153), size: 14),
+                                  color: Colors.white, size: 18),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 12),
+                      SizedBox(height: 16),
                       Text(
                         _usernameController.text,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: 6),
                       Text(
                         _emailController.text,
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.9),
                         ),
                       ),
                     ],

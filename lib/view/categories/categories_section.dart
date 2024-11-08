@@ -184,77 +184,116 @@ class _CategoriesSectionState extends State<CategoriesSection> {
               // Fixed orange background section
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.fromLTRB(12.0, 45.0, 12.0, 12.0),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFFEB8153), Color(0xFFFF9D6C)],
-                  ),
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(20.0), // Radius dikurangi
-                    bottomLeft: Radius.circular(20.0),
-                  ),
+                  color: Color(0xFFEB8153),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.4),
-                      spreadRadius: 1,
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
+                      color: Color(0xFFEB8153).withOpacity(0.3),
+                      spreadRadius: 3,
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
                     ),
                   ],
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
                   children: [
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Kategori',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                    // Background pattern
+                    Positioned(
+                      right: -30,
+                      bottom: -20,
+                      child: Icon(
+                        Icons.insert_chart_outlined_rounded,
+                        size: MediaQuery.of(context).size.width * 0.45,
+                        color: Colors.white.withOpacity(0.15),
+                      ),
+                    ),
+                    Positioned(
+                      left: -20,
+                      top: 20,
+                      child: Icon(
+                        Icons.interests_outlined,
+                        size: MediaQuery.of(context).size.width * 0.25,
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                    ),
+                    // Content
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(12.0, 45.0, 12.0, 12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.interests_outlined,
+                                      color: Colors.white.withOpacity(0.9),
+                                      size: 18,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Kategori',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        Icon(Icons.notifications,
-                            color: Colors.white, size: 20),
-                      ],
-                    ),
-                    SizedBox(height: 16), // Spacing dikurangi
-                    Center(
-                      child: Text(
-                        'Pilih Kategori',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                          SizedBox(height: 16),
+                          Center(
+                            child: Text(
+                              'Pilih Kategori',
+                              style: TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 15),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              style: TextStyle(fontSize: 13),
+                              decoration: InputDecoration(
+                                hintText: 'Cari nama atau jenis kategori...',
+                                hintStyle: TextStyle(fontSize: 13),
+                                border: InputBorder.none,
+                                icon: Icon(Icons.search,
+                                    color: Colors.grey, size: 16),
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: 8),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 12),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 15),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: TextField(
-                        controller: _searchController,
-                        style: TextStyle(fontSize: 13),
-                        decoration: InputDecoration(
-                          hintText: 'Cari nama atau jenis kategori...',
-                          hintStyle: TextStyle(fontSize: 13),
-                          border: InputBorder.none,
-                          icon:
-                              Icon(Icons.search, color: Colors.grey, size: 16),
-                          contentPadding: EdgeInsets.symmetric(vertical: 8),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 12),
                   ],
                 ),
               ),
