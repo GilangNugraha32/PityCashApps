@@ -177,271 +177,282 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              // Fixed orange background section
-              Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Color(0xFFEB8153),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0xFFEB8153).withOpacity(0.3),
-                      spreadRadius: 3,
-                      blurRadius: 10,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                  borderRadius: BorderRadius.only(
-                    bottomRight: Radius.circular(30.0),
-                    bottomLeft: Radius.circular(30.0),
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    // Background pattern
-                    Positioned(
-                      right: -30,
-                      bottom: -20,
-                      child: Icon(
-                        Icons.insert_chart_outlined_rounded,
-                        size: MediaQuery.of(context).size.width * 0.45,
-                        color: Colors.white.withOpacity(0.15),
-                      ),
-                    ),
-                    Positioned(
-                      left: -20,
-                      top: 20,
-                      child: Icon(
-                        Icons.interests_outlined,
-                        size: MediaQuery.of(context).size.width * 0.25,
-                        color: Colors.white.withOpacity(0.1),
-                      ),
-                    ),
-                    // Content
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(12.0, 45.0, 12.0, 12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.interests_outlined,
-                                      color: Colors.white.withOpacity(0.9),
-                                      size: 18,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Kategori',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16),
-                          Center(
-                            child: Text(
-                              'Pilih Kategori',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 15),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: TextField(
-                              controller: _searchController,
-                              style: TextStyle(fontSize: 13),
-                              decoration: InputDecoration(
-                                hintText: 'Cari nama atau jenis kategori...',
-                                hintStyle: TextStyle(fontSize: 13),
-                                border: InputBorder.none,
-                                icon: Icon(Icons.search,
-                                    color: Colors.grey, size: 16),
-                                contentPadding:
-                                    EdgeInsets.symmetric(vertical: 8),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 12),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 35), // Spacing dikurangi
-
-              // Categories List
-              Expanded(
-                child: Container(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              children: [
+                // Fixed orange background section
+                Container(
+                  width: double.infinity,
+                  constraints:
+                      BoxConstraints(maxHeight: 250), // Batasi tinggi maksimal
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16.0)), // Radius dikurangi
+                    color: Color(0xFFEB8153),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 1, // Dikurangi
-                        blurRadius: 4, // Dikurangi
-                        offset: Offset(0, 2), // Dikurangi
+                        color: Color(0xFFEB8153).withOpacity(0.3),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
                       ),
                     ],
+                    borderRadius: BorderRadius.only(
+                      bottomRight: Radius.circular(25.0),
+                      bottomLeft: Radius.circular(25.0),
+                    ),
                   ),
-                  child: Column(
+                  child: Stack(
                     children: [
-                      // Buttons in the upper right corner
-                      FutureBuilder<Map<String, dynamic>?>(
-                        future: SharedPreferencesService().getRoles(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            final roles = snapshot.data?['roles'] as List;
-                            bool isReaderOnly = roles.length == 1 &&
-                                roles[0]['name'] == 'Reader';
-
-                            if (!isReaderOnly) {
-                              return Padding(
-                                padding: const EdgeInsets.only(
-                                    right: 14.0,
-                                    top: 14.0), // Padding dikurangi
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    _buildActionButton(
-                                      Icons.print_outlined,
-                                      Color(0xFF51A6F5),
-                                      () {
-                                        _showExportPDFDialog(context);
-                                      },
-                                    ),
-                                    SizedBox(width: 4), // Spacing dikurangi
-                                    _buildActionButton(
-                                      Icons.file_upload_outlined,
-                                      Color(0xFF68CF29),
-                                      () {
-                                        _showDragAndDropModal(context);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-                          }
-                          return SizedBox.shrink();
-                        },
+                      // Background pattern dengan ukuran relatif
+                      Positioned(
+                        right: -20,
+                        bottom: -15,
+                        child: Icon(
+                          Icons.insert_chart_outlined_rounded,
+                          size: 100, // Ukuran tetap
+                          color: Colors.white.withOpacity(0.15),
+                        ),
                       ),
-                      Expanded(
-                        child: LazyLoadScrollView(
-                          onEndOfPage: () {
-                            _fetchCategories(currentPage);
-                          },
-                          child: RefreshIndicator(
-                            onRefresh: _refreshCategoryList,
-                            child: ListView.separated(
-                              padding: EdgeInsets.zero,
-                              itemCount: filteredCategories.length +
-                                  (isLoadingMore ? 1 : 0),
-                              separatorBuilder: (context, index) => Divider(
-                                color: Colors.grey[300],
-                                height: 1,
+                      Positioned(
+                        left: -15,
+                        top: 15,
+                        child: Icon(
+                          Icons.interests_outlined,
+                          size: 60, // Ukuran tetap
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                      // Content dengan padding yang konsisten
+                      Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                              itemBuilder: (context, index) {
-                                if (index == filteredCategories.length) {
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                          Color(0xFFEB8153)),
-                                    ),
-                                  );
-                                }
-                                final category = filteredCategories[index];
-                                return ListTile(
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8), // Padding dikurangi lagi
-                                  leading: Container(
-                                    padding: EdgeInsets.all(
-                                        6), // Padding dikurangi lagi
-                                    decoration: BoxDecoration(
-                                      color: category.jenisKategori == 1
-                                          ? Color(0xFFE6F7FF)
-                                          : Color(0xFFFFE6E6),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      category.jenisKategori == 1
-                                          ? Icons.trending_up
-                                          : Icons.trending_down,
-                                      color: category.jenisKategori == 1
-                                          ? Colors.blue
-                                          : Colors.red,
-                                      size: 18, // Icon size dikurangi lagi
-                                    ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.interests_outlined,
+                                    color: Colors.white.withOpacity(0.9),
+                                    size: 16,
                                   ),
-                                  title: Text(
-                                    category.name,
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Kategori',
                                     style: TextStyle(
-                                      fontSize: 14, // Font size dikurangi lagi
-                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  subtitle: Text(
-                                    category.jenisKategori == 1
-                                        ? 'Pemasukan'
-                                        : 'Pengeluaran',
-                                    style: TextStyle(
-                                      fontSize: 11, // Font size dikurangi lagi
-                                      color: category.jenisKategori == 1
-                                          ? Colors.green
-                                          : Colors.red,
-                                    ),
-                                  ),
-                                  trailing: Icon(Icons.chevron_right,
-                                      color: Color(0xFFEB8153),
-                                      size: 18), // Icon size dikurangi lagi
-                                  onTap: () {
-                                    _showDetailsModal(context, category.id);
-                                  },
-                                );
-                              },
+                                ],
+                              ),
                             ),
-                          ),
+                            SizedBox(height: 12),
+                            Center(
+                              child: Text(
+                                'Pilih Kategori',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 12),
+                            Container(
+                              height: 36,
+                              margin: EdgeInsets.symmetric(horizontal: 20),
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              child: TextField(
+                                controller: _searchController,
+                                style: TextStyle(fontSize: 12),
+                                decoration: InputDecoration(
+                                  hintText: 'Cari nama atau jenis kategori...',
+                                  hintStyle: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey[400],
+                                  ),
+                                  border: InputBorder.none,
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: Colors.grey,
+                                    size: 14,
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 4,
+                                  ),
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 20),
+
+                // Categories List
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16.0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3),
+                          spreadRadius: 1,
+                          blurRadius: 4,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // Buttons in the upper right corner
+                        FutureBuilder<Map<String, dynamic>?>(
+                          future: SharedPreferencesService().getRoles(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              final roles = snapshot.data?['roles'] as List;
+                              bool isReaderOnly = roles.length == 1 &&
+                                  roles[0]['name'] == 'Reader';
+
+                              if (!isReaderOnly) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(
+                                      right: 14.0, top: 14.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      _buildActionButton(
+                                        Icons.print_outlined,
+                                        Color(0xFF51A6F5),
+                                        () {
+                                          _showExportPDFDialog(context);
+                                        },
+                                      ),
+                                      SizedBox(width: 4),
+                                      _buildActionButton(
+                                        Icons.file_upload_outlined,
+                                        Color(0xFF68CF29),
+                                        () {
+                                          _showDragAndDropModal(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+                            }
+                            return SizedBox.shrink();
+                          },
+                        ),
+                        Expanded(
+                          child: LazyLoadScrollView(
+                            onEndOfPage: () {
+                              _fetchCategories(currentPage);
+                            },
+                            child: RefreshIndicator(
+                              onRefresh: _refreshCategoryList,
+                              child: ListView.separated(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                padding: EdgeInsets.zero,
+                                itemCount: filteredCategories.length +
+                                    (isLoadingMore ? 1 : 0),
+                                separatorBuilder: (context, index) => Divider(
+                                  color: Colors.grey[300],
+                                  height: 1,
+                                ),
+                                itemBuilder: (context, index) {
+                                  if (index == filteredCategories.length) {
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Color(0xFFEB8153)),
+                                      ),
+                                    );
+                                  }
+                                  final category = filteredCategories[index];
+                                  return ListTile(
+                                    contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
+                                    leading: Container(
+                                      padding: EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: category.jenisKategori == 1
+                                            ? Color(0xFFE6F7FF)
+                                            : Color(0xFFFFE6E6),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        category.jenisKategori == 1
+                                            ? Icons.trending_up
+                                            : Icons.trending_down,
+                                        color: category.jenisKategori == 1
+                                            ? Colors.blue
+                                            : Colors.red,
+                                        size: 18,
+                                      ),
+                                    ),
+                                    title: Text(
+                                      category.name,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      category.jenisKategori == 1
+                                          ? 'Pemasukan'
+                                          : 'Pengeluaran',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: category.jenisKategori == 1
+                                            ? Colors.green
+                                            : Colors.red,
+                                      ),
+                                    ),
+                                    trailing: Icon(Icons.chevron_right,
+                                        color: Color(0xFFEB8153), size: 18),
+                                    onTap: () {
+                                      _showDetailsModal(context, category.id);
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -131,15 +131,15 @@ class _ProfileSectionState extends State<ProfileSection> {
           stops: [0.3, 0.9],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(35.0),
-          bottomLeft: Radius.circular(35.0),
+          bottomRight: Radius.circular(25.0),
+          bottomLeft: Radius.circular(25.0),
         ),
         boxShadow: [
           BoxShadow(
             color: Color(0xFFEB8153).withOpacity(0.25),
-            spreadRadius: 3,
-            blurRadius: 12,
-            offset: Offset(0, 4),
+            spreadRadius: 2,
+            blurRadius: 8,
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -147,18 +147,20 @@ class _ProfileSectionState extends State<ProfileSection> {
         children: [
           // Background pattern
           Positioned(
-            right: -30,
-            bottom: -20,
+            right: -20,
+            bottom: -15,
             child: Icon(
               Icons.co_present,
-              size: MediaQuery.of(context).size.width * 0.45,
+              size: MediaQuery.of(context).size.width *
+                  0.35, // Ukuran lebih kecil
               color: Colors.white.withOpacity(0.1),
             ),
           ),
 
           // Main content
           Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 50.0, 20.0, 30.0),
+            padding: const EdgeInsets.fromLTRB(
+                16.0, 40.0, 16.0, 24.0), // Padding lebih kecil
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -167,24 +169,24 @@ class _ProfileSectionState extends State<ProfileSection> {
                   children: [
                     Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(15),
                       ),
                       child: Row(
                         children: [
                           Icon(
                             Icons.person_outline_rounded,
                             color: Colors.white.withOpacity(0.9),
-                            size: 18,
+                            size: 16,
                           ),
-                          SizedBox(width: 8),
+                          SizedBox(width: 6),
                           Text(
                             'Profile',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 13,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.5,
                             ),
@@ -194,20 +196,20 @@ class _ProfileSectionState extends State<ProfileSection> {
                     ),
                   ],
                 ),
-                SizedBox(height: 24),
+                SizedBox(height: 20),
                 Stack(
                   children: [
                     Container(
-                      width: 110,
-                      height: 110,
+                      width: 90, // Ukuran foto profil lebih kecil
+                      height: 90,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
+                        border: Border.all(color: Colors.white, width: 2.5),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
-                            spreadRadius: 2,
-                            blurRadius: 8,
+                            spreadRadius: 1.5,
+                            blurRadius: 6,
                             offset: Offset(0, 2),
                           ),
                         ],
@@ -230,7 +232,7 @@ class _ProfileSectionState extends State<ProfileSection> {
                                 color: Colors.white.withOpacity(0.2),
                                 child: Icon(
                                   Icons.person_rounded,
-                                  size: 50,
+                                  size: 40,
                                   color: Colors.white,
                                 ),
                               );
@@ -246,18 +248,18 @@ class _ProfileSectionState extends State<ProfileSection> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: 12),
                 Text(
                   isLoggedIn ? '$name' : 'Hi, Guest!',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     letterSpacing: 0.5,
                     shadows: [
                       Shadow(
                         offset: Offset(0, 1),
-                        blurRadius: 3,
+                        blurRadius: 2,
                         color: Colors.black.withOpacity(0.2),
                       ),
                     ],
@@ -265,15 +267,15 @@ class _ProfileSectionState extends State<ProfileSection> {
                 ),
                 SizedBox(height: 4),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     isLoggedIn ? '$email' : 'guest@gmail.com',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       color: Colors.white.withOpacity(0.9),
                       letterSpacing: 0.3,
                     ),

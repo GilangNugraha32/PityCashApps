@@ -226,6 +226,8 @@ class _EditProfileState extends State<EditProfile> {
             children: [
               Container(
                 width: double.infinity,
+                height: MediaQuery.of(context).size.height *
+                    0.35, // Menambahkan height constraint
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
@@ -238,8 +240,10 @@ class _EditProfileState extends State<EditProfile> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12.0, 16.0, 12.0, 24.0),
+                  padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 16.0),
                   child: Column(
+                    mainAxisSize:
+                        MainAxisSize.min, // Mengoptimalkan ukuran kolom
                     children: [
                       Row(
                         children: [
@@ -252,8 +256,9 @@ class _EditProfileState extends State<EditProfile> {
                               icon: Icon(
                                 Icons.arrow_back,
                                 color: Colors.white,
-                                size: 20,
+                                size: 18,
                               ),
+                              padding: EdgeInsets.all(8),
                               onPressed: () {
                                 Navigator.of(context).pop();
                                 if (Navigator.of(context).canPop()) {
@@ -265,19 +270,19 @@ class _EditProfileState extends State<EditProfile> {
                           Expanded(
                             child: Center(
                               child: Text(
-                                'Edit Profil',
+                                'Edit Profile',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(width: 48),
+                          SizedBox(width: 40),
                         ],
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 16),
                       GestureDetector(
                         onTap: () async {
                           FilePickerResult? result =
@@ -294,8 +299,8 @@ class _EditProfileState extends State<EditProfile> {
                           alignment: Alignment.bottomRight,
                           children: [
                             Container(
-                              width: 120,
-                              height: 120,
+                              width: 100,
+                              height: 100,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border:
@@ -340,14 +345,14 @@ class _EditProfileState extends State<EditProfile> {
                                                 fit: BoxFit.cover);
                                           } else {
                                             return Icon(Icons.person,
-                                                size: 50, color: Colors.white);
+                                                size: 40, color: Colors.white);
                                           }
                                         },
                                       ),
                               ),
                             ),
                             Container(
-                              padding: EdgeInsets.all(8),
+                              padding: EdgeInsets.all(6),
                               decoration: BoxDecoration(
                                 color: Color(0xFFEB8153),
                                 shape: BoxShape.circle,
@@ -355,25 +360,25 @@ class _EditProfileState extends State<EditProfile> {
                                     Border.all(color: Colors.white, width: 2),
                               ),
                               child: Icon(Icons.camera_alt,
-                                  color: Colors.white, size: 18),
+                                  color: Colors.white, size: 16),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 16),
+                      SizedBox(height: 12),
                       Text(
                         _usernameController.text,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
-                      SizedBox(height: 6),
+                      SizedBox(height: 4),
                       Text(
                         _emailController.text,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: Colors.white.withOpacity(0.9),
                         ),
                       ),

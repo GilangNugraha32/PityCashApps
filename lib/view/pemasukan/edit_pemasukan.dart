@@ -196,105 +196,113 @@ class _EditPemasukanState extends State<EditPemasukan> {
         children: [
           Container(
             width: double.infinity,
-            height: MediaQuery.of(context).size.height * 0.2,
-            decoration: BoxDecoration(
-              color: Color(0xFFEB8153),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFFEB8153).withOpacity(0.3),
-                  spreadRadius: 3,
-                  blurRadius: 10,
-                  offset: Offset(0, 3),
-                ),
-              ],
-              borderRadius: BorderRadius.only(
-                bottomRight: Radius.circular(30.0),
-                bottomLeft: Radius.circular(30.0),
-              ),
-            ),
-            child: Stack(
-              children: [
-                // Background pattern
-                Positioned(
-                  right: -30,
-                  bottom: -20,
-                  child: Icon(
-                    Icons.trending_up_rounded,
-                    size: MediaQuery.of(context).size.width * 0.45,
-                    color: Colors.white.withOpacity(0.15),
+            height: MediaQuery.of(context).size.height * 0.25,
+            child: SingleChildScrollView(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Color(0xFFEB8153),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFFEB8153).withOpacity(0.3),
+                      spreadRadius: 3,
+                      blurRadius: 10,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.only(
+                    bottomRight: Radius.circular(30.0),
+                    bottomLeft: Radius.circular(30.0),
                   ),
                 ),
-                Positioned(
-                  left: -20,
-                  top: 20,
-                  child: Icon(
-                    Icons.attach_money_rounded,
-                    size: MediaQuery.of(context).size.width * 0.25,
-                    color: Colors.white.withOpacity(0.1),
-                  ),
-                ),
-                // Content
-                Padding(
-                  padding: EdgeInsets.fromLTRB(16, 40, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: IconButton(
-                              icon: Icon(
-                                Icons.arrow_back,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                        ],
+                child: Stack(
+                  children: [
+                    // Background pattern
+                    Positioned(
+                      right: -30,
+                      bottom: -20,
+                      child: Icon(
+                        Icons.trending_up_rounded,
+                        size: MediaQuery.of(context).size.width * 0.45,
+                        color: Colors.white.withOpacity(0.15),
                       ),
-                      SizedBox(height: 16),
-                      Center(
+                    ),
+                    Positioned(
+                      left: -20,
+                      top: 20,
+                      child: Icon(
+                        Icons.attach_money_rounded,
+                        size: MediaQuery.of(context).size.width * 0.25,
+                        color: Colors.white.withOpacity(0.1),
+                      ),
+                    ),
+                    // Content
+                    SafeArea(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text(
-                              'Edit Pemasukan',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 1,
-                                shadows: [
-                                  Shadow(
-                                    offset: Offset(1, 1),
-                                    blurRadius: 3,
-                                    color: Colors.black.withOpacity(0.2),
+                            Row(
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16),
+                            Center(
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Edit Pemasukan',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 1,
+                                      shadows: [
+                                        Shadow(
+                                          offset: Offset(1, 1),
+                                          blurRadius: 3,
+                                          color: Colors.black.withOpacity(0.2),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Container(
+                                    width: 50,
+                                    height: 3,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
                                   ),
                                 ],
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Container(
-                              width: 50,
-                              height: 3,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
           Expanded(

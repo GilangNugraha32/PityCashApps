@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/view/categories/tambah_categories.dart';
@@ -148,15 +150,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     final size = MediaQuery.of(context).size;
-                    final modalHeight = size.height * 0.22;
-                    final buttonHeight = modalHeight * 0.25;
-                    final spacing = size.height * 0.006;
+                    final modalHeight = size.height * 0.25;
+                    final buttonHeight = 40.0;
+                    final spacing = 8.0;
 
                     return Container(
                       height: modalHeight,
                       padding: EdgeInsets.symmetric(
-                        horizontal: size.width * 0.03,
-                        vertical: size.height * 0.01,
+                        horizontal: 16.0,
+                        vertical: 8.0,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -170,103 +172,100 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: size.width * 0.08,
-                            height: 3,
-                            margin: EdgeInsets.only(bottom: spacing),
-                            decoration: BoxDecoration(
-                              color: Color(0xFFEB8153).withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(1.5),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 32,
+                              height: 3,
+                              margin: EdgeInsets.only(bottom: 4),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFEB8153).withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(1.5),
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 6),
-                          Text(
-                            'Pilih Aksi Tambah',
-                            style: TextStyle(
-                              fontSize: size.width * 0.038,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFEB8153),
+                            SizedBox(height: 4),
+                            Text(
+                              'Pilih Aksi Tambah',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFFEB8153),
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 12),
-                          Divider(
-                            color: Color(0xFFEB8153).withOpacity(0.2),
-                            thickness: 1,
-                            height: spacing * 2.5,
-                          ),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            SizedBox(height: 8),
+                            Divider(
+                              color: Color(0xFFEB8153).withOpacity(0.2),
+                              thickness: 1,
+                            ),
+                            SizedBox(height: 8),
+                            Row(
                               children: [
                                 Expanded(
-                                  flex: 3,
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildElevatedActionButton(
-                                          width: double.infinity,
-                                          icon: Icons.add_card_sharp,
-                                          title: 'Pemasukan',
-                                          onTap: () async {
-                                            Navigator.pop(context);
-                                            await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    TambahPemasukan(),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      SizedBox(width: spacing),
-                                      Expanded(
-                                        child: _buildElevatedActionButton(
-                                          width: double.infinity,
-                                          icon:
-                                              Icons.add_shopping_cart_outlined,
-                                          title: 'Pengeluaran',
-                                          onTap: () async {
-                                            Navigator.pop(context);
-                                            await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    TambahPengeluaran(),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ],
+                                  child: SizedBox(
+                                    height: buttonHeight,
+                                    child: _buildElevatedActionButton(
+                                      width: double.infinity,
+                                      icon: Icons.add_card_sharp,
+                                      title: 'Pemasukan',
+                                      onTap: () async {
+                                        Navigator.pop(context);
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                TambahPemasukan(),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
-                                SizedBox(height: spacing),
+                                SizedBox(width: spacing),
                                 Expanded(
-                                  flex: 2,
-                                  child: _buildElevatedActionButton(
-                                    width: double.infinity,
-                                    icon: Icons.add_chart,
-                                    title: 'Kategori',
-                                    onTap: () async {
-                                      Navigator.pop(context);
-                                      await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              TambahCategories(),
-                                        ),
-                                      );
-                                    },
+                                  child: SizedBox(
+                                    height: buttonHeight,
+                                    child: _buildElevatedActionButton(
+                                      width: double.infinity,
+                                      icon: Icons.add_shopping_cart_outlined,
+                                      title: 'Pengeluaran',
+                                      onTap: () async {
+                                        Navigator.pop(context);
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                TambahPengeluaran(),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 10),
+                            SizedBox(
+                              height: buttonHeight,
+                              child: _buildElevatedActionButton(
+                                width: double.infinity,
+                                icon: Icons.add_chart,
+                                title: 'Kategori',
+                                onTap: () async {
+                                  Navigator.pop(context);
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => TambahCategories(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -290,6 +289,10 @@ class _HomeScreenState extends State<HomeScreen> {
     required String title,
     required VoidCallback onTap,
   }) {
+    final screenSize = MediaQuery.of(context).size;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return SizedBox(
       width: width,
       child: Material(
@@ -298,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: onTap,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: EdgeInsets.symmetric(vertical: 12),
+            padding: EdgeInsets.symmetric(vertical: 12 * fontScale),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: Color(0xFFFFF4EE),
@@ -310,12 +313,12 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, color: Color(0xFFEB8153), size: 20),
-                SizedBox(width: 8),
+                Icon(icon, color: Color(0xFFEB8153), size: 18 * iconScale),
+                SizedBox(width: 8 * fontScale),
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 12 * fontScale,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFFEB8153),
                   ),
@@ -331,6 +334,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavItem(
       int index, IconData selectedIcon, IconData unselectedIcon, String label,
       {VoidCallback? onTap}) {
+    final screenSize = MediaQuery.of(context).size;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -341,15 +348,15 @@ class _HomeScreenState extends State<HomeScreen> {
             Icon(
               _selectedIndex == index ? selectedIcon : unselectedIcon,
               color: _selectedIndex == index ? Color(0xFFEB8153) : Colors.grey,
-              size: 22,
+              size: 22 * iconScale,
             ),
-            SizedBox(height: 3),
+            SizedBox(height: 3 * fontScale),
             Text(
               label,
               style: TextStyle(
                 color:
                     _selectedIndex == index ? Color(0xFFEB8153) : Colors.grey,
-                fontSize: 11,
+                fontSize: 11 * fontScale,
                 fontWeight: _selectedIndex == index
                     ? FontWeight.w600
                     : FontWeight.normal,

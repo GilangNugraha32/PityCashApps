@@ -542,22 +542,33 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          _buildHeaderSection(),
-          SizedBox(height: 10),
-          _buildSearchForm(),
-          SizedBox(height: 20),
-          _buildIncomesList(),
-        ],
+      resizeToAvoidBottomInset: true,
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: Column(
+            children: [
+              _buildHeaderSection(),
+              SizedBox(height: 10),
+              _buildSearchForm(),
+              SizedBox(height: 20),
+              _buildIncomesList(),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildHeaderSection() {
+    final screenSize = MediaQuery.of(context).size;
+    final double paddingScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(bottom: 20.0),
+      padding: EdgeInsets.only(bottom: 16.0 * paddingScale),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -566,15 +577,15 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           stops: [0.3, 0.9],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(35.0),
-          bottomLeft: Radius.circular(35.0),
+          bottomRight: Radius.circular(30.0),
+          bottomLeft: Radius.circular(30.0),
         ),
         boxShadow: [
           BoxShadow(
             color: Color(0xFFEB8153).withOpacity(0.25),
-            spreadRadius: 3,
-            blurRadius: 12,
-            offset: Offset(0, 4),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -583,26 +594,26 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           children: [
             // Background pattern
             Positioned(
-              right: -30,
-              bottom: -20,
+              right: -25,
+              bottom: -15,
               child: Icon(
                 Icons.trending_up,
-                size: MediaQuery.of(context).size.width * 0.45,
+                size: screenSize.width * 0.4 * iconScale,
                 color: Colors.white.withOpacity(0.1),
               ),
             ),
 
             // Main content
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0 * paddingScale),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 20),
+                  SizedBox(height: 16 * paddingScale),
                   _buildHeaderTopRow(),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8 * paddingScale),
                   _buildSaldoSection(),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8 * paddingScale),
                   _buildToggleButton(),
                 ],
               ),
@@ -614,28 +625,32 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   }
 
   Widget _buildHeaderTopRow() {
+    final screenSize = MediaQuery.of(context).size;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
             children: [
               Icon(
                 Icons.arrow_upward_rounded,
                 color: Colors.white.withOpacity(0.9),
-                size: 18,
+                size: 16 * iconScale,
               ),
-              SizedBox(width: 8),
+              SizedBox(width: 6),
               Text(
                 'Inflow',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 14,
+                  fontSize: 13 * fontScale,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
                 ),
@@ -648,13 +663,17 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   }
 
   Widget _buildSaldoSection() {
+    final screenSize = MediaQuery.of(context).size;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Center(
       child: Column(
         children: [
           Text(
             'Saldo Pity Cash',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 13 * fontScale,
               fontWeight: FontWeight.w500,
               color: Colors.white.withOpacity(0.9),
               letterSpacing: 0.5,
@@ -675,7 +694,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(width: 40),
+                        SizedBox(width: 30),
                         Expanded(
                           child: Text(
                             isBalanceVisible
@@ -686,7 +705,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                   ).format(saldo)
                                 : 'Rp' + _formatHiddenBalance(saldo),
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 24 * fontScale,
                               fontWeight: FontWeight.bold,
                               color: isLowBalance
                                   ? Color(0xFFF54D42)
@@ -702,7 +721,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                 ? Icons.visibility
                                 : Icons.visibility_off,
                             color: Colors.white.withOpacity(0.9),
-                            size: 20,
+                            size: 18 * iconScale,
                           ),
                           onPressed: () {
                             setState(() {
@@ -714,12 +733,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     ),
                     if (isLowBalance)
                       Container(
-                        margin: EdgeInsets.only(top: 12),
+                        margin: EdgeInsets.only(top: 10),
                         padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.yellow.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: Colors.yellow.withOpacity(0.3),
                             width: 1,
@@ -731,19 +750,19 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             Icon(
                               Icons.warning_amber_rounded,
                               color: Colors.yellow[100],
-                              size: 16,
+                              size: 14 * iconScale,
                             ),
-                            SizedBox(width: 6),
+                            SizedBox(width: 5),
                             Text(
                               'Saldo di bawah batas minimal',
                               style: TextStyle(
                                 color: Colors.yellow[100],
                                 fontWeight: FontWeight.w500,
-                                fontSize: 12,
+                                fontSize: 11 * fontScale,
                                 letterSpacing: 0.3,
                               ),
                             ),
-                            SizedBox(width: 4),
+                            SizedBox(width: 3),
                             Text(
                               '(${NumberFormat.currency(
                                 locale: 'id_ID',
@@ -752,7 +771,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               ).format(minimalSaldo)})',
                               style: TextStyle(
                                 color: Colors.yellow[100]?.withOpacity(0.8),
-                                fontSize: 12,
+                                fontSize: 11 * fontScale,
                                 letterSpacing: 0.3,
                               ),
                             ),
@@ -781,21 +800,25 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   }
 
   Widget _buildToggleButton() {
+    final screenSize = MediaQuery.of(context).size;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 40),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
             spreadRadius: 0,
-            blurRadius: 10,
+            blurRadius: 8,
             offset: Offset(0, 2),
           ),
         ],
       ),
-      padding: EdgeInsets.all(5),
+      padding: EdgeInsets.all(4),
       child: Row(
         children: [
           _buildToggleOption('Inflow', isIncomeSelected),
@@ -806,6 +829,10 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   }
 
   Widget _buildToggleOption(String text, bool isSelected) {
+    final screenSize = MediaQuery.of(context).size;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -818,10 +845,10 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           );
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected ? Color(0xFFEB8153) : Colors.white,
-            borderRadius: BorderRadius.circular(12.0),
+            borderRadius: BorderRadius.circular(10.0),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -829,14 +856,14 @@ class _PemasukanSectionState extends State<PemasukanSection> {
               Icon(
                 text == 'Inflow' ? Icons.arrow_upward : Icons.arrow_downward,
                 color: isSelected ? Colors.white : Color(0xFFB8B8B8),
-                size: 16,
+                size: 14 * iconScale,
               ),
               SizedBox(width: 4),
               Text(
                 text,
                 style: TextStyle(
                   color: isSelected ? Colors.white : Color(0xFFB8B8B8),
-                  fontSize: 13,
+                  fontSize: 12 * fontScale,
                   fontWeight: FontWeight.bold,
                 ),
               ),

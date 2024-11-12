@@ -206,23 +206,35 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       groupedExpenses[expense.idParent]!.add(expense);
     }
     return Scaffold(
-      body: Column(
-        children: [
-          _buildOrangeBackgroundSection(),
-          SizedBox(height: 8),
-          _buildSearchForm(),
-          SizedBox(height: 16),
-          _buildCategoriesList(groupedFilteredExpenses),
-          if (isLoading) Center(child: CircularProgressIndicator())
-        ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              children: [
+                _buildOrangeBackgroundSection(),
+                SizedBox(height: 8),
+                _buildSearchForm(),
+                SizedBox(height: 16),
+                _buildCategoriesList(groupedFilteredExpenses),
+                if (isLoading) Center(child: CircularProgressIndicator())
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
   Widget _buildOrangeBackgroundSection() {
+    final screenSize = MediaQuery.of(context).size;
+    final double paddingScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(bottom: 20.0),
+      padding: EdgeInsets.only(bottom: 16.0 * paddingScale),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -231,15 +243,15 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           stops: [0.3, 0.9],
         ),
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(35.0),
-          bottomLeft: Radius.circular(35.0),
+          bottomRight: Radius.circular(30.0),
+          bottomLeft: Radius.circular(30.0),
         ),
         boxShadow: [
           BoxShadow(
             color: Color(0xFFEB8153).withOpacity(0.25),
-            spreadRadius: 3,
-            blurRadius: 12,
-            offset: Offset(0, 4),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -248,45 +260,47 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           children: [
             // Background pattern
             Positioned(
-              right: -30,
-              bottom: -20,
+              right: -25,
+              bottom: -15,
               child: Icon(
                 Icons.trending_down_rounded,
-                size: MediaQuery.of(context).size.width * 0.45,
+                size: screenSize.width * 0.4 * iconScale,
                 color: Colors.white.withOpacity(0.1),
               ),
             ),
 
             // Main content
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0 * paddingScale),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 20),
+                  SizedBox(height: 16 * paddingScale),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10 * paddingScale,
+                          vertical: 6 * paddingScale,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: Row(
                           children: [
                             Icon(
                               Icons.arrow_downward_rounded,
                               color: Colors.white.withOpacity(0.9),
-                              size: 18,
+                              size: 16 * iconScale,
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: 6 * paddingScale),
                             Text(
                               'Outflow',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 14,
+                                fontSize: 13 * fontScale,
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: 0.5,
                               ),
@@ -296,19 +310,19 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8 * paddingScale),
                   Center(
                     child: Text(
                       'Saldo Pity Cash',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13 * fontScale,
                         fontWeight: FontWeight.w500,
                         color: Colors.white.withOpacity(0.9),
                         letterSpacing: 0.5,
                       ),
                     ),
                   ),
-                  SizedBox(height: 2),
+                  SizedBox(height: 2 * paddingScale),
                   Center(
                     child: FutureBuilder<double>(
                       future: ApiService().fetchMinimalSaldo(),
@@ -320,7 +334,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                SizedBox(width: 40),
+                                SizedBox(width: 30 * paddingScale),
                                 Expanded(
                                   child: Text(
                                     isBalanceVisible
@@ -331,7 +345,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                           ).format(saldo)
                                         : 'Rp' + _formatHiddenBalance(saldo),
                                     style: TextStyle(
-                                      fontSize: 28,
+                                      fontSize: 24 * fontScale,
                                       fontWeight: FontWeight.bold,
                                       color: isLowBalance
                                           ? Color(0xFFF54D42)
@@ -347,7 +361,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                         ? Icons.visibility
                                         : Icons.visibility_off,
                                     color: Colors.white.withOpacity(0.9),
-                                    size: 20,
+                                    size: 18 * iconScale,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -359,12 +373,14 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                             ),
                             if (isLowBalance)
                               Container(
-                                margin: EdgeInsets.only(top: 12),
+                                margin: EdgeInsets.only(top: 10 * paddingScale),
                                 padding: EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
+                                  horizontal: 10 * paddingScale,
+                                  vertical: 5 * paddingScale,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.yellow.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                     color: Colors.yellow.withOpacity(0.3),
                                     width: 1,
@@ -376,19 +392,19 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                     Icon(
                                       Icons.warning_amber_rounded,
                                       color: Colors.yellow[100],
-                                      size: 16,
+                                      size: 14 * iconScale,
                                     ),
-                                    SizedBox(width: 6),
+                                    SizedBox(width: 5 * paddingScale),
                                     Text(
                                       'Saldo di bawah batas minimal',
                                       style: TextStyle(
                                         color: Colors.yellow[100],
                                         fontWeight: FontWeight.w500,
-                                        fontSize: 12,
+                                        fontSize: 11 * fontScale,
                                         letterSpacing: 0.3,
                                       ),
                                     ),
-                                    SizedBox(width: 4),
+                                    SizedBox(width: 3 * paddingScale),
                                     Text(
                                       '(${NumberFormat.currency(
                                         locale: 'id_ID',
@@ -398,7 +414,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                       style: TextStyle(
                                         color: Colors.yellow[100]
                                             ?.withOpacity(0.8),
-                                        fontSize: 12,
+                                        fontSize: 11 * fontScale,
                                         letterSpacing: 0.3,
                                       ),
                                     ),
@@ -410,7 +426,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                       },
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 8 * paddingScale),
                   _buildToggleButton(),
                 ],
               ),
@@ -433,13 +449,25 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   }
 
   Widget _buildToggleButton() {
+    final screenSize = MediaQuery.of(context).size;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 50),
+      margin: EdgeInsets.symmetric(horizontal: 40),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 0,
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
-      padding: EdgeInsets.all(5),
+      padding: EdgeInsets.all(4),
       child: Row(
         children: [
           _buildToggleOption('Inflow', !isOutcomeSelected, Icons.arrow_upward),
@@ -451,6 +479,10 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   }
 
   Widget _buildToggleOption(String text, bool isSelected, IconData icon) {
+    final screenSize = MediaQuery.of(context).size;
+    final double iconScale = screenSize.width < 360 ? 0.8 : 1.0;
+    final double fontScale = screenSize.width < 360 ? 0.9 : 1.0;
+
     return Expanded(
       child: GestureDetector(
         onTap: () {
@@ -463,7 +495,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           );
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected ? Color(0xFFEB8153) : Colors.white,
             borderRadius: BorderRadius.circular(10.0),
@@ -473,15 +505,15 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
             children: [
               Icon(
                 icon,
-                size: 16,
                 color: isSelected ? Colors.white : Color(0xFFB8B8B8),
+                size: 14 * iconScale,
               ),
               SizedBox(width: 4),
               Text(
                 text,
                 style: TextStyle(
                   color: isSelected ? Colors.white : Color(0xFFB8B8B8),
-                  fontSize: 13,
+                  fontSize: 12 * fontScale,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -525,6 +557,57 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           onChanged: (value) {
             _filterExpenses();
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpensesList(
+      Map<int, List<Pengeluaran>> groupedFilteredExpenses) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        await _refreshExpenses();
+      },
+      child: LazyLoadScrollView(
+        onEndOfPage: () {
+          if (!isLoading &&
+              !isLoadingMore &&
+              groupedFilteredExpenses.isNotEmpty) {
+            _fetchExpenses(currentPage);
+          }
+        },
+        child: Stack(
+          children: [
+            ListView.builder(
+              padding: const EdgeInsets.all(8),
+              physics: groupedFilteredExpenses.isEmpty
+                  ? NeverScrollableScrollPhysics()
+                  : AlwaysScrollableScrollPhysics(),
+              itemCount:
+                  groupedFilteredExpenses.length + (isLoadingMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == groupedFilteredExpenses.length) {
+                  return Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(Color(0xFFEB8153)),
+                      ),
+                    ),
+                  );
+                }
+
+                int parentId = groupedFilteredExpenses.keys.elementAt(index);
+                List<Pengeluaran> groupItems =
+                    groupedFilteredExpenses[parentId]!;
+                double totalJumlah =
+                    groupItems.fold(0, (sum, item) => sum + item.jumlah);
+
+                return _buildExpenseGroup(groupItems, totalJumlah);
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -1161,57 +1244,6 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildExpensesList(
-      Map<int, List<Pengeluaran>> groupedFilteredExpenses) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        await _refreshExpenses();
-      },
-      child: LazyLoadScrollView(
-        onEndOfPage: () {
-          if (!isLoading &&
-              !isLoadingMore &&
-              groupedFilteredExpenses.isNotEmpty) {
-            _fetchExpenses(currentPage);
-          }
-        },
-        child: Stack(
-          children: [
-            ListView.builder(
-              padding: const EdgeInsets.all(8),
-              physics: groupedFilteredExpenses.isEmpty
-                  ? NeverScrollableScrollPhysics()
-                  : AlwaysScrollableScrollPhysics(),
-              itemCount:
-                  groupedFilteredExpenses.length + (isLoadingMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == groupedFilteredExpenses.length) {
-                  return Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(Color(0xFFEB8153)),
-                      ),
-                    ),
-                  );
-                }
-
-                int parentId = groupedFilteredExpenses.keys.elementAt(index);
-                List<Pengeluaran> groupItems =
-                    groupedFilteredExpenses[parentId]!;
-                double totalJumlah =
-                    groupItems.fold(0, (sum, item) => sum + item.jumlah);
-
-                return _buildExpenseGroup(groupItems, totalJumlah);
-              },
-            ),
-          ],
-        ),
-      ),
     );
   }
 
