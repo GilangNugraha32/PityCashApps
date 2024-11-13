@@ -688,7 +688,11 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                       selectedFilePath,
                       (String? filePath) {
                         setState(() {
+                          print("apapa");
+                          print(filePath.toString());
                           selectedFilePath = filePath;
+
+                          print("cek " + selectedFilePath.toString());
                         });
                       },
                     ),
@@ -1014,8 +1018,13 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     );
 
     if (result != null) {
-      PlatformFile file = result.files.first;
-      onFileSelected(file.path);
+      setState(() {
+        PlatformFile file = result.files.first;
+
+        print("filr " + file.toString());
+
+        onFileSelected(file.path);
+      });
     }
   }
 

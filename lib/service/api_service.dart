@@ -12,9 +12,10 @@ import 'package:dio/dio.dart';
 import 'package:pity_cash/models/incomes_model.dart';
 import 'package:pity_cash/models/outcomes_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http_parser/http_parser.dart';
 
 class ApiService {
-  // final String baseUrl = "http://192.168.0.211:8000/api";
+  // final String baseUrl = "http://192.168.18.165:8000/api";
   final String baseUrl = "http://pitycash.mamorasoft.com/api";
   final Dio _dio = Dio();
 
@@ -407,12 +408,6 @@ class ApiService {
     try {
       await _setAuthToken(); // Set auth token if necessary
 
-      // Request permission to write to external storage
-      var status = await Permission.storage.request();
-      if (!status.isGranted) {
-        throw Exception('Izin penyimpanan tidak diberikan');
-      }
-
       final response = await _dio.get(
         '$baseUrl/category/template',
         options: Options(responseType: ResponseType.bytes),
@@ -469,6 +464,7 @@ class ApiService {
 
       // Buat temporary file dengan nama random
       final tempDir = await getTemporaryDirectory();
+
       final originalFile = File(filePath);
       final fileExtension = filePath.split('.').last;
       final randomFileName = '$randomString.$fileExtension';
@@ -477,6 +473,7 @@ class ApiService {
       // Copy file asli ke temporary file
       await originalFile.copy(tempFile.path);
 
+      print('Nama file yang diacak untuk server: $randomFileName');
       print('Nama file yang diacak untuk server: $randomFileName');
 
       // Gunakan temporary file untuk upload
@@ -498,9 +495,6 @@ class ApiService {
           },
         ),
       );
-
-      // Hapus temporary file setelah upload
-      await tempFile.delete();
 
       print('Respons server: ${response.data}');
 
@@ -534,6 +528,7 @@ class ApiService {
                 });
               }
             }
+            await tempDir.delete(recursive: true);
 
             if (importedCategories.isEmpty) {
               throw Exception('Tidak ada data valid untuk diimpor');
@@ -541,6 +536,8 @@ class ApiService {
 
             return importedCategories;
           } else {
+            await tempDir.delete(recursive: true);
+
             print('Format data tidak sesuai atau tidak ada data valid.');
             return [];
           }
@@ -814,6 +811,7 @@ class ApiService {
         final tempDir = await getTemporaryDirectory();
         final tempPath = tempDir.path;
         final fileName = 'template_pemasukan.xlsx';
+        // final timestamp = ;
         final filePath = '$tempPath/$fileName';
 
         // Menulis data response ke file
@@ -844,33 +842,59 @@ class ApiService {
     print('Mengimpor data pemasukan dari Excel: $filePath');
 
     try {
-      await _setAuthToken(); // Pastikan token otorisasi diset sebelum request
+      await _setAuthToken();
 
-      // Buat FormData untuk mengirim file
+      // Generate random string untuk nama file yang akan dikirim ke server
+      String randomString = '';
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      final random = Random();
+      for (var i = 0; i < 16; i++) {
+        randomString += chars[random.nextInt(chars.length)];
+      }
+
+      // Buat temporary file dengan nama random
+      final tempDir = await getTemporaryDirectory();
+
+      final originalFile = File(filePath);
+      final fileExtension = filePath.split('.').last;
+      final randomFileName = '$randomString.$fileExtension';
+      final tempFile = File('${tempDir.path}/$randomFileName');
+
+      // Copy file asli ke temporary file
+      await originalFile.copy(tempFile.path);
+
+      print('Nama file yang diacak untuk server: $randomFileName');
+      print('Nama file yang diacak untuk server: $randomFileName');
+
+      // Gunakan temporary file untuk upload
       var formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(filePath,
-            filename: 'template_pemasukan.xlsx'),
+        'file': await MultipartFile.fromFile(
+          tempFile.path,
+          filename: randomFileName,
+        ),
       });
 
       final response = await _dio.post(
         '$baseUrl/income/import',
         data: formData,
-        options: Options(),
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Accept': 'application/json',
+          },
+        ),
       );
 
       print('Respons server: ${response.data}');
 
-      // Cek status code
       if (response.statusCode == 200) {
         print('Data pemasukan berhasil diimpor');
 
-        // Validasi respons format JSON
         if (response.data is Map<String, dynamic>) {
           final status = response.data['status'];
           final message = response.data['message'];
           final importedData = response.data['data'];
 
-          // Pastikan status dan data sesuai dengan yang diharapkan
           if (status == 200 &&
               message == "Data Berhasil Ditambahkan" &&
               importedData != null &&
@@ -879,19 +903,34 @@ class ApiService {
 
             List<Map<String, dynamic>> importedIncomes = [];
             for (var item in importedData) {
-              print(
-                  '- Nama: ${item['Nama']}, Deskripsi: ${item['Deskripsi']}, Tanggal: ${item['Tanggal']}, Jumlah: ${item['Jumlah']}, Kode Kategori: ${item['Kode Kategori']}');
-              importedIncomes.add({
-                'Nama': item['Nama'],
-                'Deskripsi': item['Deskripsi'],
-                'Tanggal': item['Tanggal'],
-                'Jumlah': item['Jumlah'],
-                'Kode Kategori': item['Kode Kategori'],
-              });
+              // Filter data null dan kosong
+              if (item['Nama'] != null &&
+                  item['Deskripsi'] != null &&
+                  item['Tanggal'] != null &&
+                  item['Jumlah'] != null &&
+                  item['Kode Kategori'] != null &&
+                  item['Nama'].toString().trim().isNotEmpty) {
+                print(
+                    '- Nama: ${item['Nama']}, Deskripsi: ${item['Deskripsi']}, Tanggal: ${item['Tanggal']}, Jumlah: ${item['Jumlah']}, Kode Kategori: ${item['Kode Kategori']}');
+                importedIncomes.add({
+                  'Nama': item['Nama'],
+                  'Deskripsi': item['Deskripsi'],
+                  'Tanggal': item['Tanggal'],
+                  'Jumlah': item['Jumlah'],
+                  'Kode Kategori': item['Kode Kategori'],
+                });
+              }
             }
+            await tempDir.delete(recursive: true);
+
+            if (importedIncomes.isEmpty) {
+              throw Exception('Tidak ada data valid untuk diimpor');
+            }
+
             return importedIncomes;
           } else {
-            print('Format data tidak sesuai atau tidak ada data yang diimpor.');
+            await tempDir.delete(recursive: true);
+            print('Format data tidak sesuai atau tidak ada data valid.');
             return [];
           }
         } else {
@@ -903,17 +942,21 @@ class ApiService {
       }
     } catch (e) {
       if (e is DioError) {
-        // Tangani kesalahan dari Dio (request ke server)
         final responseData = e.response?.data;
-        final errorMessage =
-            responseData != null && responseData is Map<String, dynamic>
-                ? responseData['message'] ?? 'Error tidak diketahui'
-                : 'Error tidak diketahui';
+        String errorMessage = 'Error tidak diketahui';
+
+        if (responseData != null && responseData is Map<String, dynamic>) {
+          final errorString = responseData['error']?.toString();
+          if (errorString != null && errorString.contains('Duplicate entry')) {
+            errorMessage = 'Data pemasukan sudah ada di database';
+          } else {
+            errorMessage = responseData['message'] ?? 'Error tidak diketahui';
+          }
+        }
 
         print('DioError saat mengimpor data pemasukan: $responseData');
         throw Exception('Gagal mengimpor data pemasukan: $errorMessage');
       } else {
-        // Tangani kesalahan lainnya
         print('Error saat mengimpor data pemasukan: $e');
         throw Exception('Gagal mengimpor data pemasukan: $e');
       }
@@ -1023,7 +1066,7 @@ class ApiService {
 
       final Map<String, dynamic> queryParams = {
         'page': page,
-        'per_page': 5, // Meningkatkan jumlah item per halaman
+        'per_page': 1, // Meningkatkan jumlah item per halaman
         'all': true // Parameter untuk mendapatkan semua data
       };
 
@@ -1414,16 +1457,37 @@ class ApiService {
     print('Mengimpor data pengeluaran dari Excel: $filePath');
 
     try {
-      await _setAuthToken(); // Pastikan token otorisasi diset sebelum request
+      await _setAuthToken();
 
-      // Buat FormData untuk mengirim file
-      // Dapatkan nama file dari filePath
-      String fileName = path.basename(filePath);
+      // Generate random string untuk nama file yang akan dikirim ke server
+      String randomString = '';
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      final random = Random();
+      for (var i = 0; i < 16; i++) {
+        randomString += chars[random.nextInt(chars.length)];
+      }
 
-      // Buat FormData untuk mengirim file
+      // Buat temporary file dengan nama random
+      final tempDir = await getTemporaryDirectory();
+      final originalFile = File(filePath);
+      final fileExtension = filePath.split('.').last;
+      final randomFileName = '$randomString.$fileExtension';
+      final tempFile = File('${tempDir.path}/$randomFileName');
+
+      // Copy file asli ke temporary file
+      await originalFile.copy(tempFile.path);
+
+      print('File path: ${tempFile.path}');
+      print('File exists: ${await tempFile.exists()}');
+      print('File size: ${await tempFile.length()} bytes');
+
       var formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(filePath, filename: fileName),
+        'file': await MultipartFile.fromFile(
+          tempFile.path,
+          filename: randomFileName,
+        ),
       });
+
       final response = await _dio.post(
         '$baseUrl/outcome/import',
         data: formData,
@@ -1435,25 +1499,29 @@ class ApiService {
         ),
       );
 
-      print('Respons server: ${response.statusCode}');
+      print('Response status: ${response.statusCode}');
+      print('Response data: ${response.data}');
 
-      // Cek status code
       if (response.statusCode == 200) {
-        print('Data pengeluaran berhasil diimpor');
-
-        // Validasi respons format JSON
         if (response.data is Map<String, dynamic>) {
           final status = response.data['status'];
           final message = response.data['message'];
+          final data = response.data['data'];
 
-          // Pastikan status sesuai dengan yang diharapkan
-          if (status == 200 && message == "Data Berhasil Ditambahkan") {
+          if (status == 200 &&
+              message == "Data pengeluaran berhasil diimpor!") {
             print('Import berhasil: $message');
-            return []; // Mengembalikan list kosong karena tidak menampilkan data
-          } else {
-            print('Import gagal: $message');
-            return [];
+
+            // Return data yang berhasil diimpor
+            if (data != null) {
+              List<Map<String, dynamic>> importedOutcomes = [];
+              importedOutcomes.add(Map<String, dynamic>.from(data));
+              await tempDir.delete(recursive: true);
+              return importedOutcomes;
+            }
           }
+          await tempDir.delete(recursive: true);
+          return [];
         } else {
           throw Exception('Format respons tidak sesuai');
         }
@@ -1463,17 +1531,21 @@ class ApiService {
       }
     } catch (e) {
       if (e is DioError) {
-        // Tangani kesalahan dari Dio (request ke server)
         final responseData = e.response?.data;
-        final errorMessage =
-            responseData != null && responseData is Map<String, dynamic>
-                ? responseData['message'] ?? 'Error tidak diketahui'
-                : 'Error tidak diketahui';
+        String errorMessage = 'Error tidak diketahui';
 
-        print('DioError saat mengimpor data pengeluaran: $errorMessage');
+        if (responseData != null && responseData is Map<String, dynamic>) {
+          final errorString = responseData['error']?.toString();
+          if (errorString != null && errorString.contains('Duplicate entry')) {
+            errorMessage = 'Data pengeluaran sudah ada di database';
+          } else {
+            errorMessage = responseData['message'] ?? 'Error tidak diketahui';
+          }
+        }
+
+        print('DioError saat mengimpor data pengeluaran: $responseData');
         throw Exception('Gagal mengimpor data pengeluaran: $errorMessage');
       } else {
-        // Tangani kesalahan lainnya
         print('Error saat mengimpor data pengeluaran: $e');
         throw Exception('Gagal mengimpor data pengeluaran: $e');
       }
@@ -1672,45 +1744,6 @@ class ApiService {
       } else {
         print('Error saat mengunduh template: $e');
         throw Exception('Gagal mengunduh template pengeluaran');
-      }
-    }
-  }
-
-  Future<void> importOutcomeData(File file) async {
-    print('Mengimpor data pengeluaran');
-    try {
-      await _setAuthToken(); // Pastikan token autentikasi diatur
-
-      String fileName = file.path.split('/').last;
-      FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(file.path, filename: fileName),
-      });
-
-      final response = await _dio.post(
-        '$baseUrl/outcome/import',
-        data: formData,
-        options: Options(
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        print('Data pengeluaran berhasil diimpor');
-      } else {
-        String pesanError =
-            response.data['message'] ?? 'Gagal mengimpor data pengeluaran';
-        throw Exception(pesanError);
-      }
-    } catch (e) {
-      if (e is DioError) {
-        print('DioError saat mengimpor data: ${e.response?.data}');
-        throw Exception(
-            'Gagal mengimpor data: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
-      } else {
-        print('Error saat mengimpor data: $e');
-        throw Exception('Gagal mengimpor data pengeluaran');
       }
     }
   }

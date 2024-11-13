@@ -1507,18 +1507,15 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                     onPressed: selectedFilePath != null
                         ? () async {
                             try {
-                              List<Map<String, dynamic>> importedData =
-                                  await ApiService()
-                                      .importIncomeFromExcel(selectedFilePath!);
+                              final response = await ApiService()
+                                  .importIncomeFromExcel(selectedFilePath!);
                               Navigator.of(context).pop();
-                              _showImportedDataDialog(context, importedData);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'Data pemasukan berhasil diimpor',
+                                    'Data berhasil diimpor',
                                     style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
+                                        color: Colors.white, fontSize: 12),
                                   ),
                                   backgroundColor: Colors.green,
                                   behavior: SnackBarBehavior.floating,
@@ -1526,17 +1523,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   margin: EdgeInsets.all(8),
+                                  duration: Duration(seconds: 2),
                                 ),
                               );
-                              _refreshIncomes();
+                              _showImportedDataDialog(context, response);
                             } catch (e) {
+                              Navigator.of(context).pop();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'Gagal mengimpor data pemasukan: $e',
+                                    'Gagal mengimpor kategori: $e',
                                     style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
+                                        color: Colors.white, fontSize: 12),
                                   ),
                                   backgroundColor: Colors.red,
                                   behavior: SnackBarBehavior.floating,
@@ -1549,7 +1547,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                             }
                           }
                         : null,
-                    child: Text('Upload', style: TextStyle(fontSize: 12)),
+                    child: Text('Upload', style: TextStyle(fontSize: 13)),
                     style: ElevatedButton.styleFrom(
                       primary: Color(0xFFEB8153),
                       shape: RoundedRectangleBorder(

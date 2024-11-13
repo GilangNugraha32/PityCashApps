@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'dart:math' as math;
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -1082,33 +1084,41 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                     onPressed: selectedFilePath != null
                         ? () async {
                             try {
-                              List<Map<String, dynamic>> importedData =
-                                  await ApiService().importPengeluaranFromExcel(
-                                      selectedFilePath!);
-                              Navigator.of(context).pop();
-                              _showImportedDataDialog(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Data pengeluaran berhasil diimpor',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  backgroundColor: Colors.green,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  margin: EdgeInsets.all(10),
-                                ),
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (BuildContext context) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                },
                               );
-                              _refreshExpenses();
+
+                              final importedData = await ApiService()
+                                  .importPengeluaranFromExcel(
+                                      selectedFilePath!);
+
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+
+                              if (importedData.isNotEmpty) {
+                                _showImportSuccessDialog(context, importedData);
+                                await _refreshExpenses();
+                              }
                             } catch (e) {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+
+                              String errorMessage = e.toString();
+                              if (errorMessage.contains('Undefined variable')) {
+                                errorMessage =
+                                    'Format file Excel tidak sesuai dengan template. Silakan gunakan template yang disediakan.';
+                              }
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'Gagal mengimpor data pemasukan: $e',
+                                    'Gagal mengimpor data: $errorMessage',
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold),
@@ -1142,6 +1152,234 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
               ),
             );
           },
+        );
+      },
+    );
+  }
+
+  void _showImportSuccessDialog(
+      BuildContext context, List<Map<String, dynamic>> importedData) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          insetPadding: EdgeInsets.symmetric(horizontal: 40),
+          child: Container(
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFFF5EE),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.check_circle,
+                    color: Color(0xFFEB8153),
+                    size: 40,
+                  ),
+                ),
+                SizedBox(height: 12),
+                Text(
+                  'Import Berhasil!',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFEB8153),
+                  ),
+                ),
+                SizedBox(height: 16),
+                _buildSingleDataCard(importedData[0]),
+                SizedBox(height: 4),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '+Data pengeluaran lainnya',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 15),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      'Lihat Selengkapnya',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFFEB8153),
+                      padding: EdgeInsets.symmetric(vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSingleDataCard(Map<String, dynamic> data) {
+    DateTime createdAt = DateTime.parse(data['created_at']);
+    String formattedDate =
+        '${createdAt.day} ${_getMonthName(createdAt.month)} ${createdAt.year}';
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Color(0xFFEB8153).withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 2,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Color(0xFFFFF5EE),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.description_outlined,
+              color: Color(0xFFEB8153),
+              size: 18,
+            ),
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  data['name'],
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 2),
+                Text(
+                  formattedDate,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: Color(0xFFFFF5EE),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Text(
+              'Rp ${NumberFormat('#.###').format(data['jumlah'] ?? 0)}',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 11,
+                color: Color(0xFFEB8153),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAllImportedData(
+      BuildContext context, List<Map<String, dynamic>> importedData) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final size = MediaQuery.of(context).size;
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Container(
+            constraints: BoxConstraints(
+              maxHeight: size.height * 0.7,
+              maxWidth: size.width * 0.85,
+            ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Semua Data',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFEB8153),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.grey, size: 20),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                Divider(),
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    itemCount: importedData.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: _buildSingleDataCard(importedData[index]),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -1192,19 +1430,6 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
     if (result != null) {
       PlatformFile file = result.files.first;
       onFileSelected(file.path);
-    }
-  }
-
-  void _importFile(BuildContext context, String filePath) async {
-    try {
-      await ApiService().importIncomeFromExcel(filePath);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Data pemasukan berhasil diimpor')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengimpor data pemasukan: $e')),
-      );
     }
   }
 
@@ -1435,84 +1660,6 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
           ),
         ),
       ],
-    );
-  }
-
-  void _showImportedDataDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          child: Container(
-            padding: EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 6.0,
-                  offset: Offset(0.0, 6.0),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFFF5EE),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check,
-                    color: Color(0xFFEB8153),
-                    size: 32,
-                  ),
-                ),
-                SizedBox(height: 14),
-                Text(
-                  'Impor Berhasil!',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFEB8153),
-                  ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  'Data pengeluaran telah berhasil diimpor ke dalam sistem.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                ),
-                SizedBox(height: 16),
-                TextButton(
-                  child: Text(
-                    'Tutup',
-                    style: TextStyle(fontSize: 12, color: Colors.white),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Color(0xFFEB8153),
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
