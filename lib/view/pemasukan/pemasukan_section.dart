@@ -421,15 +421,33 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     });
 
     try {
-      final fetchedIncomes = await _apiService.fetchIncomes(page: page);
+      // Tambahkan delay untuk menghindari terlalu banyak request bersamaan
+      if (page > 1) {
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+
+      final fetchedIncomes = await _apiService.fetchIncomes(
+        page: page,
+        limit: 20, // Batasi jumlah data per request
+      );
+
+      if (!mounted) return;
 
       setState(() {
         if (page == 1) {
           incomes = fetchedIncomes;
         } else {
-          incomes.addAll(fetchedIncomes);
+          // Cek duplikasi data sebelum menambahkan
+          final existingIds = incomes.map((e) => e.id).toSet();
+          final newIncomes = fetchedIncomes
+              .where((income) => !existingIds.contains(income.id));
+          incomes.addAll(newIncomes);
         }
-        currentPage++;
+
+        // Hanya increment page jika ada data baru
+        if (fetchedIncomes.isNotEmpty) {
+          currentPage++;
+        }
 
         if (selectedDateRange != null) {
           _filterIncomesByDateRange();
@@ -441,10 +459,12 @@ class _PemasukanSectionState extends State<PemasukanSection> {
       print('Error fetching incomes: $e');
       _showErrorSnackbar('Error fetching incomes. Please try again.');
     } finally {
-      setState(() {
-        isLoading = false;
-        isLoadingMore = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          isLoadingMore = false;
+        });
+      }
     }
   }
 
@@ -939,13 +959,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
               child: Stack(
                 children: [
                   LazyLoadScrollView(
-                    onEndOfPage: () {
+                    onEndOfPage: () async {
                       if (!isLoading && !isLoadingMore) {
-                        _fetchIncomes(currentPage);
+                        await Future.delayed(Duration(milliseconds: 500));
+                        setState(() {
+                          filteredIncomes = incomes;
+                        });
+                        _fetchIncomes(currentPage++);
                       }
                     },
                     child: ListView.builder(
-                      padding: EdgeInsets.zero,
+                      padding: EdgeInsets.only(
+                          bottom: 60), // Tambahkan padding bottom
                       itemCount: filteredIncomes.length,
                       itemBuilder: (context, index) {
                         return _buildIncomeListItem(filteredIncomes[index]);
@@ -958,7 +983,7 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                       right: 0,
                       bottom: 0,
                       child: Container(
-                        color: Colors.white,
+                        color: Colors.white.withOpacity(0.8), // Ubah opacity
                         padding: EdgeInsets.all(12.0),
                         child: Center(
                           child: CircularProgressIndicator(

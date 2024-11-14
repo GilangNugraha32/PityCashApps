@@ -581,7 +581,12 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
         child: Stack(
           children: [
             ListView.builder(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.only(
+                left: 8,
+                right: 8,
+                top: 8,
+                bottom: 100, // Tambahkan padding bottom yang lebih besar
+              ),
               physics: groupedFilteredExpenses.isEmpty
                   ? NeverScrollableScrollPhysics()
                   : AlwaysScrollableScrollPhysics(),

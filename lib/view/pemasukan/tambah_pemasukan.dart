@@ -58,38 +58,27 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
   }
 
   void submit() async {
+    if (nameController.text.isEmpty ||
+        descriptionController.text.isEmpty ||
+        selectedDate == null ||
+        selectedCategory == null) {
+      _showSnackbar('Harap lengkapi semua field', isError: true);
+      return;
+    }
+
+    String jumlahText = jumlahController.text
+        .replaceAll('Rp', '')
+        .replaceAll('.', '')
+        .replaceAll(',', '');
+    double? jumlah = double.tryParse(jumlahText);
+
+    if (jumlah == null || jumlah <= 0) {
+      _showSnackbar('Jumlah harus berupa angka yang valid dan positif',
+          isError: true);
+      return;
+    }
+
     try {
-      if (nameController.text.isEmpty) {
-        _showSnackbar('Nama tidak boleh kosong', isError: true);
-        return;
-      }
-
-      if (descriptionController.text.isEmpty) {
-        _showSnackbar('Deskripsi tidak boleh kosong', isError: true);
-        return;
-      }
-
-      if (selectedDate == null) {
-        _showSnackbar('Tanggal tidak boleh kosong', isError: true);
-        return;
-      }
-
-      String jumlahText = jumlahController.text
-          .replaceAll('Rp', '')
-          .replaceAll('.', '')
-          .replaceAll(',', '');
-      double? jumlah = double.tryParse(jumlahText);
-
-      if (jumlah == null) {
-        _showSnackbar('Jumlah harus berupa angka', isError: true);
-        return;
-      }
-
-      if (selectedCategory == null) {
-        _showSnackbar('Kategori tidak boleh kosong', isError: true);
-        return;
-      }
-
       ApiService apiService = ApiService();
       await apiService.createPemasukan(
         context,
@@ -97,7 +86,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         description: descriptionController.text,
         date: selectedDate?.toIso8601String() ?? '',
         jumlah: jumlah.toString(),
-        jenisKategori: selectedCategory?.id ?? 0,
+        jenisKategori: selectedCategory!.id,
       );
 
       _showSnackbar('Pemasukan berhasil ditambahkan', isError: false);
@@ -112,17 +101,11 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
       Future.delayed(Duration(milliseconds: 500), () {
         Navigator.pop(context, true);
-        // Refresh halaman PengeluaranSection dengan mempertahankan bottom navigation bar
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HomeScreen(initialIndex: 3),
-          ),
-        );
       });
     } catch (e) {
       print('Error: $e');
-      _showSnackbar('Gagal menambahkan pemasukan', isError: true);
+      _showSnackbar('Gagal menambahkan pemasukan: ${e.toString()}',
+          isError: true);
     }
   }
 

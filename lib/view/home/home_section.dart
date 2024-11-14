@@ -1006,10 +1006,12 @@ class _HomeSectionState extends State<HomeSection>
     } catch (e) {
       print('Kesalahan saat mengambil pemasukan: $e');
     } finally {
-      setState(() {
-        isLoading = false;
-        isLoadingMore = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          isLoadingMore = false;
+        });
+      }
     }
   }
 

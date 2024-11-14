@@ -617,7 +617,7 @@ class ApiService {
   }
 
   // Fetch all incomes with pagination
-  Future<List<Pemasukan>> fetchIncomes({int page = 1}) async {
+  Future<List<Pemasukan>> fetchIncomes({int page = 1, int limit = 20}) async {
     print('Fetching incomes from page: $page');
     await _setAuthToken(); // Ensure the authentication token is set
 
@@ -691,10 +691,11 @@ class ApiService {
         date.isEmpty ||
         jumlah.isEmpty ||
         jenisKategori <= 0) {
-      throw Exception('All fields must be provided');
+      throw Exception('Semua field harus diisi');
     }
 
-    print('Creating income with name: $name, jenisKategori: $jenisKategori');
+    print(
+        'Membuat pemasukan dengan nama: $name, jenisKategori: $jenisKategori');
 
     try {
       await _setAuthToken(); // Ensure your token is set for authentication
@@ -711,19 +712,19 @@ class ApiService {
       );
 
       if (response.statusCode == 201) {
-        print('Income created successfully: ${response.data}');
+        print('Pemasukan berhasil dibuat: ${response.data}');
         Navigator.pop(context, response.data); // Sends the created data back
       } else {
-        print('Failed to create income: ${response.data}');
-        throw Exception('Failed to create income: ${response.data}');
+        print('Gagal membuat pemasukan: ${response.data}');
+        throw Exception('Gagal membuat pemasukan: ${response.data}');
       }
     } catch (e) {
       if (e is DioError) {
-        print('DioError creating income: ${e.response?.data}');
-        throw Exception('Failed to create income: ${e.response?.data}');
+        print('DioError saat membuat pemasukan: ${e.response?.data}');
+        throw Exception('Gagal membuat pemasukan: ${e.response?.data}');
       } else {
-        print('Error creating income: $e');
-        throw Exception('Failed to create income');
+        print('Error saat membuat pemasukan: $e');
+        throw Exception('Gagal membuat pemasukan');
       }
     }
   }
