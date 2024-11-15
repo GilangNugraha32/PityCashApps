@@ -20,6 +20,19 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage;
   bool _obscureText = true;
 
+  @override
+  void initState() {
+    super.initState();
+    _checkToken();
+  }
+
+  Future<void> _checkToken() async {
+    final token = await _prefsService.getToken();
+    if (token != null && token.isNotEmpty) {
+      Navigator.pushReplacementNamed(context, '/home');
+    }
+  }
+
   Future<void> _login() async {
     final String apiUrl = "http://pitycash.mamorasoft.com/api/login";
 //  final String apiUrl = "http://192.168.18.165:8000/api/login";
@@ -138,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            "Silakan masuk ke akun Anda",
+                            "Silahkan masuk ke akun Anda",
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 14,

@@ -150,9 +150,9 @@ class _HomeSectionState extends State<HomeSection>
               child: Column(
                 children: [
                   _buildThisMonthIncomeCard(),
-                  SizedBox(height: 16),
+                  SizedBox(height: 10),
                   _buildSaldoCard(),
-                  SizedBox(height: 16),
+                  SizedBox(height: 10),
                   _buildRecentTransactions(),
                 ],
               ),
@@ -171,7 +171,8 @@ class _HomeSectionState extends State<HomeSection>
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.only(bottom: 16.0 * paddingScale),
+      padding: EdgeInsets.only(
+          bottom: 12.0 * paddingScale), // Mengurangi padding bawah
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -212,7 +213,7 @@ class _HomeSectionState extends State<HomeSection>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 16 * paddingScale),
+                  SizedBox(height: 12 * paddingScale), // Mengurangi spacing
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -254,7 +255,7 @@ class _HomeSectionState extends State<HomeSection>
                       ),
                     ],
                   ),
-                  SizedBox(height: 24 * paddingScale),
+                  SizedBox(height: 12 * paddingScale), // Mengurangi spacing
                   Center(
                     child: Text(
                       'Saldo Pity Cash',
@@ -278,7 +279,7 @@ class _HomeSectionState extends State<HomeSection>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                SizedBox(width: 30 * paddingScale),
+                                SizedBox(width: 10 * paddingScale),
                                 Expanded(
                                   child: Text(
                                     isBalanceVisible
@@ -317,7 +318,8 @@ class _HomeSectionState extends State<HomeSection>
                             ),
                             if (isLowBalance)
                               Container(
-                                margin: EdgeInsets.only(top: 10 * paddingScale),
+                                margin: EdgeInsets.only(
+                                    top: 8 * paddingScale), // Mengurangi margin
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 10 * paddingScale,
                                   vertical: 5 * paddingScale,
@@ -370,7 +372,7 @@ class _HomeSectionState extends State<HomeSection>
                       },
                     ),
                   ),
-                  SizedBox(height: 8 * paddingScale),
+                  SizedBox(height: 4 * paddingScale),
                   _buildIncomeExpenseToggle(),
                 ],
               ),
@@ -394,13 +396,14 @@ class _HomeSectionState extends State<HomeSection>
 
   Widget _buildIncomeExpenseToggle() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 50),
+      margin: EdgeInsets.symmetric(horizontal: 30),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(10),
       ),
-      padding: EdgeInsets.all(5),
+      padding: EdgeInsets.all(3),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _buildToggleOption('Inflow', isIncomeSelected, Icons.arrow_upward),
           _buildToggleOption(
@@ -417,25 +420,25 @@ class _HomeSectionState extends State<HomeSection>
           _handleSectionClick(text == 'Inflow');
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: isSelected ? Color(0xFFEB8153) : Colors.white,
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 icon,
-                size: 16,
+                size: 14,
                 color: isSelected ? Colors.white : Color(0xFFB8B8B8),
               ),
-              SizedBox(width: 4),
+              SizedBox(width: 2),
               Text(
                 text,
                 style: TextStyle(
                   color: isSelected ? Colors.white : Color(0xFFB8B8B8),
-                  fontSize: 13,
+                  fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
               ),
