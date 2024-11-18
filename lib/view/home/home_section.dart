@@ -244,15 +244,15 @@ class _HomeSectionState extends State<HomeSection>
                           ],
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.all(6 * paddingScale),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Icon(Icons.notifications_outlined,
-                            color: Colors.white, size: 18 * iconScale),
-                      ),
+                      // Container(
+                      //   padding: EdgeInsets.all(6 * paddingScale),
+                      //   decoration: BoxDecoration(
+                      //     color: Colors.white.withOpacity(0.2),
+                      //     borderRadius: BorderRadius.circular(10),
+                      //   ),
+                      //   child: Icon(Icons.notifications_outlined,
+                      //       color: Colors.white, size: 18 * iconScale),
+                      // ),
                     ],
                   ),
                   SizedBox(height: 12 * paddingScale), // Mengurangi spacing
