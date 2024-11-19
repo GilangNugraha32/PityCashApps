@@ -350,7 +350,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                                       fontSize: 24 * fontScale,
                                       fontWeight: FontWeight.bold,
                                       color: isLowBalance
-                                          ? Color(0xFFF54D42)
+                                          ? Color(0xFFFFF5F5)
                                           : Colors.white,
                                       letterSpacing: 1,
                                     ),

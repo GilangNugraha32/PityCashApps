@@ -186,8 +186,8 @@ class ApiService {
   }
 
   // Fetch all categories with pagination
-  Future<List<Category>> fetchCategories({int page = 1}) async {
-    print('Mengambil kategori dari halaman: $page');
+  Future<List<Category>> fetchCategories() async {
+    print('Mengambil semua kategori');
     try {
       await _setAuthToken();
 
@@ -196,26 +196,41 @@ class ApiService {
       final rolesString = prefs.getString('roles');
       final roles = rolesString != null ? json.decode(rolesString) : null;
 
-      final response = await _dio.get(
-        '$baseUrl/category/all',
-        queryParameters: {'page': page},
-      );
+      List<Category> allCategories = [];
+      int currentPage = 1;
+      bool hasMoreData = true;
 
-      if (response.statusCode == 200) {
-        final data = response.data['data']['data'] as List;
-        print('Kategori yang diambil: $data');
+      while (hasMoreData) {
+        final response = await _dio.get(
+          '$baseUrl/category/all',
+          queryParameters: {'page': currentPage},
+        );
 
-        // Simpan roles untuk penggunaan selanjutnya
-        if (roles != null) {
-          await prefs.setString('roles', json.encode(roles));
+        if (response.statusCode == 200) {
+          final data = response.data['data']['data'] as List;
+          if (data.isEmpty) {
+            hasMoreData = false;
+          } else {
+            print('Mengambil kategori dari halaman $currentPage');
+            final categories = data
+                .map((categoryJson) => Category.fromJson(categoryJson))
+                .toList();
+            allCategories.addAll(categories);
+            currentPage++;
+          }
+        } else {
+          throw Exception('Gagal memuat kategori');
         }
-
-        return data
-            .map((categoryJson) => Category.fromJson(categoryJson))
-            .toList();
-      } else {
-        throw Exception('Gagal memuat kategori');
       }
+
+      print('Total kategori yang diambil: ${allCategories.length}');
+
+      // Simpan roles untuk penggunaan selanjutnya
+      if (roles != null) {
+        await prefs.setString('roles', json.encode(roles));
+      }
+
+      return allCategories;
     } catch (e) {
       if (e is DioError) {
         print('DioError saat mengambil kategori: ${e.response?.data}');
@@ -474,7 +489,6 @@ class ApiService {
       await originalFile.copy(tempFile.path);
 
       print('Nama file yang diacak untuk server: $randomFileName');
-      print('Nama file yang diacak untuk server: $randomFileName');
 
       // Gunakan temporary file untuk upload
       var formData = FormData.fromMap({
@@ -555,17 +569,17 @@ class ApiService {
         if (responseData != null && responseData is Map<String, dynamic>) {
           final errorString = responseData['error']?.toString();
           if (errorString != null && errorString.contains('Duplicate entry')) {
-            errorMessage = 'Nama kategori sudah ada di database';
+            errorMessage = 'Gagal mengimpor Kategori';
           } else {
             errorMessage = responseData['message'] ?? 'Error tidak diketahui';
           }
         }
 
         print('DioError saat mengimpor kategori: $responseData');
-        throw Exception('Gagal mengimpor kategori: $errorMessage');
+        throw Exception(errorMessage);
       } else {
         print('Error saat mengimpor kategori: $e');
-        throw Exception('Gagal mengimpor kategori: $e');
+        throw Exception('Terjadi kesalahan saat mengimpor kategori');
       }
     }
   }

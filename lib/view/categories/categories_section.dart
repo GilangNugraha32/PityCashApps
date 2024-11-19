@@ -28,6 +28,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   bool isFetching = false; // Guard variable to prevent multiple fetch requests
   bool hasMoreCategories =
       true; // To track if there are more categories to load
+  String selectedFilter = 'Semua'; // Default filter
 
   // Track login status
 
@@ -41,7 +42,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   void initState() {
     super.initState();
     filteredCategories = List.from(categories);
-    _fetchCategories(currentPage);
+    _fetchCategories(currentPage, 10);
     _checkLoginStatus();
 
     // Menambahkan listener untuk pencarian realtime
@@ -94,7 +95,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     Navigator.of(context).pushReplacementNamed('/login');
   }
 
-  Future<void> _fetchCategories(int page) async {
+  Future<void> _fetchCategories(int page, int itemsPerLoad) async {
     if (isFetching || !hasMoreCategories)
       return; // Exit if already fetching or no more categories
 
@@ -105,8 +106,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
 
     try {
       // Fetch categories from the server based on the current page
-      List<Category> newCategories =
-          await ApiService().fetchCategories(page: page);
+      List<Category> newCategories = await ApiService().fetchCategories();
 
       if (newCategories.isEmpty) {
         setState(() {
@@ -171,7 +171,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     });
 
     // Fetch the first set of categories again
-    await _fetchCategories(currentPage);
+    await _fetchCategories(currentPage, 10);
   }
 
   @override
@@ -341,24 +341,194 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                               if (!isReaderOnly) {
                                 return Padding(
                                   padding: const EdgeInsets.only(
-                                      right: 14.0, top: 14.0),
+                                      right: 14.0, top: 14.0, left: 14.0),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      _buildActionButton(
-                                        Icons.print_outlined,
-                                        Color(0xFF51A6F5),
-                                        () {
-                                          _showExportPDFDialog(context);
-                                        },
+                                      // Filter dropdown
+                                      Container(
+                                        width: 150,
+                                        height: 32,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 6.0),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.grey[300]!),
+                                          borderRadius:
+                                              BorderRadius.circular(6.0),
+                                        ),
+                                        child: Theme(
+                                          data: Theme.of(context).copyWith(
+                                            canvasColor: Colors.white,
+                                            // Memastikan dropdown muncul di bawah
+                                            popupMenuTheme:
+                                                PopupMenuThemeData(),
+                                          ),
+                                          child: DropdownButtonHideUnderline(
+                                            child: DropdownButton<String>(
+                                              value: selectedFilter,
+                                              isExpanded: true,
+                                              isDense: true,
+                                              itemHeight: 48,
+                                              icon: Icon(Icons.arrow_drop_down,
+                                                  color: Color(0xFFEB8153)),
+                                              dropdownColor: Colors.white,
+                                              // Memaksa dropdown muncul di bawah
+                                              menuMaxHeight: 300,
+                                              // Mengatur posisi dropdown
+                                              alignment: AlignmentDirectional
+                                                  .bottomStart,
+                                              items: [
+                                                DropdownMenuItem<String>(
+                                                  value: 'Semua',
+                                                  child: Container(
+                                                    constraints: BoxConstraints(
+                                                        minWidth: 150),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Icon(Icons.list_alt,
+                                                            size: 16,
+                                                            color: Color(
+                                                                0xFFEB8153)),
+                                                        SizedBox(width: 8),
+                                                        Flexible(
+                                                          child: Text(
+                                                            'Semua',
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: Colors
+                                                                  .black87,
+                                                            ),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                DropdownMenuItem<String>(
+                                                  value: 'Pemasukan',
+                                                  child: Container(
+                                                    constraints: BoxConstraints(
+                                                        minWidth: 150),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Icon(
+                                                            Icons
+                                                                .arrow_downward,
+                                                            size: 16,
+                                                            color:
+                                                                Colors.green),
+                                                        SizedBox(width: 8),
+                                                        Flexible(
+                                                          child: Text(
+                                                            'Pemasukan',
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: Colors
+                                                                  .black87,
+                                                            ),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                DropdownMenuItem<String>(
+                                                  value: 'Pengeluaran',
+                                                  child: Container(
+                                                    constraints: BoxConstraints(
+                                                        minWidth: 150),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Icon(Icons.arrow_upward,
+                                                            size: 16,
+                                                            color: Colors.red),
+                                                        SizedBox(width: 8),
+                                                        Flexible(
+                                                          child: Text(
+                                                            'Pengeluaran',
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              color: Colors
+                                                                  .black87,
+                                                            ),
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                              onChanged: (String? newValue) {
+                                                setState(() {
+                                                  selectedFilter = newValue!;
+                                                  if (selectedFilter ==
+                                                      'Semua') {
+                                                    filteredCategories =
+                                                        List.from(categories);
+                                                  } else if (selectedFilter ==
+                                                      'Pemasukan') {
+                                                    filteredCategories = categories
+                                                        .where((category) =>
+                                                            category
+                                                                .jenisKategori ==
+                                                            1)
+                                                        .toList();
+                                                  } else if (selectedFilter ==
+                                                      'Pengeluaran') {
+                                                    filteredCategories = categories
+                                                        .where((category) =>
+                                                            category
+                                                                .jenisKategori ==
+                                                            2)
+                                                        .toList();
+                                                  }
+                                                  if (_searchController
+                                                      .text.isNotEmpty) {
+                                                    _filterCategories(
+                                                        _searchController.text);
+                                                  }
+                                                });
+                                              },
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                      SizedBox(width: 4),
-                                      _buildActionButton(
-                                        Icons.file_upload_outlined,
-                                        Color(0xFF68CF29),
-                                        () {
-                                          _showDragAndDropModal(context);
-                                        },
+                                      // Action buttons
+                                      Row(
+                                        children: [
+                                          _buildActionButton(
+                                            Icons.print_outlined,
+                                            Color(0xFF51A6F5),
+                                            () {
+                                              _showExportPDFDialog(context);
+                                            },
+                                          ),
+                                          SizedBox(width: 4),
+                                          _buildActionButton(
+                                            Icons.file_upload_outlined,
+                                            Color(0xFF68CF29),
+                                            () {
+                                              _showDragAndDropModal(context);
+                                            },
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -371,13 +541,18 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                         Expanded(
                           child: LazyLoadScrollView(
                             onEndOfPage: () {
-                              _fetchCategories(currentPage);
+                              if (!isFetching) {
+                                // Batasi jumlah data yang dimuat per scroll
+                                final itemsPerLoad = 10;
+                                _fetchCategories(currentPage, itemsPerLoad);
+                              }
                             },
                             child: RefreshIndicator(
                               onRefresh: _refreshCategoryList,
                               child: ListView.separated(
                                 physics: AlwaysScrollableScrollPhysics(),
-                                padding: EdgeInsets.zero,
+                                padding: EdgeInsets.only(
+                                    bottom: 100), // Padding bawah diperbesar
                                 itemCount: filteredCategories.length +
                                     (isLoadingMore ? 1 : 0),
                                 separatorBuilder: (context, index) => Divider(
@@ -385,15 +560,56 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                   height: 1,
                                 ),
                                 itemBuilder: (context, index) {
+                                  // Muat data berikutnya saat mendekati akhir list
+                                  if (index >= filteredCategories.length - 5 &&
+                                      !isFetching) {
+                                    _fetchCategories(currentPage, 10);
+                                  }
+
                                   if (index == filteredCategories.length) {
-                                    return Center(
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                Color(0xFFEB8153)),
+                                    return Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 8.0),
+                                      child: Center(
+                                        child: SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.0,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Color(0xFFEB8153)),
+                                          ),
+                                        ),
                                       ),
                                     );
                                   }
+
+                                  // Sort categories - lowercase first, then uppercase, for all letters
+                                  filteredCategories.sort((a, b) {
+                                    String aLower = a.name.toLowerCase();
+                                    String bLower = b.name.toLowerCase();
+
+                                    // If same letter but different case
+                                    if (aLower[0] == bLower[0]) {
+                                      if (a.name[0].toLowerCase() ==
+                                              a.name[0] &&
+                                          b.name[0].toUpperCase() ==
+                                              b.name[0]) {
+                                        return -1;
+                                      }
+                                      if (a.name[0].toUpperCase() ==
+                                              a.name[0] &&
+                                          b.name[0].toLowerCase() ==
+                                              b.name[0]) {
+                                        return 1;
+                                      }
+                                    }
+
+                                    // Otherwise sort alphabetically
+                                    return aLower.compareTo(bLower);
+                                  });
+
                                   final category = filteredCategories[index];
                                   return ListTile(
                                     contentPadding: EdgeInsets.symmetric(
@@ -792,7 +1008,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'Gagal mengimpor kategori: $e',
+                                    '$e',
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 12),
                                   ),

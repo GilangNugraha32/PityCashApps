@@ -25,6 +25,9 @@ class _EditPemasukanState extends State<EditPemasukan> {
   List<Category> categories = [];
   Category? selectedCategory;
 
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController categoryController = TextEditingController();
+
   final SharedPreferencesService _prefsService = SharedPreferencesService();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
@@ -628,26 +631,52 @@ class _EditPemasukanState extends State<EditPemasukan> {
 
   Widget _buildCategoryModal() {
     TextEditingController searchController = TextEditingController();
-    TextEditingController categoryController = TextEditingController();
     categoryController.text = selectedCategory?.name ?? '';
 
     ValueNotifier<List<Category>> filteredCategories =
-        ValueNotifier<List<Category>>(categories);
+        ValueNotifier<List<Category>>([]);
+
+    // Fungsi untuk mengurutkan kategori
+    void sortCategories(String searchQuery) {
+      List<Category> sorted = [...categories];
+
+      // Filter berdasarkan pencarian jika ada
+      if (searchQuery.isNotEmpty) {
+        sorted = sorted
+            .where((category) =>
+                category.name.toLowerCase().contains(searchQuery.toLowerCase()))
+            .toList();
+      }
+
+      // Jika ada kategori yang dipilih, pindahkan ke atas
+      if (selectedCategory != null) {
+        sorted.removeWhere((c) => c.id == selectedCategory!.id);
+        if (searchQuery.isEmpty ||
+            selectedCategory!.name
+                .toLowerCase()
+                .contains(searchQuery.toLowerCase())) {
+          sorted.insert(0, selectedCategory!);
+        }
+      }
+
+      filteredCategories.value = sorted;
+    }
+
+    // Inisialisasi awal
+    sortCategories('');
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Container(
-          height: MediaQuery.of(context).size.height *
-              0.6, // Mengurangi tinggi modal
-          padding: EdgeInsets.symmetric(
-              horizontal: 16, vertical: 12), // Mengurangi padding
+          height: MediaQuery.of(context).size.height * 0.6,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: Container(
-                  width: 32, // Mengurangi lebar handle bar
-                  height: 3, // Mengurangi tinggi handle bar
+                  width: 32,
+                  height: 3,
                   margin: EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
@@ -656,9 +685,9 @@ class _EditPemasukanState extends State<EditPemasukan> {
                 ),
               ),
               Text(
-                'Pilih Kategori',
+                'Edit Kategori',
                 style: TextStyle(
-                  fontSize: 16, // Mengurangi ukuran font judul
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -669,30 +698,37 @@ class _EditPemasukanState extends State<EditPemasukan> {
                   border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Cari kategori...',
-                    hintStyle: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 13,
-                    ),
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Color(0xFFEB8153),
-                      size: 18,
-                    ),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                  onChanged: (value) {
-                    filteredCategories.value = categories
-                        .where((category) => category.name
-                            .toLowerCase()
-                            .contains(value.toLowerCase()))
-                        .toList();
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) {
+                      sortCategories(searchController.text);
+                    }
                   },
+                  child: TextField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Cari kategori...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 13,
+                      ),
+                      border: InputBorder.none,
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Color(0xFFEB8153),
+                        size: 18,
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    onChanged: (value) {
+                      sortCategories(value);
+                    },
+                    onSubmitted: (value) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    textInputAction: TextInputAction.search,
+                  ),
                 ),
               ),
               SizedBox(height: 16),
@@ -750,17 +786,21 @@ class _EditPemasukanState extends State<EditPemasukan> {
                       ),
                       itemBuilder: (context, index) {
                         final category = categories[index];
+                        bool isSelected = selectedCategory?.id == category.id;
+
                         return ListTile(
-                          dense: true, // Membuat list tile lebih compact
+                          dense: true,
                           contentPadding: EdgeInsets.zero,
                           title: Text(
                             category.name,
                             style: TextStyle(
                               fontSize: 13,
-                              fontWeight: selectedCategory == category
+                              fontWeight: isSelected
                                   ? FontWeight.w700
                                   : FontWeight.w600,
-                              color: Colors.black87,
+                              color: isSelected
+                                  ? Color(0xFFEB8153)
+                                  : Colors.black87,
                             ),
                           ),
                           trailing: Radio<Category>(

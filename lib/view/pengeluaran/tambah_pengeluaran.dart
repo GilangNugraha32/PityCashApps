@@ -687,6 +687,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   bool showPrefix = false;
   int _selectedIndex = 0;
 
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController categoryController = TextEditingController();
+
   final SharedPreferencesService _prefsService = SharedPreferencesService();
   final List<TextEditingController> nameControllers = [];
   final List<TextEditingController> descriptionControllers = [];
@@ -1092,41 +1095,45 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }
 
   Widget _buildCategoryModal() {
-    TextEditingController searchController = TextEditingController();
+    categoryController.text = selectedCategory?.name ?? '';
+
     ValueNotifier<List<Category>> filteredCategories =
         ValueNotifier<List<Category>>(categories);
 
-    Category? initialCategory;
-    if (selectedCategory != null) {
-      initialCategory = categories.firstWhere(
-        (category) => category.name == selectedCategory!.name,
-        orElse: () => selectedCategory!,
-      );
+    // Filter awal sesuai dengan isi _searchController
+    if (_searchController.text.isNotEmpty) {
+      filteredCategories.value = categories
+          .where((category) => category.name
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
+          .toList();
     }
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.7,
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          height: MediaQuery.of(context).size.height *
+              0.6, // Mengurangi tinggi modal
+          padding: EdgeInsets.symmetric(
+              horizontal: 16, vertical: 12), // Mengurangi padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: Container(
-                  width: 32,
-                  height: 4,
+                  width: 32, // Mengurangi lebar handle bar
+                  height: 3, // Mengurangi tinggi handle bar
                   margin: EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),
               ),
               Text(
                 'Pilih Kategori',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16, // Mengurangi ukuran font judul
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1134,36 +1141,53 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: 1,
-                  ),
+                  border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Cari kategori...',
-                    hintStyle: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 12,
-                    ),
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Color(0xFFEB8153),
-                      size: 18,
-                    ),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                  onChanged: (value) {
-                    filteredCategories.value = categories
-                        .where((category) => category.name
-                            .toLowerCase()
-                            .contains(value.toLowerCase()))
-                        .toList();
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) {
+                      // Ketika kehilangan fokus, nilai tetap dipertahankan dan filter diupdate
+                      setState(() {
+                        filteredCategories.value = categories
+                            .where((category) => category.name
+                                .toLowerCase()
+                                .contains(_searchController.text.toLowerCase()))
+                            .toList();
+                      });
+                    }
                   },
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Cari kategori...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 13,
+                      ),
+                      border: InputBorder.none,
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Color(0xFFEB8153),
+                        size: 18,
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        filteredCategories.value = categories
+                            .where((category) => category.name
+                                .toLowerCase()
+                                .contains(value.toLowerCase()))
+                            .toList();
+                      });
+                    },
+                    onSubmitted: (value) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    textInputAction: TextInputAction.search,
+                  ),
                 ),
               ),
               SizedBox(height: 16),
@@ -1197,7 +1221,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                           children: [
                             Icon(
                               Icons.search_off,
-                              size: 32,
+                              size: 36,
                               color: Colors.grey[400],
                             ),
                             SizedBox(height: 12),
@@ -1205,7 +1229,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                               'Tidak ada kategori yang ditemukan',
                               style: TextStyle(
                                 color: Colors.grey[600],
-                                fontSize: 12,
+                                fontSize: 14,
                               ),
                             ),
                           ],
@@ -1221,15 +1245,14 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                       ),
                       itemBuilder: (context, index) {
                         final category = categories[index];
-                        final isSelected =
-                            initialCategory?.name == category.name;
                         return ListTile(
+                          dense: true, // Membuat list tile lebih compact
                           contentPadding: EdgeInsets.zero,
                           title: Text(
                             category.name,
                             style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: isSelected
+                              fontSize: 13,
+                              fontWeight: selectedCategory == category
                                   ? FontWeight.w700
                                   : FontWeight.w600,
                               color: Colors.black87,
@@ -1237,11 +1260,11 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                           ),
                           trailing: Radio<Category>(
                             value: category,
-                            groupValue: isSelected ? category : initialCategory,
+                            groupValue: selectedCategory,
                             onChanged: (Category? value) {
                               setState(() {
                                 selectedCategory = value;
-                                initialCategory = value;
+                                categoryController.text = value?.name ?? '';
                               });
                               this.setState(() {});
                               Navigator.pop(context);
@@ -1251,7 +1274,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                           onTap: () {
                             setState(() {
                               selectedCategory = category;
-                              initialCategory = category;
+                              categoryController.text = category.name;
                             });
                             this.setState(() {});
                             Navigator.pop(context);
@@ -1405,7 +1428,20 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               style: TextStyle(fontSize: 12),
               onChanged: (value) {
                 if (value.isEmpty) {
+                  // Ketika field kosong, set nilai ke "0"
                   jumlahSatuanControllers.last.text = "0";
+                  jumlahSatuanControllers.last.selection =
+                      TextSelection.fromPosition(
+                    TextPosition(
+                        offset: jumlahSatuanControllers.last.text.length),
+                  );
+                } else if (value == "0") {
+                  // Ketika nilai "0" dimasukkan, kosongkan field
+                  jumlahSatuanControllers.last.clear();
+                } else if (value.startsWith('0') && value.length > 1) {
+                  // Hapus leading zeros
+                  jumlahSatuanControllers.last.text =
+                      value.replaceFirst(RegExp(r'^0+'), '');
                   jumlahSatuanControllers.last.selection =
                       TextSelection.fromPosition(
                     TextPosition(
@@ -1462,7 +1498,11 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                   int currentValue = int.tryParse(currentText) ?? 0;
                   if (currentValue > 0) {
                     int newValue = currentValue - 1;
-                    jumlahSatuanControllers.last.text = newValue.toString();
+                    if (newValue == 0) {
+                      jumlahSatuanControllers.last.clear();
+                    } else {
+                      jumlahSatuanControllers.last.text = newValue.toString();
+                    }
                     _calculateTotal('');
                   }
                 },

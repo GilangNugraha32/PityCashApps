@@ -20,6 +20,8 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
   DateTime? selectedDate;
   List<Category> categories = [];
   Category? selectedCategory;
+  final TextEditingController _searchController = TextEditingController();
+  final TextEditingController categoryController = TextEditingController();
 
   // Instantiate the controllers
   final SharedPreferencesService _prefsService = SharedPreferencesService();
@@ -568,12 +570,19 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
   }
 
   Widget _buildCategoryModal() {
-    TextEditingController searchController = TextEditingController();
-    TextEditingController categoryController = TextEditingController();
     categoryController.text = selectedCategory?.name ?? '';
 
     ValueNotifier<List<Category>> filteredCategories =
         ValueNotifier<List<Category>>(categories);
+
+    // Filter awal sesuai dengan isi _searchController
+    if (_searchController.text.isNotEmpty) {
+      filteredCategories.value = categories
+          .where((category) => category.name
+              .toLowerCase()
+              .contains(_searchController.text.toLowerCase()))
+          .toList();
+    }
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
@@ -610,30 +619,50 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                   border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Cari kategori...',
-                    hintStyle: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 13,
-                    ),
-                    border: InputBorder.none,
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Color(0xFFEB8153),
-                      size: 18,
-                    ),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                  onChanged: (value) {
-                    filteredCategories.value = categories
-                        .where((category) => category.name
-                            .toLowerCase()
-                            .contains(value.toLowerCase()))
-                        .toList();
+                child: Focus(
+                  onFocusChange: (hasFocus) {
+                    if (!hasFocus) {
+                      // Ketika kehilangan fokus, nilai tetap dipertahankan dan filter diupdate
+                      setState(() {
+                        filteredCategories.value = categories
+                            .where((category) => category.name
+                                .toLowerCase()
+                                .contains(_searchController.text.toLowerCase()))
+                            .toList();
+                      });
+                    }
                   },
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Cari kategori...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 13,
+                      ),
+                      border: InputBorder.none,
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Color(0xFFEB8153),
+                        size: 18,
+                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        filteredCategories.value = categories
+                            .where((category) => category.name
+                                .toLowerCase()
+                                .contains(value.toLowerCase()))
+                            .toList();
+                      });
+                    },
+                    onSubmitted: (value) {
+                      FocusScope.of(context).unfocus();
+                    },
+                    textInputAction: TextInputAction.search,
+                  ),
                 ),
               ),
               SizedBox(height: 16),
