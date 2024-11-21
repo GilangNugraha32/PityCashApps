@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'dart:math' as math;
@@ -43,6 +44,9 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   int currentPage = 1;
   bool isBalanceVisible = true;
 
+  Timer? _debouncer;
+  bool _isRequesting = false;
+
   @override
   void initState() {
     super.initState();
@@ -77,36 +81,40 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   }
 
   Future<void> _fetchExpenses(int page) async {
-    if (isLoadingMore) return;
+    if (isLoadingMore || _isRequesting) return;
 
     setState(() {
+      _isRequesting = true;
       isLoadingMore = true;
     });
 
     try {
-      // Karena API sudah mengambil semua data sekaligus pada page 1
-      // Kita hanya perlu memanggil API sekali saja
-      if (page == 1) {
-        final fetchedExpenses = await _apiService.fetchExpenses(
-          page: page,
-          dateRange: selectedDateRange,
-        );
+      final fetchedExpenses = await _apiService.fetchExpenses(
+        page: page,
+        dateRange: selectedDateRange,
+      );
 
-        setState(() {
+      if (!mounted) return;
+
+      setState(() {
+        if (page == 1) {
           expenses = fetchedExpenses;
-          _filterExpenses();
-          // Karena semua data sudah diambil, set isLoadingMore ke false
-          isLoadingMore = false;
-          // Tidak perlu increment currentPage karena semua data sudah diambil
-        });
-      }
+        } else {
+          expenses.addAll(fetchedExpenses);
+        }
+        _filterExpenses();
+        currentPage++;
+      });
     } catch (e) {
       print('Error saat mengambil pengeluaran: $e');
     } finally {
-      setState(() {
-        isLoading = false;
-        isLoadingMore = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          isLoadingMore = false;
+          _isRequesting = false;
+        });
+      }
     }
   }
 
@@ -145,40 +153,45 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   }
 
   void _filterExpenses() {
-    String query = _searchController.text.toLowerCase();
+    if (_debouncer?.isActive ?? false) _debouncer!.cancel();
 
-    setState(() {
-      List<Pengeluaran> dateRangeFilteredExpenses = expenses;
-      if (selectedDateRange != null) {
-        dateRangeFilteredExpenses = expenses.where((pengeluaran) {
-          return pengeluaran.tanggal != null &&
-              (pengeluaran.tanggal!.isAfter(selectedDateRange!.start) ||
-                  pengeluaran.tanggal!
-                      .isAtSameMomentAs(selectedDateRange!.start)) &&
-              (pengeluaran.tanggal!.isBefore(selectedDateRange!.end) ||
-                  pengeluaran.tanggal!
-                      .isAtSameMomentAs(selectedDateRange!.end));
-        }).toList();
-      }
+    _debouncer = Timer(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
 
-      filteredExpenses = query.isEmpty
-          ? List.from(dateRangeFilteredExpenses)
-          : dateRangeFilteredExpenses.where((pengeluaran) {
-              return pengeluaran.name.toLowerCase().contains(query) ||
-                  DateFormat('dd MMMM yyyy')
-                      .format(pengeluaran.tanggal!)
-                      .toLowerCase()
-                      .contains(query);
-            }).toList();
+      setState(() {
+        String query = _searchController.text.toLowerCase();
+        List<Pengeluaran> dateRangeFilteredExpenses = expenses;
 
-      groupedFilteredExpenses = {};
-      for (var pengeluaran in filteredExpenses) {
-        int parentId = pengeluaran.idParent;
-        if (!groupedFilteredExpenses.containsKey(parentId)) {
-          groupedFilteredExpenses[parentId] = [];
+        if (selectedDateRange != null) {
+          dateRangeFilteredExpenses = expenses.where((pengeluaran) {
+            return pengeluaran.tanggal != null &&
+                pengeluaran.tanggal!.isAfter(
+                    selectedDateRange!.start.subtract(Duration(days: 1))) &&
+                pengeluaran.tanggal!
+                    .isBefore(selectedDateRange!.end.add(Duration(days: 1)));
+          }).toList();
         }
-        groupedFilteredExpenses[parentId]!.add(pengeluaran);
-      }
+
+        filteredExpenses = query.isEmpty
+            ? List.from(dateRangeFilteredExpenses)
+            : dateRangeFilteredExpenses.where((pengeluaran) {
+                return pengeluaran.name.toLowerCase().contains(query) ||
+                    DateFormat('dd MMMM yyyy')
+                        .format(pengeluaran.tanggal!)
+                        .toLowerCase()
+                        .contains(query);
+              }).toList();
+
+        // Update grouped expenses
+        groupedFilteredExpenses = {};
+        for (var pengeluaran in filteredExpenses) {
+          int parentId = pengeluaran.idParent;
+          if (!groupedFilteredExpenses.containsKey(parentId)) {
+            groupedFilteredExpenses[parentId] = [];
+          }
+          groupedFilteredExpenses[parentId]!.add(pengeluaran);
+        }
+      });
     });
   }
 
@@ -585,7 +598,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                 left: 8,
                 right: 8,
                 top: 8,
-                bottom: 100, // Tambahkan padding bottom yang lebih besar
+                bottom: 100,
               ),
               physics: groupedFilteredExpenses.isEmpty
                   ? NeverScrollableScrollPhysics()
@@ -608,6 +621,39 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                 int parentId = groupedFilteredExpenses.keys.elementAt(index);
                 List<Pengeluaran> groupItems =
                     groupedFilteredExpenses[parentId]!;
+
+                // Filter berdasarkan dateRange jika ada
+                if (selectedDateRange != null) {
+                  groupItems = groupItems
+                      .where((expense) =>
+                          expense.tanggal != null &&
+                          (expense.tanggal!.isAfter(selectedDateRange!.start) ||
+                              expense.tanggal!.isAtSameMomentAs(
+                                  selectedDateRange!.start)) &&
+                          (expense.tanggal!.isBefore(selectedDateRange!.end) ||
+                              expense.tanggal!
+                                  .isAtSameMomentAs(selectedDateRange!.end)))
+                      .toList();
+                } else {
+                  // Jika tidak ada dateRange, filter untuk bulan dan tahun saat ini
+                  final now = DateTime.now();
+                  final firstDayOfMonth = DateTime(now.year, now.month, 1);
+                  final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
+                  groupItems = groupItems
+                      .where((expense) =>
+                          expense.tanggal != null &&
+                          expense.tanggal!.isAfter(
+                              firstDayOfMonth.subtract(Duration(days: 1))) &&
+                          expense.tanggal!
+                              .isBefore(lastDayOfMonth.add(Duration(days: 1))))
+                      .toList();
+                }
+
+                if (groupItems.isEmpty) {
+                  return Container(); // Skip jika tidak ada data
+                }
+
                 double totalJumlah =
                     groupItems.fold(0, (sum, item) => sum + item.jumlah);
 
@@ -674,6 +720,10 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
   }
 
   Widget _buildDateRangeSelector() {
+    final now = DateTime.now();
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0);
+
     return GestureDetector(
       onTap: () => _selectDateRange(context),
       child: Container(
@@ -710,7 +760,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                   SizedBox(height: 1),
                   Text(
                     selectedDateRange == null
-                        ? 'Pilih rentang tanggal sesuai kebutuhan Anda'
+                        ? 'Data bulan ${DateFormat.MMMM().format(now)} ${now.year}'
                         : 'Rentang tanggal yang dipilih',
                     style: TextStyle(
                       color: Color(0xFFFF9D6C),
@@ -1670,6 +1720,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
 
   @override
   void dispose() {
+    _debouncer?.cancel();
     _searchController.dispose();
     super.dispose();
   }

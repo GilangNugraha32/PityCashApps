@@ -7,6 +7,9 @@ import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/view/home/home.dart';
+import 'dart:async';
+
+import 'package:pity_cash/view/pemasukan/pemasukan_section.dart';
 
 class TambahPemasukan extends StatefulWidget {
   @override
@@ -28,6 +31,9 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController jumlahController = TextEditingController();
+
+  // Tambahkan timer untuk debouncing
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -56,6 +62,12 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
       setState(() {});
     } catch (e) {
       print('Error fetching categories: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memuat kategori, silakan coba lagi nanti'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -93,6 +105,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
       _showSnackbar('Pemasukan berhasil ditambahkan', isError: false);
 
+      // Clear form fields
       nameController.clear();
       descriptionController.clear();
       jumlahController.clear();
@@ -101,9 +114,13 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         selectedCategory = null;
       });
 
-      Future.delayed(Duration(milliseconds: 500), () {
-        Navigator.pop(context, true);
-      });
+      // Ubah navigasi ke HomeScreen dengan index 2 (PemasukanSection)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomeScreen(initialIndex: 2),
+        ),
+      );
     } catch (e) {
       print('Error: $e');
       _showSnackbar('Gagal menambahkan pemasukan: ${e.toString()}',
@@ -571,21 +588,65 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
   Widget _buildCategoryModal() {
     categoryController.text = selectedCategory?.name ?? '';
-
     ValueNotifier<List<Category>> filteredCategories =
         ValueNotifier<List<Category>>(categories);
 
-    // Filter awal sesuai dengan isi _searchController
-    if (_searchController.text.isNotEmpty) {
-      filteredCategories.value = categories
-          .where((category) => category.name
-              .toLowerCase()
-              .contains(_searchController.text.toLowerCase()))
-          .toList();
-    }
-
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
+        if (categories.isEmpty) {
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.3,
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Colors.red[300],
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Gagal memuat kategori',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red[300],
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Terlalu banyak permintaan, silakan coba lagi nanti',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFFEB8153),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text(
+                    'Tutup',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
         return Container(
           height: MediaQuery.of(context).size.height *
               0.6, // Mengurangi tinggi modal
@@ -650,12 +711,16 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                           EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
                     onChanged: (value) {
-                      setState(() {
-                        filteredCategories.value = categories
-                            .where((category) => category.name
-                                .toLowerCase()
-                                .contains(value.toLowerCase()))
-                            .toList();
+                      // Implementasi debouncing
+                      if (_debounce?.isActive ?? false) _debounce?.cancel();
+                      _debounce = Timer(const Duration(milliseconds: 500), () {
+                        setState(() {
+                          filteredCategories.value = categories
+                              .where((category) => category.name
+                                  .toLowerCase()
+                                  .contains(value.toLowerCase()))
+                              .toList();
+                        });
                       });
                     },
                     onSubmitted: (value) {
@@ -1036,7 +1101,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
   @override
   void dispose() {
-    // Bersihkan listener saat widget dihancurkan
+    _debounce?.cancel(); // Batalkan timer saat widget di-dispose
     jumlahController.dispose();
     super.dispose();
   }

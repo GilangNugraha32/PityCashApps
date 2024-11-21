@@ -74,18 +74,39 @@ class _EditPemasukanState extends State<EditPemasukan> {
   }
 
   Future<void> fetchCategories() async {
-    try {
-      ApiService apiService = ApiService();
-      List<Category> allCategories = await apiService.fetchCategories();
-      categories = allCategories
-          .where((category) => category.jenisKategori == 1)
-          .toList();
-      setState(() {});
-    } catch (e) {
-      print('Error fetching categories: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal mengambil kategori: ${e.toString()}')),
-      );
+    int maxRetries = 3;
+    int currentRetry = 0;
+    Duration delayDuration = Duration(seconds: 2);
+
+    while (currentRetry < maxRetries) {
+      try {
+        ApiService apiService = ApiService();
+        List<Category> allCategories = await apiService.fetchCategories();
+        categories = allCategories
+            .where((category) => category.jenisKategori == 1)
+            .toList();
+        setState(() {});
+        return; // Sukses, keluar dari loop
+      } catch (e) {
+        currentRetry++;
+        print('Error fetching categories (Attempt $currentRetry): $e');
+
+        if (currentRetry == maxRetries) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                  'Gagal mengambil kategori setelah $maxRetries percobaan. Silakan coba lagi nanti.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        // Tunggu sebelum mencoba lagi
+        await Future.delayed(delayDuration);
+        // Tingkatkan delay untuk setiap percobaan
+        delayDuration *= 2;
+      }
     }
   }
 

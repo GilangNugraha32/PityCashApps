@@ -22,10 +22,15 @@ class _ProfileSectionState extends State<ProfileSection> {
   bool isLoggedIn = false;
   final SharedPreferencesService _prefsService = SharedPreferencesService();
 
+  // Tambahkan variable untuk menyimpan data profil
+  String? _profilePicture;
+  bool _isLoadingProfile = true;
+
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
+    _loadProfilePicture();
   }
 
   Future<void> _checkLoginStatus() async {
@@ -215,35 +220,28 @@ class _ProfileSectionState extends State<ProfileSection> {
                         ],
                       ),
                       child: ClipOval(
-                        child: FutureBuilder<String>(
-                          future: ApiService().showProfilePicture(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
+                        child: _isLoadingProfile
+                            ? Center(
                                 child: CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                       Colors.white),
                                   strokeWidth: 2,
                                 ),
-                              );
-                            } else if (snapshot.hasError || !snapshot.hasData) {
-                              return Container(
-                                color: Colors.white.withOpacity(0.2),
-                                child: Icon(
-                                  Icons.person_rounded,
-                                  size: 40,
-                                  color: Colors.white,
-                                ),
-                              );
-                            } else {
-                              return Image.memory(
-                                base64Decode(snapshot.data!.split(',').last),
-                                fit: BoxFit.cover,
-                              );
-                            }
-                          },
-                        ),
+                              )
+                            : _profilePicture == null
+                                ? Container(
+                                    color: Colors.white.withOpacity(0.2),
+                                    child: Icon(
+                                      Icons.person_rounded,
+                                      size: 40,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Image.memory(
+                                    base64Decode(
+                                        _profilePicture!.split(',').last),
+                                    fit: BoxFit.cover,
+                                  ),
                       ),
                     ),
                   ],
@@ -433,5 +431,26 @@ class _ProfileSectionState extends State<ProfileSection> {
         dense: true,
       ),
     );
+  }
+
+  // Tambahkan method baru untuk load profile picture
+  Future<void> _loadProfilePicture() async {
+    if (mounted) {
+      setState(() => _isLoadingProfile = true);
+    }
+
+    try {
+      final picture = await ApiService().showProfilePicture();
+      if (mounted) {
+        setState(() {
+          _profilePicture = picture;
+          _isLoadingProfile = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingProfile = false);
+      }
+    }
   }
 }

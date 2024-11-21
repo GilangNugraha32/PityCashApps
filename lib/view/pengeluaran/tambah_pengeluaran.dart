@@ -10,6 +10,7 @@ import 'package:pity_cash/service/api_service.dart';
 import 'package:pity_cash/models/category_model.dart';
 import 'package:pity_cash/service/share_preference.dart';
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:pity_cash/view/home/home.dart';
 
@@ -23,6 +24,9 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
   final ScrollController _scrollController = ScrollController();
   DateTime? selectedDate;
   List<Category> categories = [];
+
+  // Cache untuk kategori
+  final Map<String, List<Category>> _categoryCache = {};
 
   @override
   void initState() {
@@ -175,18 +179,42 @@ class _TambahPengeluaranState extends State<TambahPengeluaran> {
   }
 
   Future<void> fetchCategories() async {
+    final String cacheKey = 'categories_2'; // untuk jenis_kategori 2
+
+    if (_categoryCache.containsKey(cacheKey)) {
+      setState(() {
+        categories = _categoryCache[cacheKey]!;
+      });
+      return;
+    }
+
     try {
       ApiService apiService = ApiService();
       List<Category> allCategories = await apiService.fetchCategories();
+      List<Category> filteredCategories = allCategories
+          .where((category) => category.jenisKategori == 2)
+          .toList();
+
+      _categoryCache[cacheKey] = filteredCategories;
+
       setState(() {
-        categories = allCategories
-            .where((category) => category.jenisKategori == 2)
-            .toList();
+        categories = filteredCategories;
       });
     } catch (e) {
       print('Error fetching categories: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memuat kategori')),
+        SnackBar(
+          content: Text(
+            'Gagal memuat kategori, silakan coba lagi nanti',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(10),
+        ),
       );
     }
   }
@@ -704,6 +732,9 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   Category? selectedCategory;
   FilePickerResult? selectedImage;
 
+  // Tambahkan debouncer
+  Timer? _debouncer;
+
   @override
   void initState() {
     super.initState();
@@ -887,6 +918,7 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 
   @override
   void dispose() {
+    _debouncer?.cancel();
     for (var controller in nameControllers) {
       controller.dispose();
     }
@@ -1683,23 +1715,28 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 
 // Function to calculate the total
   void _calculateTotal(String value) {
-    double nominal = double.tryParse(nominalControllers.last.text.isEmpty
-            ? "0"
-            : nominalControllers.last.text.replaceAll(RegExp(r'[^\d]'), '')) ??
-        0;
-    int satuan = int.tryParse(jumlahSatuanControllers.last.text.isEmpty
-            ? "0"
-            : jumlahSatuanControllers.last.text) ??
-        0;
-    double dll = double.tryParse(dllControllers.last.text.isEmpty
-            ? "0"
-            : dllControllers.last.text.replaceAll(RegExp(r'[^\d]'), '')) ??
-        0;
+    if (_debouncer?.isActive ?? false) _debouncer?.cancel();
 
-    double total = (nominal * satuan) + dll;
+    _debouncer = Timer(const Duration(milliseconds: 500), () {
+      double nominal = double.tryParse(nominalControllers.last.text.isEmpty
+              ? "0"
+              : nominalControllers.last.text
+                  .replaceAll(RegExp(r'[^\d]'), '')) ??
+          0;
+      int satuan = int.tryParse(jumlahSatuanControllers.last.text.isEmpty
+              ? "0"
+              : jumlahSatuanControllers.last.text) ??
+          0;
+      double dll = double.tryParse(dllControllers.last.text.isEmpty
+              ? "0"
+              : dllControllers.last.text.replaceAll(RegExp(r'[^\d]'), '')) ??
+          0;
 
-    setState(() {
-      jumlahControllers.last.text = _formatCurrency(total);
+      double total = (nominal * satuan) + dll;
+
+      setState(() {
+        jumlahControllers.last.text = _formatCurrency(total);
+      });
     });
   }
 
@@ -1989,21 +2026,24 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
 }
 
 class ThousandSeparatorInputFormatter extends TextInputFormatter {
+  static final NumberFormat _formatter = NumberFormat('#,##0', 'id_ID');
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    // Menghapus semua karakter non-digit
+    if (newValue.text.isEmpty) {
+      return TextEditingValue();
+    }
+
     String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (newText.isEmpty) {
       return TextEditingValue();
     }
 
-    // Menggunakan intl package untuk format dengan pemisah ribuan
-    String formattedText =
-        'Rp' + NumberFormat('#,##0', 'id_ID').format(int.parse(newText));
+    String formattedText = 'Rp${_formatter.format(int.parse(newText))}';
 
     return TextEditingValue(
       text: formattedText,

@@ -13,6 +13,7 @@ import 'package:pity_cash/service/share_preference.dart';
 import 'package:pity_cash/view/home/home.dart';
 import 'package:pity_cash/view/pemasukan/tambah_pemasukan.dart';
 import 'package:pity_cash/view/pengeluaran/pengeluaran_section.dart';
+import 'dart:async';
 
 class EditPengeluaran extends StatefulWidget {
   final List<Pengeluaran> pengeluaranList;
@@ -34,6 +35,13 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
 
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
+
+  // Tambahkan debouncer
+  Timer? _debouncer;
+
+  // Tambahkan rate limiting
+  DateTime? _lastRequestTime;
+  static const Duration _minRequestInterval = Duration(milliseconds: 500);
 
   @override
   void initState() {
@@ -64,145 +72,195 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
     }
   }
 
-  void _handleSubmit() async {
-    List<Map<String, dynamic>> allFormData = [];
-    List<File?> selectedImages = [];
+  @override
+  void dispose() {
+    _debouncer?.cancel();
+    super.dispose();
+  }
 
-    // Validasi dan kumpulkan data dari semua form
-    for (var key in formKeys) {
-      var data = key.currentState?.getFormData();
-      if (data != null && data.isNotEmpty) {
-        allFormData.add(data);
-
-        // Cek apakah ada gambar yang dipilih
-        if (key.currentState?.selectedImage != null &&
-            key.currentState!.selectedImage!.files.isNotEmpty) {
-          String? imagePath = key.currentState!.selectedImage!.files.first.path;
-          if (imagePath != null) {
-            selectedImages.add(File(imagePath));
-          } else {
-            selectedImages.add(null);
-          }
-        } else {
-          selectedImages.add(null);
-        }
-      }
-    }
-
-    print('Mengirim data: $allFormData');
-
-    if (allFormData.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Tidak ada data untuk dikirim')),
-      );
-      return;
-    }
-
-    // Siapkan data untuk API request
-    List<String> names = [];
-    List<String> descriptions = [];
-    List<int> jumlahs = [];
-    List<int> jumlahSatuans = [];
-    List<double> nominals = [];
-    List<double> dls = [];
-    List<int> categoryIds = [];
-    List<int> dataIds = [];
-    List<String> tanggalList = [];
-    List<File?> images =
-        List.filled(allFormData.length, null); // Initialize dengan null
-
-    // Dapatkan parent ID dari pengeluaran pertama
-    int parentId = widget.pengeluaranList.isNotEmpty
-        ? widget.pengeluaranList.first.idParent
-        : 0;
-
-    // Format data sesuai dengan response yang diharapkan
-    for (int i = 0; i < allFormData.length; i++) {
-      var entry = allFormData[i];
-      dataIds.add(entry['id_data'] ?? 0);
-      names.add(entry['name']);
-      descriptions.add(entry['description'] ?? '');
-      jumlahs.add(entry['jumlah']);
-      jumlahSatuans.add(entry['jumlah_satuan']);
-      nominals.add(entry['nominal']);
-      dls.add(entry['dll']);
-      categoryIds.add(entry['category']);
-
-      // Format tanggal sesuai dengan response "YYYY-MM-DD"
-      String tanggal = entry['tanggal'] ?? DateTime.now().toIso8601String();
-      try {
-        DateTime parsedDate = DateTime.parse(tanggal);
-        String formattedDate =
-            "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
-        tanggalList.add(formattedDate);
-        print('Tanggal terformat dari form: $formattedDate');
-      } catch (e) {
-        print('Error saat parsing tanggal: $tanggal. Error: $e');
-      }
-
-      // Hanya update gambar jika ada perubahan
-      if (selectedImages[i] != null) {
-        images[i] = selectedImages[i];
+  // Modifikasi fungsi fetchCategories dengan rate limiting
+  Future<void> fetchCategories() async {
+    // Check if enough time has passed since last request
+    if (_lastRequestTime != null) {
+      final timeSinceLastRequest = DateTime.now().difference(_lastRequestTime!);
+      if (timeSinceLastRequest < _minRequestInterval) {
+        return;
       }
     }
 
     try {
-      // Kirim request ke API dengan gambar yang sudah difilter
-      await ApiService().editPengeluaran(
-        parentId,
-        tanggalList,
-        dataIds,
-        names,
-        descriptions,
-        jumlahs,
-        jumlahSatuans,
-        nominals,
-        dls,
-        categoryIds,
-        images.whereType<File>().toList(), // Hanya kirim gambar yang tidak null
-      );
+      _lastRequestTime = DateTime.now();
+      ApiService apiService = ApiService();
+      List<Category> allCategories = await apiService.fetchCategories();
 
-      // Tampilkan pesan sukses
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Data berhasil diperbarui!',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          margin: EdgeInsets.all(10),
-        ),
-      );
-
-      // Refresh halaman dan navigasi
-      Navigator.pop(context, true);
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomeScreen(initialIndex: 3),
-        ),
-      );
-    } catch (error) {
-      print('Error: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Terjadi kesalahan saat memperbarui data: ${error.toString()}',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          margin: EdgeInsets.all(10),
-        ),
-      );
+      if (mounted) {
+        setState(() {
+          categories = allCategories
+              .where((category) => category.jenisKategori == 2)
+              .toList();
+        });
+      }
+    } catch (e) {
+      print('Error fetching categories: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat kategori: $e')),
+        );
+      }
     }
+  }
+
+  // Modifikasi _handleSubmit dengan debouncing
+  void _handleSubmit() async {
+    if (_debouncer?.isActive ?? false) {
+      _debouncer?.cancel();
+    }
+
+    _debouncer = Timer(const Duration(milliseconds: 500), () async {
+      List<Map<String, dynamic>> allFormData = [];
+      List<File?> selectedImages = [];
+
+      // Validasi dan kumpulkan data dari semua form
+      for (var key in formKeys) {
+        var data = key.currentState?.getFormData();
+        if (data != null && data.isNotEmpty) {
+          allFormData.add(data);
+
+          // Cek apakah ada gambar yang dipilih
+          if (key.currentState?.selectedImage != null &&
+              key.currentState!.selectedImage!.files.isNotEmpty) {
+            String? imagePath =
+                key.currentState!.selectedImage!.files.first.path;
+            if (imagePath != null) {
+              selectedImages.add(File(imagePath));
+            } else {
+              selectedImages.add(null);
+            }
+          } else {
+            selectedImages.add(null);
+          }
+        }
+      }
+
+      print('Mengirim data: $allFormData');
+
+      if (allFormData.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Tidak ada data untuk dikirim')),
+        );
+        return;
+      }
+
+      // Siapkan data untuk API request
+      List<String> names = [];
+      List<String> descriptions = [];
+      List<int> jumlahs = [];
+      List<int> jumlahSatuans = [];
+      List<double> nominals = [];
+      List<double> dls = [];
+      List<int> categoryIds = [];
+      List<int> dataIds = [];
+      List<String> tanggalList = [];
+      List<File?> images =
+          List.filled(allFormData.length, null); // Initialize dengan null
+
+      // Dapatkan parent ID dari pengeluaran pertama
+      int parentId = widget.pengeluaranList.isNotEmpty
+          ? widget.pengeluaranList.first.idParent
+          : 0;
+
+      // Format data sesuai dengan response yang diharapkan
+      for (int i = 0; i < allFormData.length; i++) {
+        var entry = allFormData[i];
+        dataIds.add(entry['id_data'] ?? 0);
+        names.add(entry['name']);
+        descriptions.add(entry['description'] ?? '');
+        jumlahs.add(entry['jumlah']);
+        jumlahSatuans.add(entry['jumlah_satuan']);
+        nominals.add(entry['nominal']);
+        dls.add(entry['dll']);
+        categoryIds.add(entry['category']);
+
+        // Format tanggal sesuai dengan response "YYYY-MM-DD"
+        String tanggal = entry['tanggal'] ?? DateTime.now().toIso8601String();
+        try {
+          DateTime parsedDate = DateTime.parse(tanggal);
+          String formattedDate =
+              "${parsedDate.year}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.day.toString().padLeft(2, '0')}";
+          tanggalList.add(formattedDate);
+          print('Tanggal terformat dari form: $formattedDate');
+        } catch (e) {
+          print('Error saat parsing tanggal: $tanggal. Error: $e');
+        }
+
+        // Hanya update gambar jika ada perubahan
+        if (selectedImages[i] != null) {
+          images[i] = selectedImages[i];
+        }
+      }
+
+      try {
+        // Kirim request ke API dengan gambar yang sudah difilter
+        await ApiService().editPengeluaran(
+          parentId,
+          tanggalList,
+          dataIds,
+          names,
+          descriptions,
+          jumlahs,
+          jumlahSatuans,
+          nominals,
+          dls,
+          categoryIds,
+          images
+              .whereType<File>()
+              .toList(), // Hanya kirim gambar yang tidak null
+        );
+
+        // Tampilkan pesan sukses
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Data berhasil diperbarui!',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(10),
+          ),
+        );
+
+        // Refresh halaman dan navigasi
+        Navigator.pop(context, true);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeScreen(initialIndex: 3),
+          ),
+        );
+      } catch (error) {
+        print('Error: $error');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Terjadi kesalahan saat memperbarui data: ${error.toString()}',
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            margin: EdgeInsets.all(10),
+          ),
+        );
+      }
+    });
   }
 
   void _removeForm(int index) {
@@ -278,34 +336,6 @@ class _EditPengeluaranState extends State<EditPengeluaran> {
         ),
       );
     });
-  }
-
-  Future<void> fetchCategories() async {
-    try {
-      ApiService apiService = ApiService();
-      List<Category> allCategories = await apiService.fetchCategories();
-      setState(() {
-        categories = allCategories
-            .where((category) => category.jenisKategori == 2)
-            .toList();
-      });
-    } catch (e) {
-      print('Error fetching categories: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Gagal memuat kategori: $e',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          margin: EdgeInsets.all(10),
-        ),
-      );
-    }
   }
 
   @override
@@ -726,6 +756,7 @@ class PengeluaranForm extends StatefulWidget {
 
 class _PengeluaranFormState extends State<PengeluaranForm> {
   bool showPrefix = false;
+  Timer? _debouncer;
 
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController categoryController = TextEditingController();
@@ -1378,7 +1409,18 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
               style: TextStyle(fontSize: 12),
               onChanged: (value) {
                 if (value.isEmpty) {
+                  // Ketika field kosong, set nilai ke "0"
                   jumlahSatuanController.text = "0";
+                  jumlahSatuanController.selection = TextSelection.fromPosition(
+                    TextPosition(offset: jumlahSatuanController.text.length),
+                  );
+                } else if (value == "0") {
+                  // Ketika nilai "0" dimasukkan, kosongkan field
+                  jumlahSatuanController.clear();
+                } else if (value.startsWith('0') && value.length > 1) {
+                  // Hapus leading zeros
+                  jumlahSatuanController.text =
+                      value.replaceFirst(RegExp(r'^0+'), '');
                   jumlahSatuanController.selection = TextSelection.fromPosition(
                     TextPosition(offset: jumlahSatuanController.text.length),
                   );
@@ -1433,7 +1475,11 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
                   int currentValue = int.tryParse(currentText) ?? 0;
                   if (currentValue > 0) {
                     int newValue = currentValue - 1;
-                    jumlahSatuanController.text = newValue.toString();
+                    if (newValue == 0) {
+                      jumlahSatuanController.clear();
+                    } else {
+                      jumlahSatuanController.text = newValue.toString();
+                    }
                     _calculateTotal();
                   }
                 },
@@ -1503,16 +1549,24 @@ class _PengeluaranFormState extends State<PengeluaranForm> {
   }
 
   void _calculateTotal() {
-    double nominal = _parseCurrency(nominalController.text);
-    int satuan = int.tryParse(jumlahSatuanController.text) ?? 0;
-    double dll = _parseCurrency(dllController.text);
-
-    if (nominal > 0 && satuan > 0) {
-      double total = (nominal * satuan) + dll;
-      setState(() {
-        jumlahController.text = _formatCurrency(total);
-      });
+    if (_debouncer?.isActive ?? false) {
+      _debouncer?.cancel();
     }
+
+    _debouncer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        double nominal = _parseCurrency(nominalController.text);
+        int satuan = int.tryParse(jumlahSatuanController.text) ?? 0;
+        double dll = _parseCurrency(dllController.text);
+
+        if (nominal > 0 && satuan > 0) {
+          double total = (nominal * satuan) + dll;
+          setState(() {
+            jumlahController.text = _formatCurrency(total);
+          });
+        }
+      }
+    });
   }
 
   String _formatCurrency(double amount) {

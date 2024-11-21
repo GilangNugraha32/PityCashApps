@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -28,7 +29,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   bool isFetching = false; // Guard variable to prevent multiple fetch requests
   bool hasMoreCategories =
       true; // To track if there are more categories to load
-  String selectedFilter = 'Semua'; // Default filter
+  String selectedFilter = 'Pilih Semua'; // Default filter
 
   // Track login status
 
@@ -38,6 +39,13 @@ class _CategoriesSectionState extends State<CategoriesSection> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
 
+  // Tambahkan debouncer untuk pencarian
+  Timer? _debouncer;
+
+  // Tambahkan variabel untuk throttling
+  DateTime? _lastFetchTime;
+  static const throttleDuration = Duration(seconds: 2);
+
   @override
   void initState() {
     super.initState();
@@ -45,13 +53,14 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     _fetchCategories(currentPage, 10);
     _checkLoginStatus();
 
-    // Menambahkan listener untuk pencarian realtime
-    _searchController.addListener(_onSearchChanged);
+    // Ganti listener langsung dengan debounced search
+    _searchController.addListener(_debouncedSearch);
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
+    _debouncer?.cancel();
+    _searchController.removeListener(_debouncedSearch);
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
@@ -65,18 +74,67 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     });
   }
 
-  void _onSearchChanged() {
-    _filterCategories(_searchController.text);
+  // Implementasi debounced search
+  void _debouncedSearch() {
+    if (_debouncer?.isActive ?? false) _debouncer!.cancel();
+    _debouncer = Timer(const Duration(milliseconds: 500), () {
+      _filterCategories(_searchController.text);
+    });
   }
 
+  // Modifikasi fetch categories dengan throttling
+  Future<void> _fetchCategories(int page, int itemsPerLoad) async {
+    if (isFetching || !hasMoreCategories) return;
+
+    // Implementasi throttling
+    final now = DateTime.now();
+    if (_lastFetchTime != null &&
+        now.difference(_lastFetchTime!) < throttleDuration) {
+      return;
+    }
+    _lastFetchTime = now;
+
+    setState(() {
+      isFetching = true;
+      isLoadingMore = true;
+    });
+
+    try {
+      List<Category> newCategories = await ApiService().fetchCategories();
+
+      // Cache hasil fetch
+      if (newCategories.isEmpty) {
+        setState(() => hasMoreCategories = false);
+      } else {
+        setState(() {
+          // Optimasi pengecekan duplikat
+          final existingIds = Set.from(categories.map((c) => c.id));
+          categories.addAll(
+              newCategories.where((cat) => !existingIds.contains(cat.id)));
+          _filterCategories(_searchController.text);
+          currentPage++;
+        });
+      }
+    } catch (e) {
+      print('Error saat memuat kategori: $e');
+      // ... error handling ...
+    } finally {
+      setState(() {
+        isFetching = false;
+        isLoadingMore = false;
+      });
+    }
+  }
+
+  // Optimasi filter categories
   void _filterCategories(String query) {
     setState(() {
       if (query.isEmpty) {
         filteredCategories = List.from(categories);
       } else {
+        final queryLower = query.toLowerCase();
         filteredCategories = categories.where((category) {
           final nameLower = category.name.toLowerCase();
-          final queryLower = query.toLowerCase();
           final jenisKategori =
               category.jenisKategori == 1 ? 'pemasukan' : 'pengeluaran';
           return nameLower.contains(queryLower) ||
@@ -93,72 +151,6 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       isLoggedIn = false; // Update login status
     });
     Navigator.of(context).pushReplacementNamed('/login');
-  }
-
-  Future<void> _fetchCategories(int page, int itemsPerLoad) async {
-    if (isFetching || !hasMoreCategories)
-      return; // Exit if already fetching or no more categories
-
-    setState(() {
-      isFetching = true; // Set fetching state to true
-      isLoadingMore = true; // Show loading indicator when fetching more
-    });
-
-    try {
-      // Fetch categories from the server based on the current page
-      List<Category> newCategories = await ApiService().fetchCategories();
-
-      if (newCategories.isEmpty) {
-        setState(() {
-          hasMoreCategories = false; // No more categories to load
-        });
-      } else {
-        // Append only new categories to the filtered list
-        setState(() {
-          // Filter out duplicates before adding
-          newCategories.forEach((category) {
-            if (!categories.any(
-                (existingCategory) => existingCategory.id == category.id)) {
-              categories.add(category);
-            }
-          });
-          _filterCategories(_searchController.text); // Reapply current filter
-          currentPage++; // Increment the page for the next load
-        });
-
-        // Simpan roles menggunakan SharedPreferencesService
-        final roles = await _prefsService.getRoles();
-        if (roles != null) {
-          print('Roles yang ditemukan: $roles'); // Print roles untuk debugging
-          await _prefsService.saveRoles(roles);
-          print('Roles berhasil disimpan'); // Konfirmasi penyimpanan
-        } else {
-          print('Roles tidak ditemukan'); // Print jika roles null
-        }
-      }
-    } catch (e) {
-      // Handle errors if any
-      print('Error saat memuat kategori: $e'); // Print error jika terjadi
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Gagal memuat kategori',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          margin: EdgeInsets.all(10),
-        ),
-      );
-    }
-
-    setState(() {
-      isFetching = false; // Reset fetching state
-      isLoadingMore = false; // Stop showing the loading indicator
-    });
   }
 
   Future<void> _refreshCategoryList() async {
@@ -338,179 +330,184 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                               bool isReaderOnly = roles.length == 1 &&
                                   roles[0]['name'] == 'Reader';
 
-                              if (!isReaderOnly) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(
-                                      right: 14.0, top: 14.0, left: 14.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // Filter dropdown
-                                      Container(
-                                        width: 150,
-                                        height: 32,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 6.0),
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                    right: 14.0, top: 14.0, left: 14.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Filter button that shows modal
+                                    Container(
+                                      width: 150,
+                                      height: 40,
+                                      child: TextButton(
+                                        onPressed: () {
+                                          showModalBottomSheet(
+                                            context: context,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.vertical(
+                                                        top: Radius.circular(
+                                                            16))),
+                                            builder: (context) => Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 20, horizontal: 16),
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 16),
+                                                    child: Text(
+                                                      'Filter Kategori',
+                                                      style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w600),
+                                                    ),
+                                                  ),
+                                                  SizedBox(height: 16),
+                                                  ListTile(
+                                                    leading: Icon(
+                                                        Icons.list_alt,
+                                                        color: Colors.grey),
+                                                    title: Text('Pilih Semua',
+                                                        style: TextStyle(
+                                                            fontSize: 14)),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        selectedFilter =
+                                                            'Pilih Semua';
+                                                        filteredCategories =
+                                                            List.from(
+                                                                categories);
+                                                        if (_searchController
+                                                            .text.isNotEmpty) {
+                                                          _filterCategories(
+                                                              _searchController
+                                                                  .text);
+                                                        }
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                  Divider(height: 1),
+                                                  ListTile(
+                                                    leading: Icon(
+                                                        Icons.arrow_downward,
+                                                        color: Colors.green),
+                                                    title: Text('Pemasukan',
+                                                        style: TextStyle(
+                                                            fontSize: 14)),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        selectedFilter =
+                                                            'Pemasukan';
+                                                        filteredCategories = categories
+                                                            .where((category) =>
+                                                                category
+                                                                    .jenisKategori ==
+                                                                1)
+                                                            .toList();
+                                                        if (_searchController
+                                                            .text.isNotEmpty) {
+                                                          _filterCategories(
+                                                              _searchController
+                                                                  .text);
+                                                        }
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                  Divider(height: 1),
+                                                  ListTile(
+                                                    leading: Icon(
+                                                        Icons.arrow_upward,
+                                                        color: Colors.red),
+                                                    title: Text('Pengeluaran',
+                                                        style: TextStyle(
+                                                            fontSize: 14)),
+                                                    onTap: () {
+                                                      setState(() {
+                                                        selectedFilter =
+                                                            'Pengeluaran';
+                                                        filteredCategories = categories
+                                                            .where((category) =>
+                                                                category
+                                                                    .jenisKategori ==
+                                                                2)
+                                                            .toList();
+                                                        if (_searchController
+                                                            .text.isNotEmpty) {
+                                                          _filterCategories(
+                                                              _searchController
+                                                                  .text);
+                                                        }
+                                                      });
+                                                      Navigator.pop(context);
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: Colors.white,
+                                          side: BorderSide(
                                               color: Colors.grey[300]!),
-                                          borderRadius:
-                                              BorderRadius.circular(6.0),
-                                        ),
-                                        child: Theme(
-                                          data: Theme.of(context).copyWith(
-                                            canvasColor: Colors.white,
-                                            // Memastikan dropdown muncul di bawah
-                                            popupMenuTheme:
-                                                PopupMenuThemeData(),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(6.0),
                                           ),
-                                          child: DropdownButtonHideUnderline(
-                                            child: DropdownButton<String>(
-                                              value: selectedFilter,
-                                              isExpanded: true,
-                                              isDense: true,
-                                              itemHeight: 48,
-                                              icon: Icon(Icons.arrow_drop_down,
-                                                  color: Color(0xFFEB8153)),
-                                              dropdownColor: Colors.white,
-                                              // Memaksa dropdown muncul di bawah
-                                              menuMaxHeight: 300,
-                                              // Mengatur posisi dropdown
-                                              alignment: AlignmentDirectional
-                                                  .bottomStart,
-                                              items: [
-                                                DropdownMenuItem<String>(
-                                                  value: 'Semua',
-                                                  child: Container(
-                                                    constraints: BoxConstraints(
-                                                        minWidth: 150),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Icon(Icons.list_alt,
-                                                            size: 16,
-                                                            color: Color(
-                                                                0xFFEB8153)),
-                                                        SizedBox(width: 8),
-                                                        Flexible(
-                                                          child: Text(
-                                                            'Semua',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color: Colors
-                                                                  .black87,
-                                                            ),
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  selectedFilter ==
+                                                          'Pilih Semua'
+                                                      ? Icons.list_alt
+                                                      : selectedFilter ==
+                                                              'Pemasukan'
+                                                          ? Icons.arrow_downward
+                                                          : Icons.arrow_upward,
+                                                  size: 16,
+                                                  color: selectedFilter ==
+                                                          'Pilih Semua'
+                                                      ? Colors.grey
+                                                      : selectedFilter ==
+                                                              'Pemasukan'
+                                                          ? Colors.green
+                                                          : Colors.red,
                                                 ),
-                                                DropdownMenuItem<String>(
-                                                  value: 'Pemasukan',
-                                                  child: Container(
-                                                    constraints: BoxConstraints(
-                                                        minWidth: 150),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Icon(
-                                                            Icons
-                                                                .arrow_downward,
-                                                            size: 16,
-                                                            color:
-                                                                Colors.green),
-                                                        SizedBox(width: 8),
-                                                        Flexible(
-                                                          child: Text(
-                                                            'Pemasukan',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color: Colors
-                                                                  .black87,
-                                                            ),
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                                DropdownMenuItem<String>(
-                                                  value: 'Pengeluaran',
-                                                  child: Container(
-                                                    constraints: BoxConstraints(
-                                                        minWidth: 150),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        Icon(Icons.arrow_upward,
-                                                            size: 16,
-                                                            color: Colors.red),
-                                                        SizedBox(width: 8),
-                                                        Flexible(
-                                                          child: Text(
-                                                            'Pengeluaran',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              color: Colors
-                                                                  .black87,
-                                                            ),
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
+                                                SizedBox(width: 8),
+                                                Text(
+                                                  selectedFilter ==
+                                                          'Pilih Semua'
+                                                      ? 'Pilih Semua'
+                                                      : selectedFilter,
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.black87,
                                                   ),
                                                 ),
                                               ],
-                                              onChanged: (String? newValue) {
-                                                setState(() {
-                                                  selectedFilter = newValue!;
-                                                  if (selectedFilter ==
-                                                      'Semua') {
-                                                    filteredCategories =
-                                                        List.from(categories);
-                                                  } else if (selectedFilter ==
-                                                      'Pemasukan') {
-                                                    filteredCategories = categories
-                                                        .where((category) =>
-                                                            category
-                                                                .jenisKategori ==
-                                                            1)
-                                                        .toList();
-                                                  } else if (selectedFilter ==
-                                                      'Pengeluaran') {
-                                                    filteredCategories = categories
-                                                        .where((category) =>
-                                                            category
-                                                                .jenisKategori ==
-                                                            2)
-                                                        .toList();
-                                                  }
-                                                  if (_searchController
-                                                      .text.isNotEmpty) {
-                                                    _filterCategories(
-                                                        _searchController.text);
-                                                  }
-                                                });
-                                              },
                                             ),
-                                          ),
+                                            Icon(Icons.arrow_drop_down,
+                                                color: Color(0xFFEB8153)),
+                                          ],
                                         ),
                                       ),
-                                      // Action buttons
+                                    ),
+                                    // Action buttons
+                                    if (!isReaderOnly)
                                       Row(
                                         children: [
                                           _buildActionButton(
@@ -530,10 +527,9 @@ class _CategoriesSectionState extends State<CategoriesSection> {
                                           ),
                                         ],
                                       ),
-                                    ],
-                                  ),
-                                );
-                              }
+                                  ],
+                                ),
+                              );
                             }
                             return SizedBox.shrink();
                           },
@@ -1566,89 +1562,98 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
+            borderRadius: BorderRadius.circular(12.0),
           ),
           title: Text(
             'Konfirmasi Hapus',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Color(0xFFE85C0D),
+              fontSize: 14,
             ),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: 16),
+              SizedBox(height: 12),
               Text(
                 'Apakah Anda yakin ingin menghapus kategori ini?',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+                style: TextStyle(fontSize: 13),
               ),
             ],
           ),
           actions: [
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
+                Navigator.of(context).pop();
               },
               child: Text(
                 'Batal',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 12),
               ),
               style: ElevatedButton.styleFrom(
-                primary: Colors.grey, // Warna abu-abu untuk background
+                primary: Colors.grey,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(6.0),
                 ),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                minimumSize: Size(60, 30),
               ),
             ),
             ElevatedButton(
               onPressed: () async {
                 try {
                   await apiService.deleteCategory(categoryId);
-                  Navigator.of(context).pop(); // Tutup dialog konfirmasi
-                  Navigator.of(context).pop(); // Tutup modal sheet
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                   _refreshCategoryList();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                         'Kategori berhasil dihapus',
                         style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12),
                       ),
                       backgroundColor: Colors.green,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      margin: EdgeInsets.all(10),
+                      margin: EdgeInsets.all(8),
                     ),
                   );
                 } catch (e) {
-                  Navigator.of(context).pop(); // Tutup dialog konfirmasi
+                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                         'Gagal menghapus kategori: $e',
                         style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12),
                       ),
                       backgroundColor: Colors.red,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      margin: EdgeInsets.all(10),
+                      margin: EdgeInsets.all(8),
                     ),
                   );
                 }
               },
-              child: Text('Hapus'),
+              child: Text('Hapus', style: TextStyle(fontSize: 12)),
               style: ElevatedButton.styleFrom(
                 primary: Color(0xFFDA0000),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                  borderRadius: BorderRadius.circular(6.0),
                 ),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                minimumSize: Size(60, 30),
               ),
             ),
           ],

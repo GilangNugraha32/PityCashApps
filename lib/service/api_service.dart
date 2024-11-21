@@ -60,30 +60,57 @@ class ApiService {
     }
   }
 
+  // Tambahkan cache manager
+  static final Map<String, dynamic> _cache = {};
+  static final Map<String, DateTime> _lastFetchTimes = {};
+  static const Duration _cacheDuration = Duration(minutes: 5);
+  static const Duration _throttleDuration = Duration(seconds: 2);
+
+  // Helper method untuk mengecek cache
+  bool _isCacheValid(String key) {
+    if (!_cache.containsKey(key)) return false;
+    final lastFetch = _lastFetchTimes[key];
+    if (lastFetch == null) return false;
+    return DateTime.now().difference(lastFetch) < _cacheDuration;
+  }
+
+  // Helper method untuk throttling
+  bool _canMakeRequest(String key) {
+    final lastFetch = _lastFetchTimes[key];
+    if (lastFetch == null) return true;
+    return DateTime.now().difference(lastFetch) > _throttleDuration;
+  }
+
+  // Modifikasi method fetchSaldo
   Future<double> fetchSaldo() async {
+    const cacheKey = 'saldo';
+
+    if (_isCacheValid(cacheKey)) {
+      return _cache[cacheKey];
+    }
+
+    if (!_canMakeRequest(cacheKey)) {
+      return _cache[cacheKey] ?? 0.0;
+    }
+
     try {
       await _setAuthToken();
-      final response = await _dio.get(
-        '$baseUrl/income/saldo',
-      );
-
-      print('Response status code: ${response.statusCode}'); // Log status code
-      print('Response data: ${response.data}'); // Log data yang diterima
+      final response = await _dio.get('$baseUrl/income/saldo');
 
       if (response.statusCode == 200) {
-        // Cek format dari response.data
-        if (response.data is Map) {
-          final double saldo = double.parse(response.data['1'].toString());
-          return saldo;
-        } else {
-          throw Exception('Response data is not a valid map');
-        }
+        final double saldo = double.parse(response.data['1'].toString());
+
+        // Update cache
+        _cache[cacheKey] = saldo;
+        _lastFetchTimes[cacheKey] = DateTime.now();
+
+        return saldo;
       } else {
-        throw Exception('Failed to fetch saldo: ${response.statusCode}');
+        throw Exception('Failed to fetch saldo');
       }
     } catch (e) {
       print('Error fetching saldo: $e');
-      throw Exception('Failed to fetch saldo');
+      return _cache[cacheKey] ?? 0.0;
     }
   }
 
@@ -112,39 +139,37 @@ class ApiService {
     }
   }
 
+  // Modifikasi method fetchMinimalSaldo
   Future<double> fetchMinimalSaldo() async {
-    print('Mengambil saldo minimal');
+    const cacheKey = 'minimalSaldo';
+
+    if (_isCacheValid(cacheKey)) {
+      return _cache[cacheKey];
+    }
+
+    if (!_canMakeRequest(cacheKey)) {
+      return _cache[cacheKey] ?? 0.0;
+    }
+
     try {
       await _setAuthToken();
       final response = await _dio.get('$baseUrl/setting/edit-minimal-saldo');
 
-      print('Kode status respons: ${response.statusCode}');
-      print('Data respons: ${response.data}');
-
       if (response.statusCode == 200) {
-        if (response.data is Map &&
-            response.data.containsKey('data') &&
-            response.data['data'] is Map &&
-            response.data['data'].containsKey('saldo')) {
-          final double minimalSaldo =
-              double.parse(response.data['data']['saldo'].toString());
-          return minimalSaldo;
-        } else {
-          throw Exception('Data saldo minimal tidak valid');
-        }
+        final double minimalSaldo =
+            double.parse(response.data['data']['saldo'].toString());
+
+        // Update cache
+        _cache[cacheKey] = minimalSaldo;
+        _lastFetchTimes[cacheKey] = DateTime.now();
+
+        return minimalSaldo;
       } else {
-        throw Exception(
-            'Gagal mengambil saldo minimal: ${response.statusCode}');
-      }
-    } catch (e) {
-      if (e is DioError) {
-        print('DioError saat mengambil saldo minimal: ${e.response?.data}');
-        throw Exception(
-            'Gagal mengambil saldo minimal: ${e.response?.data['message'] ?? 'Error tidak diketahui'}');
-      } else {
-        print('Error saat mengambil saldo minimal: $e');
         throw Exception('Gagal mengambil saldo minimal');
       }
+    } catch (e) {
+      print('Error mengambil saldo minimal: $e');
+      return _cache[cacheKey] ?? 0.0;
     }
   }
 
@@ -631,20 +656,30 @@ class ApiService {
   }
 
   // Fetch all incomes with pagination
-  Future<List<Pemasukan>> fetchIncomes({int page = 1, int limit = 20}) async {
+  Future<List<Pemasukan>> fetchIncomes({int page = 1, int limit = 100}) async {
     print('Fetching incomes from page: $page');
     await _setAuthToken(); // Ensure the authentication token is set
 
     try {
       final response = await _dio.get(
         '$baseUrl/income/all',
-        queryParameters: {'page': page},
+        queryParameters: {
+          'page': page,
+          'per_page': limit, // Menambahkan parameter per_page untuk limit data
+        },
       );
 
       if (response.statusCode == 200) {
         // Ensure the response structure matches your expectations
-        final incomeData = response.data['data']['data'] as List;
-        print('Incomes fetched: $incomeData');
+        final Map<String, dynamic> responseData = response.data['data'];
+        final List incomeData = responseData['data'] as List;
+        final int currentPage = responseData['current_page'];
+        final int lastPage = responseData['last_page'];
+        final int total = responseData['total'];
+
+        print('Incomes fetched: ${incomeData.length}');
+        print('Current page: $currentPage of $lastPage');
+        print('Total records: $total');
 
         // Check if incomeData is empty
         if (incomeData.isEmpty) {
@@ -653,9 +688,18 @@ class ApiService {
         }
 
         // Map each JSON object to Pemasukan
-        return incomeData.map((incomeJson) {
+        List<Pemasukan> pemasukans = incomeData.map((incomeJson) {
           return Pemasukan.fromJson(incomeJson);
         }).toList();
+
+        // Jika masih ada halaman berikutnya, ambil data dari halaman tersebut
+        if (currentPage < lastPage) {
+          List<Pemasukan> nextPageData =
+              await fetchIncomes(page: currentPage + 1);
+          pemasukans.addAll(nextPageData);
+        }
+
+        return pemasukans;
       } else {
         throw Exception('Failed to load incomes: ${response.statusCode}');
       }

@@ -40,6 +40,11 @@ class _HomeSectionState extends State<HomeSection>
 
   bool isBalanceVisible = true; // Tambahkan baris ini
 
+  // Tambahkan variabel untuk throttling
+  bool _isThrottled = false;
+  Duration _throttleDuration = Duration(seconds: 2);
+  int _maxRetries = 3;
+
   @override
   void initState() {
     super.initState();
@@ -988,66 +993,103 @@ class _HomeSectionState extends State<HomeSection>
   }
 
   Future<void> _fetchIncomes(int page) async {
-    if (isLoadingMore) return;
+    if (isLoadingMore || _isThrottled) return;
 
     setState(() {
       isLoading = true;
+      _isThrottled = true;
     });
 
-    try {
-      print('Mengambil pemasukan untuk halaman: $page');
-      final fetchedIncomes = await _apiService.fetchIncomes(page: page);
-      print('Pemasukan yang diambil: ${fetchedIncomes.toString()}');
+    int retryCount = 0;
+    bool success = false;
 
-      setState(() {
-        if (page == 1) {
-          incomes = fetchedIncomes;
-        } else {
-          incomes.addAll(fetchedIncomes);
+    while (!success && retryCount < _maxRetries) {
+      try {
+        print(
+            'Mengambil pemasukan untuk halaman: $page (Percobaan ${retryCount + 1})');
+        final fetchedIncomes = await _apiService.fetchIncomes(page: page);
+
+        if (mounted) {
+          setState(() {
+            if (page == 1) {
+              incomes = fetchedIncomes;
+            } else {
+              incomes.addAll(fetchedIncomes);
+            }
+          });
         }
-      });
-    } catch (e) {
-      print('Kesalahan saat mengambil pemasukan: $e');
-    } finally {
+        success = true;
+      } catch (e) {
+        print('Kesalahan saat mengambil pemasukan: $e');
+        retryCount++;
+        if (retryCount < _maxRetries) {
+          // Tunggu sebelum mencoba lagi dengan delay yang meningkat
+          await Future.delayed(Duration(seconds: retryCount * 2));
+        }
+      }
+    }
+
+    // Reset throttle setelah delay
+    Future.delayed(_throttleDuration, () {
       if (mounted) {
         setState(() {
-          isLoading = false;
-          isLoadingMore = false;
+          _isThrottled = false;
         });
       }
+    });
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+        isLoadingMore = false;
+      });
     }
   }
 
   Future<void> _fetchExpenses(int page) async {
-    if (isLoadingMore) return;
+    if (isLoadingMore || _isThrottled) return;
 
     setState(() {
       isLoadingMore = true;
+      _isThrottled = true;
     });
 
-    try {
-      final fetchedExpenses = await _apiService.fetchExpenses(
-        page: page,
-      );
+    int retryCount = 0;
+    bool success = false;
 
-      print('Pengeluaran yang diambil: ${fetchedExpenses.toString()}');
+    while (!success && retryCount < _maxRetries) {
+      try {
+        final fetchedExpenses = await _apiService.fetchExpenses(page: page);
 
-      setState(() {
-        if (page == 1) {
-          expenses = fetchedExpenses;
-        } else {
-          expenses.addAll(fetchedExpenses);
+        if (mounted) {
+          setState(() {
+            if (page == 1) {
+              expenses = fetchedExpenses;
+            } else {
+              expenses.addAll(fetchedExpenses);
+            }
+          });
         }
-      });
+        success = true;
+      } catch (e) {
+        print('Kesalahan saat mengambil pengeluaran: $e');
+        retryCount++;
+        if (retryCount < _maxRetries) {
+          await Future.delayed(Duration(seconds: retryCount * 2));
+        }
+      }
+    }
 
-      if (fetchedExpenses.isEmpty) {
+    // Reset throttle setelah delay
+    Future.delayed(_throttleDuration, () {
+      if (mounted) {
         setState(() {
-          isLoadingMore = false;
+          _isThrottled = false;
         });
       }
-    } catch (e) {
-      print('Kesalahan saat mengambil pengeluaran: $e');
-    } finally {
+    });
+
+    if (mounted) {
       setState(() {
         isLoading = false;
         isLoadingMore = false;
