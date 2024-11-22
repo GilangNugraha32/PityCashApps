@@ -306,7 +306,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                         child: Row(
                           children: [
                             Icon(
-                              Icons.arrow_downward_rounded,
+                              Icons.arrow_upward_rounded,
                               color: Colors.white.withOpacity(0.9),
                               size: 16 * iconScale,
                             ),
@@ -485,9 +485,9 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
       padding: EdgeInsets.all(4),
       child: Row(
         children: [
-          _buildToggleOption('Inflow', !isOutcomeSelected, Icons.arrow_upward),
           _buildToggleOption(
-              'Outflow', isOutcomeSelected, Icons.arrow_downward),
+              'Inflow', !isOutcomeSelected, Icons.arrow_downward),
+          _buildToggleOption('Outflow', isOutcomeSelected, Icons.arrow_upward),
         ],
       ),
     );
@@ -749,7 +749,7 @@ class _PengeluaranSectionState extends State<PengeluaranSection> {
                   Text(
                     selectedDateRange == null
                         ? 'Pilih Tanggal'
-                        : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
+                        : '${selectedDateRange!.start.day} ${_getMonthName(selectedDateRange!.start.month)} ${selectedDateRange!.start.year} - ${selectedDateRange!.end.day} ${_getMonthName(selectedDateRange!.end.month)} ${selectedDateRange!.end.year}',
                     style: TextStyle(
                       color: Color(0xFFEB8153),
                       fontSize: 10,

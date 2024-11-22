@@ -410,9 +410,9 @@ class _HomeSectionState extends State<HomeSection>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildToggleOption('Inflow', isIncomeSelected, Icons.arrow_upward),
+          _buildToggleOption('Inflow', isIncomeSelected, Icons.arrow_downward),
           _buildToggleOption(
-              'Outflow', !isIncomeSelected, Icons.arrow_downward),
+              'Outflow', !isIncomeSelected, Icons.arrow_upward),
         ],
       ),
     );
@@ -631,10 +631,10 @@ class _HomeSectionState extends State<HomeSection>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           _buildLegendItemEnhanced("Pemasukan",
-                              Color(0xFF66BB6A), Icons.arrow_upward),
+                              Color(0xFF66BB6A), Icons.arrow_downward),
                           SizedBox(width: 12),
                           _buildLegendItemEnhanced("Pengeluaran",
-                              Color(0xFFEF5350), Icons.arrow_downward),
+                              Color(0xFFEF5350), Icons.arrow_upward),
                         ],
                       ),
                     ],

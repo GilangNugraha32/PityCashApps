@@ -656,17 +656,28 @@ class ApiService {
   }
 
   // Fetch all incomes with pagination
-  Future<List<Pemasukan>> fetchIncomes({int page = 1, int limit = 100}) async {
+  Future<List<Pemasukan>> fetchIncomes({
+    int page = 1,
+    int limit = 20,
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     print('Fetching incomes from page: $page');
     await _setAuthToken(); // Ensure the authentication token is set
 
     try {
+      final queryParams = {
+        'page': page.toString(),
+        'limit': limit.toString(),
+        if (startDate != null)
+          'start_date': DateFormat('yyyy-MM-dd').format(startDate),
+        if (endDate != null)
+          'end_date': DateFormat('yyyy-MM-dd').format(endDate),
+      };
+
       final response = await _dio.get(
         '$baseUrl/income/all',
-        queryParameters: {
-          'page': page,
-          'per_page': limit, // Menambahkan parameter per_page untuk limit data
-        },
+        queryParameters: queryParams,
       );
 
       if (response.statusCode == 200) {
@@ -1301,6 +1312,14 @@ class ApiService {
       if (files.isNotEmpty) {
         for (int i = 0; i < files.length; i++) {
           if (files[i].path.isNotEmpty) {
+            // Cek ukuran file
+            final fileSize = await files[i].length();
+            final fileSizeInMB = fileSize / (1024 * 1024); // Konversi ke MB
+
+            if (fileSizeInMB > 10) {
+              throw Exception('Ukuran gambar tidak boleh lebih dari 10MB');
+            }
+
             String fileName = files[i].path.split('/').last;
             formData.files.add(
               MapEntry(
@@ -1392,6 +1411,14 @@ class ApiService {
 
         // Tambahkan file gambar jika ada perubahan
         if (i < files.length && files[i].path.isNotEmpty) {
+          // Cek ukuran file
+          final fileSize = await files[i].length();
+          final fileSizeInMB = fileSize / (1024 * 1024); // Konversi ke MB
+
+          if (fileSizeInMB > 10) {
+            throw Exception('Ukuran gambar tidak boleh lebih dari 10MB');
+          }
+
           String fileName = files[i].path.split('/').last;
           formData.files.add(
             MapEntry(
@@ -1455,8 +1482,6 @@ class ApiService {
       throw Exception('Error dalam ApiService: $e');
     }
   }
-
-// Example method to upload files if necessary
 
   Future<void> deleteDataPengeluaran(int id) async {
     print('Deleting outcome ID: $id');
@@ -1630,6 +1655,14 @@ class ApiService {
       });
 
       if (foto_profil != null) {
+        // Cek ukuran file
+        final fileSize = await foto_profil.length();
+        final fileSizeInMB = fileSize / (1024 * 1024); // Konversi ke MB
+
+        if (fileSizeInMB > 10) {
+          throw Exception('Ukuran foto profil tidak boleh lebih dari 10MB');
+        }
+
         String fileName = foto_profil.path.split('/').last;
         formData.files.add(MapEntry(
           'foto_profil',
