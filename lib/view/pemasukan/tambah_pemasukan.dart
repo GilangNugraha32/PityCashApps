@@ -587,9 +587,25 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
   }
 
   Widget _buildCategoryModal() {
-    categoryController.text = selectedCategory?.name ?? '';
-    ValueNotifier<List<Category>> filteredCategories =
+    // Inisialisasi filteredCategories dengan semua kategori di awal
+    final ValueNotifier<List<Category>> filteredCategories =
         ValueNotifier<List<Category>>(categories);
+
+    // Fungsi untuk memfilter kategori
+    void filterCategories(String query) {
+      if (query.isEmpty) {
+        filteredCategories.value = categories;
+      } else {
+        String searchText = query.toLowerCase();
+        filteredCategories.value = categories
+            .where(
+                (category) => category.name.toLowerCase().contains(searchText))
+            .toList();
+      }
+    }
+
+    // Filter awal berdasarkan teks yang mungkin sudah ada di searchController
+    filterCategories(_searchController.text);
 
     return StatefulBuilder(
       builder: (BuildContext context, StateSetter setState) {
@@ -648,17 +664,15 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
         }
 
         return Container(
-          height: MediaQuery.of(context).size.height *
-              0.6, // Mengurangi tinggi modal
-          padding: EdgeInsets.symmetric(
-              horizontal: 16, vertical: 12), // Mengurangi padding
+          height: MediaQuery.of(context).size.height * 0.6,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
                 child: Container(
-                  width: 32, // Mengurangi lebar handle bar
-                  height: 3, // Mengurangi tinggi handle bar
+                  width: 32,
+                  height: 3,
                   margin: EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
@@ -669,7 +683,7 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
               Text(
                 'Pilih Kategori',
                 style: TextStyle(
-                  fontSize: 16, // Mengurangi ukuran font judul
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -680,54 +694,46 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                   border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Focus(
-                  onFocusChange: (hasFocus) {
-                    if (!hasFocus) {
-                      // Ketika kehilangan fokus, nilai tetap dipertahankan dan filter diupdate
-                      setState(() {
-                        filteredCategories.value = categories
-                            .where((category) => category.name
-                                .toLowerCase()
-                                .contains(_searchController.text.toLowerCase()))
-                            .toList();
-                      });
-                    }
-                  },
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Cari kategori...',
-                      hintStyle: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 13,
-                      ),
-                      border: InputBorder.none,
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Color(0xFFEB8153),
-                        size: 18,
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Cari kategori...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 13,
                     ),
-                    onChanged: (value) {
-                      // Implementasi debouncing
-                      if (_debounce?.isActive ?? false) _debounce?.cancel();
-                      _debounce = Timer(const Duration(milliseconds: 500), () {
-                        setState(() {
-                          filteredCategories.value = categories
-                              .where((category) => category.name
-                                  .toLowerCase()
-                                  .contains(value.toLowerCase()))
-                              .toList();
-                        });
-                      });
-                    },
-                    onSubmitted: (value) {
-                      FocusScope.of(context).unfocus();
-                    },
-                    textInputAction: TextInputAction.search,
+                    border: InputBorder.none,
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Color(0xFFEB8153),
+                      size: 18,
+                    ),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear, size: 18),
+                            onPressed: () {
+                              setState(() {
+                                _searchController.clear();
+                                filterCategories('');
+                              });
+                            },
+                          )
+                        : null,
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
+                  onChanged: (value) {
+                    if (_debounce?.isActive ?? false) _debounce?.cancel();
+                    _debounce = Timer(const Duration(milliseconds: 500), () {
+                      filterCategories(value);
+                    });
+                  },
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (value) {
+                    // Hanya tutup keyboard dan filter ulang untuk memastikan
+                    filterCategories(value);
+                    FocusScope.of(context).unfocus();
+                  },
                 ),
               ),
               SizedBox(height: 16),
@@ -753,8 +759,8 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
               Expanded(
                 child: ValueListenableBuilder<List<Category>>(
                   valueListenable: filteredCategories,
-                  builder: (context, categories, child) {
-                    if (categories.isEmpty) {
+                  builder: (context, filteredList, child) {
+                    if (filteredList.isEmpty) {
                       return Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -778,15 +784,15 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
                     }
                     return ListView.separated(
                       padding: EdgeInsets.zero,
-                      itemCount: categories.length,
+                      itemCount: filteredList.length,
                       separatorBuilder: (context, index) => Divider(
                         height: 1,
                         color: Colors.grey.shade200,
                       ),
                       itemBuilder: (context, index) {
-                        final category = categories[index];
+                        final category = filteredList[index];
                         return ListTile(
-                          dense: true, // Membuat list tile lebih compact
+                          dense: true,
                           contentPadding: EdgeInsets.zero,
                           title: Text(
                             category.name,
@@ -1101,8 +1107,9 @@ class _TambahPemasukanState extends State<TambahPemasukan> {
 
   @override
   void dispose() {
-    _debounce?.cancel(); // Batalkan timer saat widget di-dispose
-    jumlahController.dispose();
+    _searchController.dispose();
+    categoryController.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 }

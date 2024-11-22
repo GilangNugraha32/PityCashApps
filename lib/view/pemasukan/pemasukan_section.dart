@@ -489,6 +489,13 @@ class _PemasukanSectionState extends State<PemasukanSection> {
           }
         }
 
+        // Urutkan data berdasarkan tanggal ascending
+        incomes.sort((a, b) {
+          final dateA = DateTime.parse(a.date);
+          final dateB = DateTime.parse(b.date);
+          return dateA.compareTo(dateB);
+        });
+
         // Update filtered data
         if (selectedDateRange != null) {
           _filterIncomesByDateRange();
@@ -1080,6 +1087,18 @@ class _PemasukanSectionState extends State<PemasukanSection> {
     final formattedDate =
         '${date.day} ${_getMonthName(date.month)} ${date.year}';
 
+    // Filter data berdasarkan date range yang dipilih atau default ke bulan sekarang
+    final now = DateTime.now();
+    final defaultStartDate = DateTime(now.year, now.month, 1);
+    final defaultEndDate = DateTime(now.year, now.month + 1, 0);
+
+    final selectedStartDate = selectedDateRange?.start ?? defaultStartDate;
+    final selectedEndDate = selectedDateRange?.end ?? defaultEndDate;
+
+    if (date.isBefore(selectedStartDate) || date.isAfter(selectedEndDate)) {
+      return Container(); // Skip item if outside date range
+    }
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
@@ -1166,6 +1185,10 @@ class _PemasukanSectionState extends State<PemasukanSection> {
   }
 
   Widget _buildDateRangeAndActionButtons() {
+    // Initialize default date range to current month if not set
+
+    final now = DateTime.now();
+
     return Row(
       children: [
         Expanded(
@@ -1197,18 +1220,19 @@ class _PemasukanSectionState extends State<PemasukanSection> {
                               : '${DateFormat.yMMMd().format(selectedDateRange!.start)} - ${DateFormat.yMMMd().format(selectedDateRange!.end)}',
                           style: TextStyle(
                             color: Color(0xFFEB8153),
-                            fontSize: 11,
+                            fontSize: 10,
                             fontWeight: FontWeight.w500,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
+                        SizedBox(height: 1),
                         Text(
                           selectedDateRange == null
-                              ? 'Pilih rentang tanggal sesuai kebutuhan Anda'
+                              ? 'Data bulan ${DateFormat.MMMM().format(now)} ${now.year}'
                               : 'Rentang tanggal yang dipilih',
                           style: TextStyle(
                             color: Color(0xFFFF9D6C),
-                            fontSize: 9,
+                            fontSize: 8,
                             fontStyle: FontStyle.italic,
                           ),
                         ),

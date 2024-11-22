@@ -111,7 +111,10 @@ class _CategoriesSectionState extends State<CategoriesSection> {
           final existingIds = Set.from(categories.map((c) => c.id));
           categories.addAll(
               newCategories.where((cat) => !existingIds.contains(cat.id)));
-          _filterCategories(_searchController.text);
+
+          // Terapkan filter yang sedang aktif
+          _applyCurrentFilter();
+
           currentPage++;
         });
       }
@@ -123,6 +126,25 @@ class _CategoriesSectionState extends State<CategoriesSection> {
         isFetching = false;
         isLoadingMore = false;
       });
+    }
+  }
+
+  // Tambahkan method baru untuk menerapkan filter yang sedang aktif
+  void _applyCurrentFilter() {
+    if (selectedFilter == 'Pemasukan') {
+      filteredCategories =
+          categories.where((category) => category.jenisKategori == 1).toList();
+    } else if (selectedFilter == 'Pengeluaran') {
+      filteredCategories =
+          categories.where((category) => category.jenisKategori == 2).toList();
+    } else {
+      // Pilih Semua
+      filteredCategories = List.from(categories);
+    }
+
+    // Jika ada query pencarian, terapkan juga
+    if (_searchController.text.isNotEmpty) {
+      _filterCategories(_searchController.text);
     }
   }
 
@@ -155,11 +177,12 @@ class _CategoriesSectionState extends State<CategoriesSection> {
 
   Future<void> _refreshCategoryList() async {
     setState(() {
-      currentPage = 1; // Reset to the first page
-      categories.clear(); // Clear the existing list
+      currentPage = 1;
+      categories.clear();
       filteredCategories.clear();
-      hasMoreCategories = true; // Reset this for refreshing
-      isFetching = false; // Reset fetching state
+      hasMoreCategories = true;
+      isFetching = false;
+      // Tidak perlu reset selectedFilter di sini
     });
 
     // Fetch the first set of categories again
